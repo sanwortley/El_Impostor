@@ -242,7 +242,7 @@ io.on('connection', (socket) => {
 });
 
 // Catch-all: serve frontend for client-side routing
-app.get('*', (_req, res) => {
+app.get('/{*path}', (_req, res) => {
     res.sendFile(path.join(distPath, 'index.html'));
 });
 
