@@ -1,0 +1,179 @@
+import React, { useState } from 'react';
+import { useGameStore } from '../../game/store/gameStore';
+import { Button } from '../../../shared/ui/Button';
+import { HoldToReveal } from './HoldToReveal';
+import { ChevronRight, ShieldAlert, Eye } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+
+export const RevealPage: React.FC = () => {
+    const { players, localPlayer, settings, nextReveal, gameMode, currentRevealIndex } = useGameStore();
+    const [isRevealing, setIsRevealing] = useState(false);
+    const [hasRevealed, setHasRevealed] = useState(false);
+
+    // Get the current player based on the game mode
+    const currentPlayer = gameMode === 'online'
+        ? players.find(p => p.socketId === localPlayer?.socketId)
+        : players[currentRevealIndex];
+
+    if (!currentPlayer) {
+        return (
+            <div className="flex-1 flex flex-col items-center justify-center py-12 text-center gap-4">
+                <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+                <p className="text-white/60 font-bold uppercase tracking-widest">
+                    {gameMode === 'online' ? 'Cargando tu rol...' : 'Preparando el juego...'}
+                </p>
+            </div>
+        );
+    }
+
+    const isImpostor = currentPlayer.role === 'impostor';
+    const isChaosMode = settings.impostorCount === players.length;
+
+    const isLastPlayer = currentRevealIndex === players.length - 1;
+
+    const handleNext = () => {
+        if (gameMode === 'local') {
+            setIsRevealing(false);
+            setHasRevealed(false);
+            nextReveal();
+        } else {
+            // In online mode, we just stay in "hasRevealed" state 
+            // until the server pushes the phase change to 'playing'
+            // But we tell the store/server we are ready if we want to track it
+            // For now, nextReveal() will handle the transition if it's the host
+            nextReveal();
+        }
+    };
+
+    return (
+        <div className="flex flex-col h-full">
+            <header className="flex justify-between items-center py-4 border-b border-white/10">
+                <span className="text-white/40 font-bold uppercase text-xs tracking-widest">
+                    {gameMode === 'local'
+                        ? `Jugador ${currentRevealIndex + 1} de ${players.length}`
+                        : 'Partida Online'}
+                </span>
+                <span className="text-primary font-black uppercase text-sm italic">
+                    {currentPlayer.name}
+                </span>
+            </header>
+
+            {!hasRevealed ? (
+                <HoldToReveal
+                    playerName={currentPlayer.name}
+                    isRevealing={isRevealing}
+                    onHold={() => setIsRevealing(true)}
+                    onRelease={() => {
+                        if (isRevealing) {
+                            setIsRevealing(false);
+                            setHasRevealed(true);
+                        }
+                    }}
+                />
+            ) : (
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="flex-1 flex flex-col items-center justify-center gap-12 py-12 text-center"
+                >
+                    <div className="flex flex-col gap-4">
+                        <div className="w-20 h-20 bg-green-500/20 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <ChevronRight size={40} className="ml-1" />
+                        </div>
+                        <h2 className="text-3xl font-black uppercase tracking-tighter">¡LISTO, {currentPlayer.name.toUpperCase()}!</h2>
+                        <p className="text-white/40 max-w-[280px] mx-auto">
+                            {gameMode === 'local'
+                                ? (isLastPlayer ? 'Ya todos vieron su rol.' : 'Ahora pasale el celular al siguiente jugador.')
+                                : 'Esperando a que todos terminen de ver sus roles...'}
+                        </p>
+                    </div>
+
+                    {gameMode === 'local' ? (
+                        <Button fullWidth onClick={handleNext} className="h-20 text-xl">
+                            {isLastPlayer ? 'EMPEZAR PARTIDA' : 'SIGUIENTE JUGADOR'}
+                            <ChevronRight size={24} />
+                        </Button>
+                    ) : (
+                        localPlayer?.isHost ? (
+                            <Button fullWidth onClick={handleNext} className="h-20 text-xl animate-pulse-gold">
+                                EMPEZAR DEBATE
+                                <ChevronRight size={24} />
+                            </Button>
+                        ) : (
+                            <div className="flex items-center gap-3 text-primary font-bold uppercase tracking-widest text-sm bg-primary/5 px-6 py-4 rounded-2xl border border-primary/20">
+                                <div className="w-2 h-2 bg-primary rounded-full animate-ping" />
+                                Esperando al host...
+                            </div>
+                        )
+                    )}
+                </motion.div>
+            )}
+
+            {/* Secret content only visible during hold */}
+            <AnimatePresence>
+                {isRevealing && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center p-8 text-center pointer-events-none select-none"
+                    >
+                        <div className="flex flex-col items-center gap-6 max-w-sm">
+                            {isImpostor ? (
+                                <>
+                                    <ShieldAlert size={80} className="text-red-500 animate-bounce" />
+                                    <h2 className="text-6xl font-black text-white italic tracking-tighter">
+                                        SOS IMPOSTOR
+                                    </h2>
+
+                                    <div className="flex flex-col gap-4 mt-8 w-full">
+                                        {settings.showCategory && (
+                                            <div className="flex flex-col items-center p-4 rounded-xl bg-white/5 border border-white/10">
+                                                <p className="text-white/40 uppercase font-bold text-xs">Categoría:</p>
+                                                <p className="text-2xl font-black text-primary uppercase">{settings.chosenCategory?.name}</p>
+                                            </div>
+                                        )}
+
+                                        {settings.showHint && (
+                                            <div className="flex flex-col items-center p-4 rounded-xl bg-white/5 border border-primary/20">
+                                                <p className="text-primary uppercase font-bold text-xs tracking-widest mb-2">Pista:</p>
+                                                <p className="text-xl font-medium text-white italic">"{settings.chosenCategory?.hint}"</p>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {isChaosMode && (
+                                        <p className="text-primary font-bold text-xl uppercase mt-4">
+                                            😈 Modo caos activado
+                                        </p>
+                                    )}
+                                </>
+                            ) : (
+                                <>
+                                    <Eye size={80} className="text-primary self-center" />
+                                    <div className="flex flex-col items-center">
+                                        <p className="text-white/60 mb-1 uppercase font-bold text-sm tracking-widest text-center">
+                                            TU PALABRA ES:
+                                        </p>
+                                        <h2 className="text-4xl md:text-6xl font-black text-white uppercase italic text-center leading-tight">
+                                            {settings.secretWord}
+                                        </h2>
+                                    </div>
+
+                                    <div className="mt-6 p-4 rounded-xl bg-white/5 border border-white/10">
+                                        <p className="text-white/40 text-xs uppercase font-bold">Categoría:</p>
+                                        <p className="text-xl font-bold text-primary">{settings.chosenCategory?.name}</p>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+
+                        <p className="fixed bottom-12 text-white/20 uppercase text-xs font-bold tracking-[0.3em] animate-pulse">
+                            Soltá para ocultar
+                        </p>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+};

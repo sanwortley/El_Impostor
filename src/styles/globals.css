@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-[#121212] text-white font-sans overflow-x-hidden selection:bg-primary selection:text-black;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overscroll-behavior-y: none;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+.glass {
+  @apply bg-white/5 backdrop-blur-lg border border-white/10;
+}
+
+.btn-primary {
+  @apply bg-[#ffcc00] text-black font-bold py-3 px-6 rounded-xl active:scale-95 transition-all hover:brightness-110 shadow-lg shadow-primary/20;
+}
+
+.input-field {
+  @apply bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-primary transition-colors;
+}
+
+@layer utilities {
+  .touch-none {
+    touch-action: none;
+  }
+}
+
+/* Animations */
+@keyframes pulse-gold {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 204, 0, 0.4);
+  }
+
+  70% {
+    box-shadow: 0 0 0 10px rgba(255, 204, 0, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 204, 0, 0);
+  }
+}
+
+.animate-pulse-gold {
+  animation: pulse-gold 2s infinite;
+}

@@ -1,0 +1,13 @@
+export const shuffle = <T>(array: T[]): T[] => {
+    const newArray = [...array];
+    for (let i = newArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+    }
+    return newArray;
+};
+
+export const getRandomIndices = (max: number, count: number): number[] => {
+    const indices = Array.from({ length: max }, (_, i) => i);
+    return shuffle(indices).slice(0, count);
+};
