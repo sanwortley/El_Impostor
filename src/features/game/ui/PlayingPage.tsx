@@ -3,7 +3,7 @@ import React from 'react';
 import { useGameStore } from '../store/gameStore';
 import { Button } from '../../../shared/ui/Button';
 import { Card } from '../../../shared/ui/Card';
-import { Target, Flag, User, ShieldAlert } from 'lucide-react';
+import { Target, Flag, ShieldAlert } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const PlayingPage: React.FC = () => {

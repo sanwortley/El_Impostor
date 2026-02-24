@@ -1,4 +1,4 @@
-import { GamePhase } from '../../../shared/types/game';
+import type { GamePhase } from '../../../shared/types/game';
 
 export type GameAction =
     | { type: 'START_GAME' }
