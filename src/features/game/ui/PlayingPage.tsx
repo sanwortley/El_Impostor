@@ -113,15 +113,24 @@ export const PlayingPage: React.FC = () => {
                         </Button>
                     )}
 
-                    <Button
-                        fullWidth
-                        variant="danger"
-                        onClick={finishGame}
-                        className="h-14 text-sm font-bold uppercase tracking-widest opacity-60 hover:opacity-100 transition-opacity"
-                    >
-                        <Flag size={16} />
-                        TERMINAR PARTIDA
-                    </Button>
+                    {gameMode === 'online' && !localPlayer?.isHost ? (
+                        <div className="flex flex-col items-center gap-2 py-4">
+                            <div className="w-2 h-2 bg-primary rounded-full animate-ping" />
+                            <p className="text-white/30 text-xs font-bold uppercase tracking-widest">
+                                Esperando al host...
+                            </p>
+                        </div>
+                    ) : (
+                        <Button
+                            fullWidth
+                            variant="danger"
+                            onClick={finishGame}
+                            className="h-14 text-sm font-bold uppercase tracking-widest opacity-60 hover:opacity-100 transition-opacity"
+                        >
+                            <Flag size={16} />
+                            TERMINAR PARTIDA
+                        </Button>
+                    )}
                 </div>
             </Card>
         </motion.div>

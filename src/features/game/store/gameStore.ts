@@ -3,7 +3,8 @@ import { io, Socket } from 'socket.io-client';
 import type { GameState, GameSettings, Player, GamePhase, Category } from '../../../shared/types/game';
 import { assignRoles } from '../domain/assignImpostors';
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001';
+// In production, connect to same host. In dev, connect to localhost:3001
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || (import.meta.env.PROD ? window.location.origin : 'http://localhost:3001');
 
 type GameMode = 'local' | 'online';
 
