@@ -87,6 +87,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
                     ? { ...state.localPlayer, socketId: socket.id }
                     : { ...player, socketId: socket.id }
             }));
+
+            // Auto-rejoin room on reconnect (handles mobile background/foreground)
+            const { roomCode, localPlayer } = get();
+            if (roomCode && localPlayer) {
+                socket.emit('join_room', { code: roomCode, player: { ...localPlayer, socketId: socket.id } });
+            }
         });
 
         socket.on('room_created', (room) => {

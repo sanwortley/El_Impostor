@@ -50,6 +50,8 @@ interface Room {
 }
 
 const rooms = new Map<string, Room>();
+// Grace period timers: socketId -> NodeJS.Timeout
+const disconnectTimers = new Map<string, NodeJS.Timeout>();
 
 io.on('connection', (socket) => {
     socket.on('create_room', (data) => {
@@ -73,6 +75,12 @@ io.on('connection', (socket) => {
             // Find by ID or Name (for extra safety if ID fails)
             const existingIndex = room.players.findIndex(p => p.id === player.id || p.name === player.name);
             if (existingIndex !== -1) {
+                const oldSocketId = room.players[existingIndex].socketId;
+                // Cancel pending disconnect timer for this player (reconnection!)
+                if (disconnectTimers.has(oldSocketId)) {
+                    clearTimeout(disconnectTimers.get(oldSocketId)!);
+                    disconnectTimers.delete(oldSocketId);
+                }
                 room.players[existingIndex].socketId = socket.id;
                 // Update ID if it was matched by name
                 if (room.players[existingIndex].name === player.name) {
@@ -227,15 +235,29 @@ io.on('connection', (socket) => {
             const player = room.players.find(p => p.socketId === socket.id);
             if (player) {
                 if (room.phase === 'lobby' || room.phase === 'reveal') {
-                    const idx = room.players.indexOf(player);
-                    room.players.splice(idx, 1);
-                    if (room.players.length === 0) {
-                        rooms.delete(code);
-                    } else if (player.isHost) {
-                        room.players[0].isHost = true;
-                    }
+                    // Grace period: wait 10s before removing player, to allow mobile reconnection
+                    const timer = setTimeout(() => {
+                        disconnectTimers.delete(socket.id);
+                        const currentRoom = rooms.get(code);
+                        if (!currentRoom) return;
+                        // Only remove if still using the old socketId (hasn't reconnected)
+                        const stillDisconnected = currentRoom.players.find(p => p.socketId === socket.id);
+                        if (stillDisconnected) {
+                            const idx = currentRoom.players.indexOf(stillDisconnected);
+                            currentRoom.players.splice(idx, 1);
+                            if (currentRoom.players.length === 0) {
+                                rooms.delete(code);
+                            } else if (stillDisconnected.isHost) {
+                                currentRoom.players[0].isHost = true;
+                            }
+                            io.to(code).emit('room_updated', formatRoom(currentRoom));
+                        }
+                    }, 10000); // 10 second grace period
+                    disconnectTimers.set(socket.id, timer);
+                } else {
+                    // During game phases, just notify (don't remove)
+                    io.to(code).emit('room_updated', formatRoom(room));
                 }
-                io.to(code).emit('room_updated', formatRoom(room));
             }
         });
     });
