@@ -36,8 +36,15 @@ export default defineConfig({
         categories: ['games', 'entertainment'],
       },
       workbox: {
-        // Cache all static assets
+        // Cache all static assets except heavy source images
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        globIgnores: [
+          '**/favicon-img.png',
+          '**/logo.png',
+          '**/logo-transparent.png',
+          '**/favicon-preview.png',
+        ],
+        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024, // 3 MB fallback
         // Don't cache API/socket calls
         navigateFallback: 'index.html',
         navigateFallbackDenylist: [/^\/socket\.io/],
