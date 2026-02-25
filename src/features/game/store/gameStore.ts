@@ -200,7 +200,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     },
 
     addPlayer: (name) => set((state) => {
-        if (state.players.length >= 12) return state;
+        if (state.players.length >= 30) return state;
         const newPlayers: Player[] = [...state.players, { id: Math.random().toString(), name, role: 'normal' }];
         return {
             players: newPlayers,

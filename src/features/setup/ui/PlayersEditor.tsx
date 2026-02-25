@@ -22,7 +22,7 @@ export const PlayersEditor: React.FC = () => {
             <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold flex items-center gap-2">
                     <Users size={20} className="text-primary" />
-                    {gameMode === 'local' ? 'Jugadores' : 'Jugadores Conectados'} ({players.length}/12)
+                    {gameMode === 'local' ? 'Jugadores' : 'Jugadores Conectados'} ({players.length}/30)
                 </h2>
             </div>
 
@@ -35,9 +35,9 @@ export const PlayersEditor: React.FC = () => {
                         onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
                         placeholder="Nombre del jugador..."
                         className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl outline-none focus:border-primary transition-all text-white font-bold text-base"
-                        disabled={players.length >= 12}
+                        disabled={players.length >= 30}
                     />
-                    <Button onClick={handleAdd} disabled={players.length >= 12 || !newName.trim()} fullWidth>
+                    <Button onClick={handleAdd} disabled={players.length >= 30 || !newName.trim()} fullWidth>
                         <UserPlus size={22} />
                         Agregar Jugador
                     </Button>
