@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useGameStore } from '../../game/store/gameStore';
 import { Button } from '../../../shared/ui/Button';
 import { HoldToReveal } from './HoldToReveal';
@@ -9,6 +9,18 @@ export const RevealPage: React.FC = () => {
     const { players, localPlayer, settings, nextReveal, gameMode, currentRevealIndex } = useGameStore();
     const [isRevealing, setIsRevealing] = useState(false);
     const [hasRevealed, setHasRevealed] = useState(false);
+    const [buttonReady, setButtonReady] = useState(false);
+
+    // Delay activating the button to prevent the pointerUp from hold-to-reveal
+    // accidentally triggering the button that appears in the same position
+    useEffect(() => {
+        if (hasRevealed) {
+            const t = setTimeout(() => setButtonReady(true), 800);
+            return () => clearTimeout(t);
+        } else {
+            setButtonReady(false);
+        }
+    }, [hasRevealed]);
 
     // Get the current player based on the game mode
     const currentPlayer = gameMode === 'online'
@@ -95,7 +107,11 @@ export const RevealPage: React.FC = () => {
                         </Button>
                     ) : (
                         localPlayer?.isHost ? (
-                            <Button fullWidth onClick={handleNext} className="h-20 text-xl animate-pulse-gold">
+                            <Button
+                                fullWidth
+                                onClick={handleNext}
+                                className={`h-20 text-xl animate-pulse-gold transition-opacity duration-300 ${buttonReady ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                            >
                                 EMPEZAR DEBATE
                                 <ChevronRight size={24} />
                             </Button>
