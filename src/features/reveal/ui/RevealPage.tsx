@@ -134,12 +134,17 @@ export const RevealPage: React.FC = () => {
                                             </div>
                                         )}
 
-                                        {settings.showHint && (
-                                            <div className="flex flex-col items-center p-4 rounded-xl bg-white/5 border border-primary/20">
-                                                <p className="text-primary uppercase font-bold text-xs tracking-widest mb-2">Pista:</p>
-                                                <p className="text-xl font-medium text-white italic">"{settings.chosenCategory?.hint}"</p>
-                                            </div>
-                                        )}
+                                        {(() => {
+                                            const specificHint = settings.chosenCategory?.itemHints?.[settings.secretWord];
+                                            const fallbackHint = settings.chosenCategory?.hint;
+                                            const hintText = specificHint || fallbackHint;
+                                            return hintText ? (
+                                                <div className="flex flex-col items-center p-4 rounded-xl bg-white/5 border border-primary/20">
+                                                    <p className="text-primary uppercase font-bold text-xs tracking-widest mb-2">Tu Pista:</p>
+                                                    <p className="text-lg font-medium text-white italic">"{hintText}"</p>
+                                                </div>
+                                            ) : null;
+                                        })()}
                                     </div>
 
                                     {isChaosMode && (

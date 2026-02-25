@@ -2,8 +2,9 @@ export interface Category {
     id: string;
     name: string;
     description: string;
-    items: string[]; // List of specific words for this category
-    hint: string;
+    items: string[];
+    hint: string; // Pista genérica de la categoría (para el impostor si no hay pista específica)
+    itemHints?: Record<string, string>; // Pistas específicas por palabra: { "Titanic": "Se hundió en el Atlántico Norte" }
 }
 
 export interface Player {
