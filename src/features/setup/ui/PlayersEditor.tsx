@@ -27,18 +27,19 @@ export const PlayersEditor: React.FC = () => {
             </div>
 
             {gameMode === 'local' && (
-                <div className="flex gap-2">
+                <div className="flex flex-col gap-3">
                     <input
                         type="text"
                         value={newName}
                         onChange={(e) => setNewName(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
                         placeholder="Nombre del jugador..."
-                        className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl outline-none focus:border-primary transition-all text-white font-bold"
+                        className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl outline-none focus:border-primary transition-all text-white font-bold text-base"
                         disabled={players.length >= 12}
                     />
-                    <Button onClick={handleAdd} disabled={players.length >= 12 || !newName.trim()} className="px-4">
-                        <UserPlus size={20} />
+                    <Button onClick={handleAdd} disabled={players.length >= 12 || !newName.trim()} fullWidth>
+                        <UserPlus size={22} />
+                        Agregar Jugador
                     </Button>
                 </div>
             )}
@@ -52,8 +53,8 @@ export const PlayersEditor: React.FC = () => {
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: 20 }}
                             className={`flex items-center justify-between p-4 rounded-xl border transition-all ${gameMode === 'online' && player.socketId === localPlayer?.socketId
-                                    ? 'bg-primary/10 border-primary/20'
-                                    : 'bg-white/5 border-white/5'
+                                ? 'bg-primary/10 border-primary/20'
+                                : 'bg-white/5 border-white/5'
                                 }`}
                         >
                             <div className="flex items-center gap-3">
