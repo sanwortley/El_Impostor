@@ -252,7 +252,7 @@ io.on('connection', (socket) => {
                             }
                             io.to(code).emit('room_updated', formatRoom(currentRoom));
                         }
-                    }, 10000); // 10 second grace period
+                    }, 30000); // 30 second grace period
                     disconnectTimers.set(socket.id, timer);
                 } else {
                     // During game phases, just notify (don't remove)
