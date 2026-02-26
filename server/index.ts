@@ -234,30 +234,30 @@ io.on('connection', (socket) => {
         rooms.forEach((room, code) => {
             const player = room.players.find(p => p.socketId === socket.id);
             if (player) {
-                if (room.phase === 'lobby' || room.phase === 'reveal') {
-                    // Grace period: wait 10s before removing player, to allow mobile reconnection
-                    const timer = setTimeout(() => {
-                        disconnectTimers.delete(socket.id);
-                        const currentRoom = rooms.get(code);
-                        if (!currentRoom) return;
-                        // Only remove if still using the old socketId (hasn't reconnected)
-                        const stillDisconnected = currentRoom.players.find(p => p.socketId === socket.id);
-                        if (stillDisconnected) {
-                            const idx = currentRoom.players.indexOf(stillDisconnected);
-                            currentRoom.players.splice(idx, 1);
-                            if (currentRoom.players.length === 0) {
-                                rooms.delete(code);
-                            } else if (stillDisconnected.isHost) {
-                                currentRoom.players[0].isHost = true;
-                            }
-                            io.to(code).emit('room_updated', formatRoom(currentRoom));
-                        }
-                    }, 30000); // 30 second grace period
-                    disconnectTimers.set(socket.id, timer);
-                } else {
-                    // During game phases, just notify (don't remove)
-                    io.to(code).emit('room_updated', formatRoom(room));
+                // Always apply a grace period regardless of phase.
+                // On iPhone, moving to background can cut the WebSocket and take
+                // well over 30 seconds to restore. 120s gives enough room.
+                if (disconnectTimers.has(socket.id)) {
+                    clearTimeout(disconnectTimers.get(socket.id)!);
                 }
+                const timer = setTimeout(() => {
+                    disconnectTimers.delete(socket.id);
+                    const currentRoom = rooms.get(code);
+                    if (!currentRoom) return;
+                    // Only remove if still using the old socketId (hasn't reconnected)
+                    const stillDisconnected = currentRoom.players.find(p => p.socketId === socket.id);
+                    if (stillDisconnected) {
+                        const idx = currentRoom.players.indexOf(stillDisconnected);
+                        currentRoom.players.splice(idx, 1);
+                        if (currentRoom.players.length === 0) {
+                            rooms.delete(code);
+                        } else if (stillDisconnected.isHost) {
+                            currentRoom.players[0].isHost = true;
+                        }
+                        io.to(code).emit('room_updated', formatRoom(currentRoom));
+                    }
+                }, 120000); // 2 minute grace period — covers iPhone backgrounding
+                disconnectTimers.set(socket.id, timer);
             }
         });
     });
