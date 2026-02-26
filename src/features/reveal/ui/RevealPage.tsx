@@ -150,7 +150,7 @@ export const RevealPage: React.FC = () => {
                                             </div>
                                         )}
 
-                                        {(() => {
+                                        {settings.showHint && (() => {
                                             const specificHint = settings.chosenCategory?.itemHints?.[settings.secretWord];
                                             const fallbackHint = settings.chosenCategory?.hint;
                                             const hintText = specificHint || fallbackHint;
