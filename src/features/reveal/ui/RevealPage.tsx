@@ -70,7 +70,8 @@ export const RevealPage: React.FC = () => {
                 </span>
             </header>
 
-            {!hasRevealed ? (
+            <div className="flex-1 flex flex-col gap-6 py-6">
+                {/* Hold button always visible — player can check their role multiple times */}
                 <HoldToReveal
                     playerName={currentPlayer.name}
                     isRevealing={isRevealing}
@@ -82,48 +83,45 @@ export const RevealPage: React.FC = () => {
                         }
                     }}
                 />
-            ) : (
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="flex-1 flex flex-col items-center justify-center gap-12 py-12 text-center"
-                >
-                    <div className="flex flex-col gap-4">
-                        <div className="w-20 h-20 bg-green-500/20 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <ChevronRight size={40} className="ml-1" />
-                        </div>
-                        <h2 className="text-3xl font-black uppercase tracking-tighter">¡LISTO, {currentPlayer.name.toUpperCase()}!</h2>
-                        <p className="text-white/40 max-w-[280px] mx-auto">
-                            {gameMode === 'local'
-                                ? (isLastPlayer ? 'Ya todos vieron su rol.' : 'Ahora pasale el celular al siguiente jugador.')
-                                : 'Esperando a que todos terminen de ver sus roles...'}
-                        </p>
-                    </div>
 
-                    {gameMode === 'local' ? (
-                        <Button fullWidth onClick={handleNext} className="h-20 text-xl">
-                            {isLastPlayer ? 'EMPEZAR PARTIDA' : 'SIGUIENTE JUGADOR'}
-                            <ChevronRight size={24} />
-                        </Button>
-                    ) : (
-                        localPlayer?.isHost ? (
-                            <Button
-                                fullWidth
-                                onClick={handleNext}
-                                className={`h-20 text-xl animate-pulse-gold transition-opacity duration-300 ${buttonReady ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-                            >
-                                EMPEZAR DEBATE
-                                <ChevronRight size={24} />
-                            </Button>
-                        ) : (
-                            <div className="flex items-center gap-3 text-primary font-bold uppercase tracking-widest text-sm bg-primary/5 px-6 py-4 rounded-2xl border border-primary/20">
-                                <div className="w-2 h-2 bg-primary rounded-full animate-ping" />
-                                Esperando al host...
-                            </div>
-                        )
+                {/* Action button slides in after the first reveal */}
+                <AnimatePresence>
+                    {hasRevealed && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="flex flex-col gap-3"
+                        >
+                            {gameMode === 'local' ? (
+                                <Button
+                                    fullWidth
+                                    onClick={handleNext}
+                                    className="h-16 text-lg"
+                                >
+                                    {isLastPlayer ? 'EMPEZAR PARTIDA' : 'SIGUIENTE JUGADOR'}
+                                    <ChevronRight size={24} />
+                                </Button>
+                            ) : (
+                                localPlayer?.isHost ? (
+                                    <Button
+                                        fullWidth
+                                        onClick={handleNext}
+                                        className={`h-16 text-lg animate-pulse-gold transition-opacity duration-300 ${buttonReady ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                                    >
+                                        EMPEZAR DEBATE
+                                        <ChevronRight size={24} />
+                                    </Button>
+                                ) : (
+                                    <div className="flex items-center justify-center gap-3 text-primary font-bold uppercase tracking-widest text-sm bg-primary/5 px-6 py-4 rounded-2xl border border-primary/20">
+                                        <div className="w-2 h-2 bg-primary rounded-full animate-ping" />
+                                        Esperando al host...
+                                    </div>
+                                )
+                            )}
+                        </motion.div>
                     )}
-                </motion.div>
-            )}
+                </AnimatePresence>
+            </div>
 
             {/* Secret content only visible during hold */}
             <AnimatePresence>
