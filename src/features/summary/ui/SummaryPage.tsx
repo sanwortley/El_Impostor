@@ -43,7 +43,7 @@ export const SummaryPage: React.FC = () => {
                 <div className="flex flex-col gap-3 mt-2">
                     <Button fullWidth onClick={resetGame} className="h-16 text-lg bg-amber-500 hover:bg-amber-400 text-black font-black">
                         <Laugh size={20} />
-                        OTRA BROMA
+                        NUEVA PARTIDA
                     </Button>
                     <Button fullWidth variant="secondary" onClick={() => setPhase('mode_select')} className="h-14 text-sm">
                         <Home size={18} />
