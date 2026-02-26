@@ -260,18 +260,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
         // 25% chance of a surprise prank round, but only once per session
         const triggerPrank = !hasPranked && Math.random() < 0.25;
+        const playersWithRoles = triggerPrank
+            ? assignVictim(players)
+            : assignRoles(players, settings.impostorCount);
 
         if (triggerPrank) {
-            const playersWithRoles = assignVictim(players);
-            set({
-                players: playersWithRoles,
-                currentRevealIndex: 0,
-                phase: 'reveal',
-                settings: updatedSettings,
-                hasPranked: true
-            });
-        } else if (gameMode === 'online' && socket && roomCode) {
-            const playersWithRoles = assignRoles(players, settings.impostorCount);
+            set({ hasPranked: true });
+        }
+
+        if (gameMode === 'online' && socket && roomCode) {
             socket.emit('start_game', {
                 code: roomCode,
                 word: randomWord,
@@ -279,7 +276,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 settings: updatedSettings
             });
         } else {
-            const playersWithRoles = assignRoles(players, settings.impostorCount);
             set({
                 players: playersWithRoles,
                 currentRevealIndex: 0,
