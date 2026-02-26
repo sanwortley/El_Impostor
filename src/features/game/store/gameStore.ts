@@ -1,12 +1,11 @@
 import { create } from 'zustand';
 import { io, Socket } from 'socket.io-client';
-import type { GameState, GameSettings, Player, GamePhase, Category } from '../../../shared/types/game';
-import { assignRoles } from '../domain/assignImpostors';
+import type { GameState, GameSettings, Player, GamePhase, Category, GameMode } from '../../../shared/types/game';
+import { assignRoles, assignVictim } from '../domain/assignImpostors';
 
 // In production, connect to same host. In dev, connect to localhost:3001
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || (import.meta.env.PROD ? window.location.origin : 'http://localhost:3001');
 
-type GameMode = 'local' | 'online';
 
 interface GameStore extends GameState {
     socket: Socket | null;
@@ -54,9 +53,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
     currentVotes: {},
 
     setMode: (mode) => {
-        if (mode === 'local') {
+        if (mode === 'local' || mode === 'prank') {
             set({
-                gameMode: 'local',
+                gameMode: mode,
                 phase: 'setup',
                 players: [],
                 settings: { ...DEFAULT_SETTINGS, playerCount: 0 }
@@ -250,7 +249,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
         const randomCategory = settings.selectedCategories[Math.floor(Math.random() * settings.selectedCategories.length)];
         const items = randomCategory.items;
         const randomWord = items[Math.floor(Math.random() * items.length)];
-        const playersWithRoles = assignRoles(players, settings.impostorCount);
 
         const updatedSettings = {
             ...settings,
@@ -259,7 +257,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
             playerCount: players.length
         };
 
-        if (gameMode === 'online' && socket && roomCode) {
+        if (gameMode === 'prank') {
+            const playersWithRoles = assignVictim(players);
+            set({
+                players: playersWithRoles,
+                currentRevealIndex: 0,
+                phase: 'reveal',
+                settings: updatedSettings
+            });
+        } else if (gameMode === 'online' && socket && roomCode) {
+            const playersWithRoles = assignRoles(players, settings.impostorCount);
             socket.emit('start_game', {
                 code: roomCode,
                 word: randomWord,
@@ -267,6 +274,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 settings: updatedSettings
             });
         } else {
+            const playersWithRoles = assignRoles(players, settings.impostorCount);
             set({
                 players: playersWithRoles,
                 currentRevealIndex: 0,

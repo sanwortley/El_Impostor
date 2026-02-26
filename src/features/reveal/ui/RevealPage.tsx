@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useGameStore } from '../../game/store/gameStore';
 import { Button } from '../../../shared/ui/Button';
 import { HoldToReveal } from './HoldToReveal';
-import { ChevronRight, ShieldAlert, Eye } from 'lucide-react';
+import { ChevronRight, ShieldAlert, Eye, Laugh } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const RevealPage: React.FC = () => {
@@ -39,7 +39,11 @@ export const RevealPage: React.FC = () => {
     }
 
     const isImpostor = currentPlayer.role === 'impostor';
+    const isPrankster = currentPlayer.role === 'prankster';
     const isChaosMode = settings.impostorCount === players.length;
+
+    // For pranksters: find the victim's name to show in their card
+    const victimPlayer = players.find(p => p.role === 'victim');
 
     const isLastPlayer = currentRevealIndex === players.length - 1;
 
@@ -133,7 +137,28 @@ export const RevealPage: React.FC = () => {
                         className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center p-8 text-center pointer-events-none select-none"
                     >
                         <div className="flex flex-col items-center gap-6 max-w-sm">
-                            {isImpostor ? (
+                            {isPrankster ? (
+                                // PRANKSTER CARD: secret instructions
+                                <>
+                                    <Laugh size={80} className="text-amber-400 animate-bounce" />
+                                    <h2 className="text-5xl font-black text-amber-400 italic tracking-tighter">
+                                        MODO BROMISTA
+                                    </h2>
+                                    <div className="flex flex-col gap-4 mt-4 w-full">
+                                        <div className="flex flex-col items-center p-4 rounded-xl bg-amber-500/10 border border-amber-500/30">
+                                            <p className="text-amber-400/60 uppercase font-bold text-xs mb-1">La víctima es:</p>
+                                            <p className="text-3xl font-black text-amber-400 uppercase italic">{victimPlayer?.name}</p>
+                                        </div>
+                                        <div className="flex flex-col items-center p-4 rounded-xl bg-white/5 border border-white/10">
+                                            <p className="text-white/40 text-sm leading-relaxed text-center">
+                                                Decí <strong className="text-white">palabras al azar</strong> o inventadas.<br />
+                                                Fingí que todos se entienden entre sí.<br />
+                                                <span className="text-amber-400 font-bold">¡No rompas el juego!</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </>
+                            ) : isImpostor ? (
                                 <>
                                     <ShieldAlert size={80} className="text-red-500 animate-bounce" />
                                     <h2 className="text-6xl font-black text-white italic tracking-tighter">
@@ -168,6 +193,7 @@ export const RevealPage: React.FC = () => {
                                     )}
                                 </>
                             ) : (
+                                // NORMAL / VICTIM card (victim sees this — identical to avoid suspicion)
                                 <>
                                     <Eye size={80} className="text-primary self-center" />
                                     <div className="flex flex-col items-center">

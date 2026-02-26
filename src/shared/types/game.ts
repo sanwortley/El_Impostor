@@ -10,7 +10,7 @@ export interface Category {
 export interface Player {
     id: string;
     name: string;
-    role: 'impostor' | 'normal';
+    role: 'impostor' | 'normal' | 'victim' | 'prankster';
     isHost?: boolean;
     socketId?: string;
     isReady?: boolean;
@@ -28,7 +28,7 @@ export interface GameSettings {
     showCategory: boolean;
 }
 
-export type GameMode = 'local' | 'online';
+export type GameMode = 'local' | 'online' | 'prank';
 export type GamePhase = 'mode_select' | 'lobby' | 'joining' | 'setup' | 'reveal' | 'playing' | 'voting' | 'summary';
 
 export interface GameState {

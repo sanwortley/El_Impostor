@@ -1,6 +1,7 @@
 
+import React from 'react';
 import { useGameStore } from '../store/gameStore';
-import { Users, Globe, ChevronRight } from 'lucide-react';
+import { Users, Globe, ChevronRight, Laugh } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const ModeSelectPage: React.FC = () => {
@@ -49,6 +50,22 @@ export const ModeSelectPage: React.FC = () => {
                             <p className="text-white/40 text-sm">Cada uno desde su celular</p>
                         </div>
                         <ChevronRight className="text-white/20 group-hover:text-blue-500 transition-colors" />
+                    </div>
+                </button>
+
+                <button
+                    onClick={() => setMode('prank')}
+                    className="group relative overflow-hidden rounded-[2.5rem] bg-amber-500/10 border border-amber-500/30 p-8 text-left transition-all hover:bg-amber-500/20 active:scale-95"
+                >
+                    <div className="flex items-center gap-6 relative z-10">
+                        <div className="w-16 h-16 rounded-2xl bg-amber-500 flex items-center justify-center text-black shadow-lg shadow-amber-500/20">
+                            <Laugh size={32} />
+                        </div>
+                        <div className="flex-1">
+                            <h3 className="text-2xl font-black text-white uppercase italic">Bromista <span className="text-amber-400">🃏</span></h3>
+                            <p className="text-white/40 text-sm">Uno no sabe que es la víctima</p>
+                        </div>
+                        <ChevronRight className="text-white/20 group-hover:text-amber-500 transition-colors" />
                     </div>
                 </button>
             </div>

@@ -1,13 +1,45 @@
-
 import React from 'react';
 import { useGameStore } from '../store/gameStore';
 import { Button } from '../../../shared/ui/Button';
 import { Card } from '../../../shared/ui/Card';
-import { Target, Flag, ShieldAlert } from 'lucide-react';
+import { Target, Flag, ShieldAlert, Laugh } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const PlayingPage: React.FC = () => {
     const { finishGame, gameMode, localPlayer, lastVoteResults } = useGameStore();
+
+    // Prank mode: simple playing screen with just a reveal button
+    if (gameMode === 'prank') {
+        return (
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex-1 flex flex-col justify-center gap-6 py-8"
+            >
+                <Card className="flex flex-col items-center justify-center p-8 gap-6 text-center min-h-[350px] relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-amber-500/50 to-transparent" />
+                    <div className="w-24 h-24 bg-amber-500/10 text-amber-400 rounded-full flex items-center justify-center relative">
+                        <div className="absolute inset-0 bg-amber-500/20 rounded-full animate-ping opacity-20" />
+                        <Laugh size={48} className="relative z-10" />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                        <h1 className="text-4xl font-black text-white italic uppercase tracking-tighter">¡La broma está en curso!</h1>
+                        <p className="text-white/40 text-sm font-medium max-w-[280px]">
+                            Todos hablen del tema. La víctima no sabe que está siendo confundida.
+                        </p>
+                    </div>
+                    <Button
+                        fullWidth
+                        onClick={finishGame}
+                        className="h-20 text-xl mt-4 bg-amber-500 hover:bg-amber-400 text-black font-black"
+                    >
+                        <Laugh size={24} />
+                        REVELAR LA BROMA
+                    </Button>
+                </Card>
+            </motion.div>
+        );
+    }
 
     if (localPlayer?.isEliminated) {
         return (
