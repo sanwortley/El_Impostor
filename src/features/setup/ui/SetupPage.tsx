@@ -4,7 +4,7 @@ import { Stepper } from '../../../shared/ui/Stepper';
 import { Toggle } from '../../../shared/ui/Toggle';
 import { PlayersEditor } from './PlayersEditor';
 import { CategoryPicker } from './CategoryPicker';
-import { Sparkles, ChevronRight } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const SetupPage: React.FC = () => {
@@ -20,13 +20,7 @@ export const SetupPage: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             className="flex flex-col gap-6"
         >
-            <header className="flex flex-col items-center text-center py-4 relative">
-                <button
-                    onClick={() => useGameStore.getState().setPhase('mode_select')}
-                    className="absolute left-0 top-1/2 -translate-y-1/2 text-white/20 hover:text-white transition-colors"
-                >
-                    <ChevronRight className="rotate-180" size={24} />
-                </button>
+            <header className="flex flex-col items-center text-center py-4">
                 <h1 className="text-4xl md:text-6xl font-black text-primary tracking-tighter uppercase italic">
                     El Impostor
                 </h1>

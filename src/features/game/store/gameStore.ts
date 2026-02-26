@@ -26,6 +26,7 @@ interface GameStore extends GameState {
     nextReveal: () => void;
     finishGame: () => void;
     resetGame: () => void;
+    leaveRoom: () => void;
     setPhase: (phase: GamePhase) => void;
 }
 
@@ -147,6 +148,23 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
         socket.on('phase_updated', (phase) => {
             set({ phase: phase as GamePhase });
+        });
+
+        // Host closed the room — reset everyone back to the start
+        socket.on('room_closed', () => {
+            socket.disconnect();
+            set({
+                socket: null,
+                localPlayer: null,
+                gameMode: null,
+                roomCode: null,
+                players: [],
+                phase: 'mode_select',
+                settings: DEFAULT_SETTINGS,
+                winner: null,
+                lastVoteResults: null,
+                currentVotes: {}
+            });
         });
 
         set({ socket, localPlayer: player });
@@ -286,6 +304,26 @@ export const useGameStore = create<GameStore>((set, get) => ({
         } else {
             set({ phase: 'summary' });
         }
+    },
+
+    leaveRoom: () => {
+        const { socket, roomCode } = get();
+        if (socket && roomCode) {
+            socket.emit('leave_room', { code: roomCode });
+        }
+        socket?.disconnect();
+        set({
+            socket: null,
+            localPlayer: null,
+            gameMode: null,
+            roomCode: null,
+            players: [],
+            phase: 'mode_select',
+            settings: DEFAULT_SETTINGS,
+            winner: null,
+            lastVoteResults: null,
+            currentVotes: {}
+        });
     },
 
     resetGame: () => {

@@ -118,6 +118,28 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('leave_room', ({ code }) => {
+        const room = rooms.get(code);
+        if (!room) return;
+        const leavingPlayer = room.players.find(p => p.socketId === socket.id);
+        if (!leavingPlayer) return;
+
+        if (leavingPlayer.isHost) {
+            // Host leaving → close the room for everyone
+            io.to(code).emit('room_closed');
+            rooms.delete(code);
+        } else {
+            // Non-host leaving → just remove them
+            room.players = room.players.filter(p => p.socketId !== socket.id);
+            if (room.players.length === 0) {
+                rooms.delete(code);
+            } else {
+                io.to(code).emit('room_updated', formatRoom(room));
+            }
+        }
+        socket.leave(code);
+    });
+
     socket.on('next_phase', ({ code, phase }) => {
         const room = rooms.get(code);
         if (room) {

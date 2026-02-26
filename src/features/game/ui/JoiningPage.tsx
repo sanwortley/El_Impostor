@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { Button } from '../../../shared/ui/Button';
 import { Card } from '../../../shared/ui/Card';
-import { Link, Hash, User, ChevronRight } from 'lucide-react';
+import { Link, Hash, User } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const JoiningPage: React.FC = () => {
@@ -26,13 +26,7 @@ export const JoiningPage: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="flex flex-col gap-8 py-12"
             >
-                <header className="text-center relative">
-                    <button
-                        onClick={() => useGameStore.getState().setPhase('mode_select')}
-                        className="absolute left-0 top-1/2 -translate-y-1/2 text-white/20 hover:text-white transition-colors"
-                    >
-                        <ChevronRight className="rotate-180" size={24} />
-                    </button>
+                <header className="text-center">
                     <h1 className="text-5xl font-black text-primary italic uppercase tracking-tighter">
                         EL IMPOSTOR
                     </h1>
