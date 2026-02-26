@@ -256,7 +256,7 @@ io.on('connection', (socket) => {
                         }
                         io.to(code).emit('room_updated', formatRoom(currentRoom));
                     }
-                }, 120000); // 2 minute grace period — covers iPhone backgrounding
+                }, 300000); // 5 minute grace period — covers iPhone backgrounding
                 disconnectTimers.set(socket.id, timer);
             }
         });
