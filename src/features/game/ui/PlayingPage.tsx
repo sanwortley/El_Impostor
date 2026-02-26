@@ -10,9 +10,11 @@ export const PlayingPage: React.FC = () => {
 
     // Prank round: triggered automatically when any player has role 'victim'
     const isPrankRound = players.some(p => p.role === 'victim');
+    // The victim must never see the prank screen — they'd instantly know they're the target
+    const isVictim = localPlayer?.role === 'victim';
 
-    // Prank mode: simple playing screen with just a reveal button
-    if (isPrankRound) {
+    // Show prank screen only to pranksters (or in local mode where localPlayer is null)
+    if (isPrankRound && !isVictim) {
         return (
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
