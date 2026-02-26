@@ -6,10 +6,13 @@ import { Target, Flag, ShieldAlert, Laugh } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const PlayingPage: React.FC = () => {
-    const { finishGame, gameMode, localPlayer, lastVoteResults } = useGameStore();
+    const { finishGame, gameMode, localPlayer, lastVoteResults, players } = useGameStore();
+
+    // Prank round: triggered automatically when any player has role 'victim'
+    const isPrankRound = players.some(p => p.role === 'victim');
 
     // Prank mode: simple playing screen with just a reveal button
-    if (gameMode === 'prank') {
+    if (isPrankRound) {
         return (
             <motion.div
                 initial={{ opacity: 0, y: 20 }}

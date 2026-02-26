@@ -49,13 +49,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
     currentRevealIndex: 0,
     phase: 'mode_select',
     winner: null,
+    hasPranked: false,
     lastVoteResults: null,
     currentVotes: {},
 
     setMode: (mode) => {
-        if (mode === 'local' || mode === 'prank') {
+        if (mode === 'local') {
             set({
-                gameMode: mode,
+                gameMode: 'local',
                 phase: 'setup',
                 players: [],
                 settings: { ...DEFAULT_SETTINGS, playerCount: 0 }
@@ -244,7 +245,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }),
 
     startGame: () => {
-        const { socket, roomCode, players, settings, gameMode } = get();
+        const { socket, roomCode, players, settings, gameMode, hasPranked } = get();
 
         const randomCategory = settings.selectedCategories[Math.floor(Math.random() * settings.selectedCategories.length)];
         const items = randomCategory.items;
@@ -257,13 +258,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
             playerCount: players.length
         };
 
-        if (gameMode === 'prank') {
+        // 25% chance of a surprise prank round, but only once per session
+        const triggerPrank = !hasPranked && Math.random() < 0.25;
+
+        if (triggerPrank) {
             const playersWithRoles = assignVictim(players);
             set({
                 players: playersWithRoles,
                 currentRevealIndex: 0,
                 phase: 'reveal',
-                settings: updatedSettings
+                settings: updatedSettings,
+                hasPranked: true
             });
         } else if (gameMode === 'online' && socket && roomCode) {
             const playersWithRoles = assignRoles(players, settings.impostorCount);

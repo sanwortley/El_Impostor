@@ -28,7 +28,7 @@ export interface GameSettings {
     showCategory: boolean;
 }
 
-export type GameMode = 'local' | 'online' | 'prank';
+export type GameMode = 'local' | 'online';
 export type GamePhase = 'mode_select' | 'lobby' | 'joining' | 'setup' | 'reveal' | 'playing' | 'voting' | 'summary';
 
 export interface GameState {
@@ -39,6 +39,7 @@ export interface GameState {
     currentRevealIndex: number;
     phase: GamePhase;
     winner?: 'impostors' | 'normals' | null;
+    hasPranked?: boolean;
     currentVotes?: Record<string, string>; // voterId -> targetId
     lastVoteResults?: {
         votes: Array<{ voterName: string, targetName: string }>;

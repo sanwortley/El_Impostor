@@ -8,8 +8,11 @@ import { motion } from 'framer-motion';
 export const SummaryPage: React.FC = () => {
     const { players, settings, resetGame, gameMode, winner, setPhase } = useGameStore();
 
+    // Prank round: triggered automatically when any player has role 'victim'
+    const isPrankRound = players.some(p => p.role === 'victim');
+
     // Prank mode summary
-    if (gameMode === 'prank') {
+    if (isPrankRound) {
         const victim = players.find(p => p.role === 'victim');
         return (
             <motion.div
