@@ -142,7 +142,7 @@ export const RevealPage: React.FC = () => {
                                 <>
                                     <Laugh size={80} className="text-amber-400 animate-bounce" />
                                     <h2 className="text-5xl font-black text-amber-400 italic tracking-tighter">
-                                        MODO BROMISTA
+                                        MODO JODA
                                     </h2>
                                     <div className="flex flex-col gap-4 mt-4 w-full">
                                         <div className="flex flex-col items-center p-4 rounded-xl bg-amber-500/10 border border-amber-500/30">
