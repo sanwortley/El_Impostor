@@ -8,7 +8,8 @@ import { motion } from 'framer-motion';
 export const SummaryPage: React.FC = () => {
     const { players, settings, resetGame, gameMode, winner, setPhase, localPlayer } = useGameStore();
 
-    const canRestart = gameMode !== 'online' || localPlayer?.isHost;
+    const isOnline = gameMode === 'online';
+    const canRestart = !isOnline || localPlayer?.isHost === true;
 
     // Prank round: triggered automatically when any player has role 'victim'
     const isPrankRound = players.some(p => p.role === 'victim');

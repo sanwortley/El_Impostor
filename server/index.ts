@@ -29,7 +29,7 @@ interface Player {
     name: string;
     socketId: string;
     isHost: boolean;
-    role?: 'impostor' | 'normal';
+    role?: 'impostor' | 'normal' | 'victim' | 'prankster';
     isEliminated?: boolean;
 }
 
