@@ -6,7 +6,9 @@ import { RefreshCcw, ShieldAlert, User, Laugh, Home } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const SummaryPage: React.FC = () => {
-    const { players, settings, resetGame, gameMode, winner, setPhase } = useGameStore();
+    const { players, settings, resetGame, gameMode, winner, setPhase, localPlayer } = useGameStore();
+
+    const canRestart = gameMode !== 'online' || localPlayer?.isHost;
 
     // Prank round: triggered automatically when any player has role 'victim'
     const isPrankRound = players.some(p => p.role === 'victim');
@@ -41,10 +43,12 @@ export const SummaryPage: React.FC = () => {
                 </div>
 
                 <div className="flex flex-col gap-3 mt-2">
-                    <Button fullWidth onClick={resetGame} className="h-16 text-lg bg-amber-500 hover:bg-amber-400 text-black font-black">
-                        <Laugh size={20} />
-                        NUEVA PARTIDA
-                    </Button>
+                    {canRestart && (
+                        <Button fullWidth onClick={resetGame} className="h-16 text-lg bg-amber-500 hover:bg-amber-400 text-black font-black">
+                            <Laugh size={20} />
+                            NUEVA PARTIDA
+                        </Button>
+                    )}
                     <Button fullWidth variant="secondary" onClick={() => setPhase('mode_select')} className="h-14 text-sm">
                         <Home size={18} />
                         VOLVER AL INICIO
@@ -104,10 +108,12 @@ export const SummaryPage: React.FC = () => {
                 <p className="text-white/40 text-xs uppercase font-bold tracking-widest">Categoría: {settings.chosenCategory?.name}</p>
             </div>
 
-            <Button fullWidth onClick={resetGame} className="h-20 text-xl mt-4">
-                <RefreshCcw size={24} />
-                NUEVA PARTIDA
-            </Button>
+            {canRestart && (
+                <Button fullWidth onClick={resetGame} className="h-20 text-xl mt-4">
+                    <RefreshCcw size={24} />
+                    NUEVA PARTIDA
+                </Button>
+            )}
 
             <div className="h-20" />
         </motion.div>
