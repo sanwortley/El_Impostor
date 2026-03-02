@@ -14,7 +14,16 @@ app.use(cors());
 
 // Serve frontend in production
 const distPath = path.join(__dirname, '..', 'dist');
-app.use(express.static(distPath));
+app.use(express.static(distPath, {
+    setHeaders: (res, path) => {
+        if (path.endsWith('sw.js') || path.endsWith('manifest.webmanifest')) {
+            res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+            res.setHeader('Pragma', 'no-cache');
+            res.setHeader('Expires', '0');
+        }
+    }
+}));
+
 
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
