@@ -54,6 +54,7 @@ interface Room {
     word?: string;
     votes: Record<string, string>; // voterId -> targetId
     winner?: 'impostors' | 'normals' | null;
+    starterPlayerId?: string;
     lastVoteResults?: {
         votes: Array<{ voterName: string, targetName: string }>;
         eliminatedPlayerName?: string;
@@ -153,6 +154,14 @@ io.on('connection', (socket) => {
             room.votes = {};
             room.winner = null;
             room.lastVoteResults = null;
+
+            // Pick a random starter player
+            const alivePlayers = room.players.filter(p => !p.isEliminated);
+            if (alivePlayers.length > 0) {
+                const randomIndex = Math.floor(Math.random() * alivePlayers.length);
+                room.starterPlayerId = alivePlayers[randomIndex].id;
+            }
+
             io.to(code).emit('game_started', formatRoom(room));
         }
     });
@@ -183,6 +192,14 @@ io.on('connection', (socket) => {
             room.phase = phase;
             if (phase === 'voting') {
                 room.votes = {};
+            }
+            if (phase === 'playing') {
+                // Pick a new random starter player when entering playing phase from reveal
+                const alivePlayers = room.players.filter(p => !p.isEliminated);
+                if (alivePlayers.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * alivePlayers.length);
+                    room.starterPlayerId = alivePlayers[randomIndex].id;
+                }
             }
             io.to(code).emit('room_updated', formatRoom(room));
         }
@@ -264,10 +281,22 @@ io.on('connection', (socket) => {
                     room.phase = 'summary';
                 } else {
                     room.phase = 'playing';
+                    // Pick a new random starter player for the next round
+                    const alivePlayers = room.players.filter(p => !p.isEliminated);
+                    if (alivePlayers.length > 0) {
+                        const randomIndex = Math.floor(Math.random() * alivePlayers.length);
+                        room.starterPlayerId = alivePlayers[randomIndex].id;
+                    }
                 }
             }
         } else {
             room.phase = 'playing';
+            // Pick a new random starter player for the next round
+            const alivePlayers = room.players.filter(p => !p.isEliminated);
+            if (alivePlayers.length > 0) {
+                const randomIndex = Math.floor(Math.random() * alivePlayers.length);
+                room.starterPlayerId = alivePlayers[randomIndex].id;
+            }
         }
         io.to(room.code).emit('room_updated', formatRoom(room));
     }

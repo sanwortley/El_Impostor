@@ -140,6 +140,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 settings: room.settings,
                 phase: (room.phase === 'lobby' ? 'setup' : room.phase) as GamePhase,
                 winner: room.winner,
+                starterPlayerId: room.starterPlayerId,
                 lastVoteResults: room.lastVoteResults,
                 currentVotes: room.currentVotes || {}
             });
@@ -162,6 +163,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 phase: 'reveal',
                 currentRevealIndex: 0,
                 winner: null,
+                starterPlayerId: room.starterPlayerId,
                 lastVoteResults: null,
                 currentVotes: {}
             });
@@ -301,7 +303,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 players: playersWithRoles,
                 currentRevealIndex: 0,
                 phase: 'reveal',
-                settings: updatedSettings
+                settings: updatedSettings,
+                starterPlayerId: playersWithRoles[Math.floor(Math.random() * playersWithRoles.length)].id
             });
         }
     },

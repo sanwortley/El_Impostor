@@ -6,7 +6,7 @@ import { Target, Flag, ShieldAlert, Laugh } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const PlayingPage: React.FC = () => {
-    const { finishGame, gameMode, localPlayer, lastVoteResults, players } = useGameStore();
+    const { finishGame, gameMode, localPlayer, lastVoteResults, players, starterPlayerId } = useGameStore();
 
     // Prank round: triggered automatically when any player has role 'victim'
     const isPrankRound = players.some(p => p.role === 'victim');
@@ -158,12 +158,22 @@ export const PlayingPage: React.FC = () => {
 
                 <div className="flex flex-col gap-2">
                     <h1 className="text-4xl font-black text-white italic uppercase tracking-tighter">Partida en Juego</h1>
-                    <p className="text-white/40 text-sm font-medium max-w-[280px]">
+                    <p className="text-white/40 text-sm font-medium max-w-[280px] mx-auto">
                         {gameMode === 'online'
                             ? 'Debatí con los demás jugadores y tratá de encontrar al impostor.'
                             : '¡Que no se note quién es el impostor! Pasen el celular y debatan.'}
                     </p>
                 </div>
+
+                {/* Who Starts Section */}
+                {starterPlayerId && (
+                    <div className="w-full bg-primary/5 border border-primary/10 rounded-2xl p-4 flex flex-col gap-1">
+                        <span className="text-[10px] text-primary/60 font-black uppercase tracking-[0.2em]">ARRANCA HABLANDO:</span>
+                        <span className="text-2xl font-black text-primary uppercase italic tracking-tighter">
+                            {players.find(p => p.id === starterPlayerId)?.name || 'Aleatorio'}
+                        </span>
+                    </div>
+                )}
 
                 <div className="flex flex-col w-full gap-3 mt-4">
                     {gameMode === 'online' && localPlayer?.isHost && (

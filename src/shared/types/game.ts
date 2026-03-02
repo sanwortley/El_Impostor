@@ -40,6 +40,7 @@ export interface GameState {
     currentRevealIndex: number;
     phase: GamePhase;
     winner?: 'impostors' | 'normals' | null;
+    starterPlayerId?: string;
     currentVotes?: Record<string, string>; // voterId -> targetId
     lastVoteResults?: {
         votes: Array<{ voterName: string, targetName: string }>;
