@@ -232,3 +232,24 @@ El servidor **no usa base de datos**. Todas las salas viven en memoria RAM. Si e
 ---
 
 
+## 🛠 Code Review & Arquitectura
+
+### Estructura del Proyecto
+
+El proyecto está organizado siguiendo una arquitectura modular y tipada con TypeScript:
+
+- **`src/shared/data/categories.ts`**: El corazón del juego. Contiene el diccionario completo (`CATEGORIES`) con sus ítems y el sistema de **pistas crípticas**. Es el archivo principal para la expansión de contenido.
+- **`src/shared/types/game.ts`**: Define los contratos de datos (Interfaces). Aquí se especifica qué es un `Player`, un `GameState` y una `Category`.
+- **`src/shared/utils/random.ts`**: Lógica de aleatorización. Se encarga de mezclar los jugadores, asignar roles (Impostor, Víctima en Modo Joda) y elegir quién arranca.
+- **`src/modules/game/`**: Lógica del modo **Local**. Maneja el flujo de turnos, la visualización de palabras y la votación en una misma pantalla.
+- **`src/modules/online/`**: Lógica del modo **Online**. Gestiona la sincronización de estados, salas y eventos en tiempo real.
+- **`src/shared/ui/`**: Componentes visuales reutilizables (Botones, Modals, Cards) con un diseño premium y consistente.
+
+### Análisis Técnico
+
+1. **Gestión de Estado**: Se utiliza un sistema reactivo para manejar los cambios de fase del juego (Lobby -> Roles -> Discusión -> Votación).
+2. **Sistema de Pistas**: Implementa una lógica de asociación lateral. Las pistas están diseñadas para ser tangenciales al objeto, obligando al Impostor a deducir el contexto sin tener la palabra directa.
+3. **Escalabilidad**: El sistema de categorías permite agregar miles de palabras sin tocar la lógica del motor del juego.
+4. **Modo Joda**: Una implementación creativa de "Impostor inverso" donde la mayoría engaña a uno solo, integrada fluidamente en el flujo de asignación de roles.
+
+---
