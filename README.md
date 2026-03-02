@@ -231,4 +231,4 @@ El servidor **no usa base de datos**. Todas las salas viven en memoria RAM. Si e
 
 ---
 
-Hecho con ❤️ para noches de juegos con amigos.
+

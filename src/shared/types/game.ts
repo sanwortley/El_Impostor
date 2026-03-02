@@ -16,6 +16,7 @@ export interface Player {
     isReady?: boolean;
     isEliminated?: boolean;
     votes?: number;
+    relation?: string;
 }
 
 export interface GameSettings {
@@ -39,7 +40,6 @@ export interface GameState {
     currentRevealIndex: number;
     phase: GamePhase;
     winner?: 'impostors' | 'normals' | null;
-    hasPranked?: boolean;
     currentVotes?: Record<string, string>; // voterId -> targetId
     lastVoteResults?: {
         votes: Array<{ voterName: string, targetName: string }>;

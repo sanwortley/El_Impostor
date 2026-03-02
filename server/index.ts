@@ -21,7 +21,11 @@ const io = new Server(httpServer, {
     cors: {
         origin: "*",
         methods: ["GET", "POST"]
-    }
+    },
+    pingInterval: 10000,
+    pingTimeout: 5000,
+    connectTimeout: 20000,
+    transports: ['websocket', 'polling']
 });
 
 interface Player {
@@ -50,10 +54,25 @@ interface Room {
 }
 
 const rooms = new Map<string, Room>();
-// Grace period timers: socketId -> NodeJS.Timeout
-const disconnectTimers = new Map<string, NodeJS.Timeout>();
+const disconnectTimers = new Map<string, NodeJS.Timeout>(); // playerId -> Timeout
+
+function formatRoom(room: Room) {
+    return {
+        ...room,
+        currentVotes: room.votes
+    };
+}
 
 io.on('connection', (socket) => {
+    // Helper to find a room by a player's socketId
+    const findRoomBySocketId = (socketId: string) => {
+        for (const [code, room] of rooms.entries()) {
+            const player = room.players.find(p => p.socketId === socketId);
+            if (player) return { code, room, player };
+        }
+        return null;
+    };
+
     socket.on('create_room', (data) => {
         const code = Math.random().toString(36).substring(2, 7).toUpperCase();
         const room: Room = {
@@ -72,21 +91,19 @@ io.on('connection', (socket) => {
     socket.on('join_room', ({ code, player }) => {
         const room = rooms.get(code);
         if (room) {
-            // Find by ID or Name (for extra safety if ID fails)
-            const existingIndex = room.players.findIndex(p => p.id === player.id || p.name === player.name);
+            // Cancel any pending disconnect timer for this player ID
+            if (disconnectTimers.has(player.id)) {
+                clearTimeout(disconnectTimers.get(player.id)!);
+                disconnectTimers.delete(player.id);
+            }
+
+            const existingIndex = room.players.findIndex(p => p.id === player.id);
             if (existingIndex !== -1) {
-                const oldSocketId = room.players[existingIndex].socketId;
-                // Cancel pending disconnect timer for this player (reconnection!)
-                if (disconnectTimers.has(oldSocketId)) {
-                    clearTimeout(disconnectTimers.get(oldSocketId)!);
-                    disconnectTimers.delete(oldSocketId);
-                }
+                // Reconnecting existing player
                 room.players[existingIndex].socketId = socket.id;
-                // Update ID if it was matched by name
-                if (room.players[existingIndex].name === player.name) {
-                    room.players[existingIndex].id = player.id;
-                }
+                room.players[existingIndex].name = player.name;
             } else {
+                // New player joining
                 const newPlayer = { ...player, socketId: socket.id, isHost: false };
                 room.players.push(newPlayer);
             }
@@ -101,11 +118,24 @@ io.on('connection', (socket) => {
         const room = rooms.get(code);
         if (room) {
             room.phase = 'reveal';
+
+            // Critical: Check if this is a Prank Round (Modo Joda)
+            const isPrankRound = playersWithRoles.some((p: any) => p.role === 'victim');
+
             room.players = room.players.map(p => {
                 const roleData = playersWithRoles.find((pr: any) => pr.id === p.id || pr.name === p.name);
+
+                let finalRole = roleData?.role || (isPrankRound ? 'prankster' : 'normal');
+
+                // Extra safety: If it's a prank round, there can't be "impostors", only "pranksters" and ONE "victim"
+                if (isPrankRound && finalRole === 'impostor') {
+                    finalRole = 'prankster';
+                }
+
                 return {
                     ...p,
-                    role: roleData?.role || 'normal',
+                    role: finalRole as any,
+                    relation: roleData?.relation,
                     isEliminated: false
                 };
             });
@@ -125,11 +155,9 @@ io.on('connection', (socket) => {
         if (!leavingPlayer) return;
 
         if (leavingPlayer.isHost) {
-            // Host leaving → close the room for everyone
             io.to(code).emit('room_closed');
             rooms.delete(code);
         } else {
-            // Non-host leaving → just remove them
             room.players = room.players.filter(p => p.socketId !== socket.id);
             if (room.players.length === 0) {
                 rooms.delete(code);
@@ -151,25 +179,23 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('update_settings', ({ code, settings }) => {
+        const room = rooms.get(code);
+        if (room) {
+            room.settings = settings;
+            io.to(code).emit('room_updated', formatRoom(room));
+        }
+    });
+
     socket.on('cast_vote', ({ code, targetId, voterId }) => {
         const room = rooms.get(code);
         if (room) {
-            // Try everything to find the player: ID, Socket, or Name
-            const voter = room.players.find(p => p.id === voterId) ||
-                room.players.find(p => p.socketId === socket.id);
-
+            const voter = room.players.find(p => p.id === voterId);
             if (voter && !voter.isEliminated) {
-                // Save vote
                 room.votes[voter.id] = targetId;
-
                 const alivePlayers = room.players.filter(p => !p.isEliminated);
-                const voteCount = Object.keys(room.votes).length;
-
-                // Sync immediately so dots turn green
                 io.to(code).emit('room_updated', formatRoom(room));
-
-                // Auto-advance if everyone voted
-                if (voteCount >= alivePlayers.length) {
+                if (Object.keys(room.votes).length >= alivePlayers.length) {
                     calculateResults(room);
                 }
             }
@@ -183,13 +209,6 @@ io.on('connection', (socket) => {
         }
     });
 
-    function formatRoom(room: Room) {
-        return {
-            ...room,
-            currentVotes: room.votes
-        };
-    }
-
     function calculateResults(room: Room) {
         const voteTallies: Record<string, number> = {};
         const voteHistory: Array<{ voterName: string, targetName: string }> = [];
@@ -197,7 +216,6 @@ io.on('connection', (socket) => {
         Object.entries(room.votes).forEach(([voterId, targetId]) => {
             const voter = room.players.find(p => p.id === voterId);
             const target = room.players.find(p => p.id === targetId);
-
             if (voter && target) {
                 voteHistory.push({ voterName: voter.name, targetName: target.name });
                 voteTallies[targetId] = (voteTallies[targetId] || 0) + 1;
@@ -206,7 +224,6 @@ io.on('connection', (socket) => {
 
         let maxVotes = 0;
         let candidates: string[] = [];
-
         Object.entries(voteTallies).forEach(([id, count]) => {
             if (count > maxVotes) {
                 maxVotes = count;
@@ -217,21 +234,16 @@ io.on('connection', (socket) => {
         });
 
         const tie = candidates.length !== 1 || maxVotes === 0;
-        let eliminatedId = tie ? null : candidates[0];
+        room.lastVoteResults = { votes: voteHistory, tie };
 
-        room.lastVoteResults = {
-            votes: voteHistory,
-            tie
-        };
-
-        if (!tie && eliminatedId) {
+        if (!tie) {
+            const eliminatedId = candidates[0];
             const eliminatedPlayer = room.players.find(p => p.id === eliminatedId);
             if (eliminatedPlayer) {
                 eliminatedPlayer.isEliminated = true;
                 room.lastVoteResults.eliminatedPlayerName = eliminatedPlayer.name;
                 room.lastVoteResults.isImpostor = eliminatedPlayer.role === 'impostor';
 
-                // Win conditions
                 const impostorsAlive = room.players.filter(p => p.role === 'impostor' && !p.isEliminated);
                 const normalsAlive = room.players.filter(p => p.role === 'normal' && !p.isEliminated);
 
@@ -248,44 +260,38 @@ io.on('connection', (socket) => {
         } else {
             room.phase = 'playing';
         }
-
         io.to(room.code).emit('room_updated', formatRoom(room));
     }
 
     socket.on('disconnect', () => {
-        rooms.forEach((room, code) => {
-            const player = room.players.find(p => p.socketId === socket.id);
-            if (player) {
-                // Always apply a grace period regardless of phase.
-                // On iPhone, moving to background can cut the WebSocket and take
-                // well over 30 seconds to restore. 120s gives enough room.
-                if (disconnectTimers.has(socket.id)) {
-                    clearTimeout(disconnectTimers.get(socket.id)!);
-                }
-                const timer = setTimeout(() => {
-                    disconnectTimers.delete(socket.id);
-                    const currentRoom = rooms.get(code);
-                    if (!currentRoom) return;
-                    // Only remove if still using the old socketId (hasn't reconnected)
-                    const stillDisconnected = currentRoom.players.find(p => p.socketId === socket.id);
-                    if (stillDisconnected) {
-                        const idx = currentRoom.players.indexOf(stillDisconnected);
-                        currentRoom.players.splice(idx, 1);
+        const result = findRoomBySocketId(socket.id);
+        if (result) {
+            const { room, player, code } = result;
+            if (disconnectTimers.has(player.id)) {
+                clearTimeout(disconnectTimers.get(player.id)!);
+            }
+
+            const timer = setTimeout(() => {
+                disconnectTimers.delete(player.id);
+                const currentRoom = rooms.get(code);
+                if (currentRoom && player.socketId === socket.id) {
+                    const idx = currentRoom.players.findIndex(p => p.id === player.id);
+                    if (idx !== -1) {
+                        const removedPlayer = currentRoom.players.splice(idx, 1)[0];
                         if (currentRoom.players.length === 0) {
                             rooms.delete(code);
-                        } else if (stillDisconnected.isHost) {
+                        } else if (removedPlayer.isHost) {
                             currentRoom.players[0].isHost = true;
                         }
                         io.to(code).emit('room_updated', formatRoom(currentRoom));
                     }
-                }, 300000); // 5 minute grace period — covers iPhone backgrounding
-                disconnectTimers.set(socket.id, timer);
-            }
-        });
+                }
+            }, 120000); // 2 minute grace period
+            disconnectTimers.set(player.id, timer);
+        }
     });
 });
 
-// Catch-all: serve frontend for client-side routing
 app.get('/{*path}', (_req, res) => {
     res.sendFile(path.join(distPath, 'index.html'));
 });

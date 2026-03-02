@@ -9,11 +9,28 @@ export const assignRoles = (players: Player[], impostorCount: number): Player[] 
     }));
 };
 
-/** Prank mode: one random victim gets the real word (unaware), everyone else is a prankster. */
+/** Prank mode: one random victim becomes the 'impostor' (unaware they're the target), 
+ * everyone else is a prankster with a funny identity related to the victim. */
 export const assignVictim = (players: Player[]): Player[] => {
     const victimIndex = Math.floor(Math.random() * players.length);
-    return players.map((p, i) => ({
-        ...p,
-        role: i === victimIndex ? 'victim' : 'prankster'
-    }));
+    const victim = players[victimIndex];
+
+    const relations = ['LA MAMÁ', 'LA NOVIA', 'LA PRIMA'];
+
+    // Shuffle relations to assign unique ones
+    const shuffledRelations = [...relations].sort(() => Math.random() - 0.5);
+
+    return players.map((p, i) => {
+        if (i === victimIndex) {
+            return { ...p, role: 'victim' };
+        }
+
+        // Assign a funny relation to pranksters
+        const relation = shuffledRelations[i % shuffledRelations.length];
+        return {
+            ...p,
+            role: 'prankster',
+            relation: `${relation} DE ${victim.name.toUpperCase()}`
+        };
+    });
 };

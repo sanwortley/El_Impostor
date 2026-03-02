@@ -25,8 +25,14 @@ const App: React.FC = () => {
                 leaveRoom();
             }
         } else {
-            // Local mode: just go back to start
-            setPhase('mode_select');
+            // Local mode: 
+            // If in reveal/playing/voting/summary, go back to setup to allow re-checking or repeating
+            // If already in setup, then go back to mode_select
+            if (phase === 'setup') {
+                setPhase('mode_select');
+            } else {
+                setPhase('setup');
+            }
         }
     };
 

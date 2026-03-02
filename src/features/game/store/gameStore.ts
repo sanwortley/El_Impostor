@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { io, Socket } from 'socket.io-client';
 import type { GameState, GameSettings, Player, GamePhase, Category, GameMode } from '../../../shared/types/game';
 import { assignRoles, assignVictim } from '../domain/assignImpostors';
+import { CATEGORIES } from '../../../shared/data/categories';
 
 // In production, connect to same host. In dev, connect to localhost:3001
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || (import.meta.env.PROD ? window.location.origin : 'http://localhost:3001');
@@ -49,17 +50,20 @@ export const useGameStore = create<GameStore>((set, get) => ({
     currentRevealIndex: 0,
     phase: 'mode_select',
     winner: null,
-    hasPranked: false,
     lastVoteResults: null,
     currentVotes: {},
 
     setMode: (mode) => {
         if (mode === 'local') {
+            const currentPlayers = get().players;
             set({
                 gameMode: 'local',
                 phase: 'setup',
-                players: [],
-                settings: { ...DEFAULT_SETTINGS, playerCount: 0 }
+                players: currentPlayers.length > 0 ? currentPlayers : [],
+                settings: {
+                    ...get().settings,
+                    playerCount: currentPlayers.length
+                }
             });
         } else {
             set({ gameMode: 'online', phase: 'joining' });
@@ -67,12 +71,20 @@ export const useGameStore = create<GameStore>((set, get) => ({
     },
 
     connect: (name: string) => {
-        const socket = io(SOCKET_URL);
+        // More robust connection options
+        const socket = io(SOCKET_URL, {
+            transports: ['websocket', 'polling'], // Prefer websocket, fallback to polling
+            reconnection: true,
+            reconnectionAttempts: Infinity,
+            reconnectionDelay: 1000,
+            reconnectionDelayMax: 5000,
+            timeout: 20000,
+        });
 
         // Persistent player ID
         let playerId = localStorage.getItem('impostor_player_id');
         if (!playerId) {
-            playerId = Math.random().toString(36).substring(7);
+            playerId = Math.random().toString(32).substring(2, 10);
             localStorage.setItem('impostor_player_id', playerId);
         }
 
@@ -89,17 +101,26 @@ export const useGameStore = create<GameStore>((set, get) => ({
                     : { ...player, socketId: socket.id }
             }));
 
-            // Auto-rejoin room on reconnect (handles mobile background/foreground).
-            // Small delay so the state update above settles before we read it.
-            setTimeout(() => {
-                const { roomCode, localPlayer } = get();
-                if (roomCode && localPlayer) {
-                    socket.emit('join_room', {
-                        code: roomCode,
-                        player: { ...localPlayer, socketId: socket.id }
-                    });
-                }
-            }, 100);
+            // Auto-rejoin room on reconnect or initial connect
+            const { roomCode, localPlayer } = get();
+            if (roomCode && localPlayer) {
+                socket.emit('join_room', {
+                    code: roomCode,
+                    player: { ...localPlayer, socketId: socket.id }
+                });
+            }
+        });
+
+        socket.on('disconnect', (reason) => {
+            console.log('Socket disconnected:', reason);
+            // If it was a manual disconnect, don't auto-reconnect
+            if (reason === "io client disconnect") return;
+
+            // For other reasons, the socket will try to reconnect automatically
+        });
+
+        socket.on('connect_error', (error) => {
+            console.error('Connection error:', error);
         });
 
         socket.on('room_created', (room) => {
@@ -245,9 +266,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }),
 
     startGame: () => {
-        const { socket, roomCode, players, settings, gameMode, hasPranked } = get();
+        const { socket, roomCode, players, settings, gameMode } = get();
 
-        const randomCategory = settings.selectedCategories[Math.floor(Math.random() * settings.selectedCategories.length)];
+        const sourceCategories = settings.selectedCategories.length > 0
+            ? settings.selectedCategories
+            : CATEGORIES;
+
+        const randomCategory = sourceCategories[Math.floor(Math.random() * sourceCategories.length)];
         const items = randomCategory.items;
         const randomWord = items[Math.floor(Math.random() * items.length)];
 
@@ -258,15 +283,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
             playerCount: players.length
         };
 
-        // 25% chance of a surprise prank round, but only once per session
-        const triggerPrank = !hasPranked && Math.random() < 0.25;
+        // 10% chance of a surprise prank round
+        const triggerPrank = Math.random() < 0.10;
         const playersWithRoles = triggerPrank
             ? assignVictim(players)
             : assignRoles(players, settings.impostorCount);
-
-        if (triggerPrank) {
-            set({ hasPranked: true });
-        }
 
         if (gameMode === 'online' && socket && roomCode) {
             socket.emit('start_game', {

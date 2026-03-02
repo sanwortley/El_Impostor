@@ -38,9 +38,9 @@ export const RevealPage: React.FC = () => {
         );
     }
 
-    const isImpostor = currentPlayer.role === 'impostor';
+    const isImpostor = currentPlayer.role === 'impostor' || currentPlayer.role === 'victim';
     const isPrankster = currentPlayer.role === 'prankster';
-    const isChaosMode = settings.impostorCount === players.length;
+    const isChaosMode = settings.impostorCount === players.length && currentPlayer.role !== 'victim';
 
     // For pranksters: find the victim's name to show in their card
     const victimPlayer = players.find(p => p.role === 'victim');
@@ -53,10 +53,6 @@ export const RevealPage: React.FC = () => {
             setHasRevealed(false);
             nextReveal();
         } else {
-            // In online mode, we just stay in "hasRevealed" state 
-            // until the server pushes the phase change to 'playing'
-            // But we tell the store/server we are ready if we want to track it
-            // For now, nextReveal() will handle the transition if it's the host
             nextReveal();
         }
     };
@@ -75,7 +71,6 @@ export const RevealPage: React.FC = () => {
             </header>
 
             <div className="flex-1 flex flex-col gap-6 py-6">
-                {/* Hold button always visible — player can check their role multiple times */}
                 <HoldToReveal
                     playerName={currentPlayer.name}
                     isRevealing={isRevealing}
@@ -88,7 +83,6 @@ export const RevealPage: React.FC = () => {
                     }}
                 />
 
-                {/* Action button slides in after the first reveal */}
                 <AnimatePresence>
                     {hasRevealed && (
                         <motion.div
@@ -127,7 +121,6 @@ export const RevealPage: React.FC = () => {
                 </AnimatePresence>
             </div>
 
-            {/* Secret content only visible during hold */}
             <AnimatePresence>
                 {isRevealing && (
                     <motion.div
@@ -138,29 +131,32 @@ export const RevealPage: React.FC = () => {
                     >
                         <div className="flex flex-col items-center gap-6 max-w-sm">
                             {isPrankster ? (
-                                // PRANKSTER CARD: secret instructions
                                 <>
                                     <Laugh size={80} className="text-amber-400 animate-bounce" />
-                                    <h2 className="text-5xl font-black text-amber-400 italic tracking-tighter">
-                                        MODO JODA
+                                    <h2 className="text-5xl font-black text-amber-400 italic tracking-tighter uppercase mb-2">
+                                        ¡SOS {currentPlayer.relation || 'CÓMPLICE'}!
                                     </h2>
-                                    <div className="flex flex-col gap-4 mt-4 w-full">
-                                        <div className="flex flex-col items-center p-4 rounded-xl bg-amber-500/10 border border-amber-500/30">
-                                            <p className="text-amber-400/60 uppercase font-bold text-xs mb-1">La víctima es:</p>
-                                            <p className="text-3xl font-black text-amber-400 uppercase italic">{victimPlayer?.name}</p>
+                                    <h3 className="text-xl font-bold text-white/80 mb-6 uppercase tracking-widest">MODO JODA</h3>
+
+                                    <div className="flex flex-col gap-4 w-full">
+                                        <div className="flex flex-col items-center p-5 rounded-2xl bg-amber-500/10 border-2 border-amber-500/30">
+                                            <p className="text-white/40 uppercase font-bold text-[10px] tracking-widest mb-1">LA PALABRA ES:</p>
+                                            <p className="text-3xl font-black text-white uppercase italic tracking-tighter mb-4">{settings.secretWord}</p>
+
+                                            <p className="text-amber-400/60 uppercase font-black text-[10px] tracking-[0.2em] mb-1 border-t border-amber-500/20 pt-4 w-full text-center">EL OBJETIVO ES:</p>
+                                            <p className="text-xl font-black text-amber-400 uppercase italic tracking-tighter">{victimPlayer?.name}</p>
                                         </div>
-                                        <div className="flex flex-col items-center p-4 rounded-xl bg-white/5 border border-white/10">
-                                            <p className="text-white/40 text-sm leading-relaxed text-center">
-                                                Decí <strong className="text-white">palabras al azar</strong> o inventadas.<br />
-                                                Fingí que todos se entienden entre sí.<br />
-                                                <span className="text-amber-400 font-bold">¡No rompas el juego!</span>
+
+                                        <div className="flex flex-col items-center p-5 rounded-2xl bg-white/5 border border-white/10 gap-3">
+                                            <p className="text-white font-bold text-sm leading-relaxed text-center">
+                                                ¡Actuá como su <span className="text-amber-400">{currentPlayer.relation?.split(' DE ')[0] || 'Cómplice'}</span> y confundilo!
                                             </p>
                                         </div>
                                     </div>
                                 </>
                             ) : isImpostor ? (
                                 <>
-                                    <ShieldAlert size={80} className="text-red-500 animate-bounce" />
+                                    < ShieldAlert size={80} className="text-red-500 animate-bounce" />
                                     <h2 className="text-6xl font-black text-white italic tracking-tighter">
                                         SOS IMPOSTOR
                                     </h2>
@@ -193,7 +189,6 @@ export const RevealPage: React.FC = () => {
                                     )}
                                 </>
                             ) : (
-                                // NORMAL / VICTIM card (victim sees this — identical to avoid suspicion)
                                 <>
                                     <Eye size={80} className="text-primary self-center" />
                                     <div className="flex flex-col items-center">

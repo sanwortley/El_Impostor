@@ -15,32 +15,61 @@ export const PlayingPage: React.FC = () => {
 
     // Show prank screen only to pranksters (or in local mode where localPlayer is null)
     if (isPrankRound && !isVictim) {
+        const victim = players.find(p => p.role === 'victim');
+        const chosenCategory = useGameStore.getState().settings.chosenCategory;
+
         return (
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="flex-1 flex flex-col justify-center gap-6 py-8"
             >
-                <Card className="flex flex-col items-center justify-center p-8 gap-6 text-center min-h-[350px] relative overflow-hidden">
+                <Card className="flex flex-col items-center justify-center p-8 gap-6 text-center min-h-[450px] relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-amber-500/50 to-transparent" />
-                    <div className="w-24 h-24 bg-amber-500/10 text-amber-400 rounded-full flex items-center justify-center relative">
+                    <div className="w-20 h-20 bg-amber-500/10 text-amber-400 rounded-full flex items-center justify-center relative">
                         <div className="absolute inset-0 bg-amber-500/20 rounded-full animate-ping opacity-20" />
-                        <Laugh size={48} className="relative z-10" />
+                        <Laugh size={40} className="relative z-10" />
                     </div>
-                    <div className="flex flex-col gap-2">
-                        <h1 className="text-4xl font-black text-white italic uppercase tracking-tighter">¡La broma está en curso!</h1>
-                        <p className="text-white/40 text-sm font-medium max-w-[280px]">
-                            Todos hablen del tema. La víctima no sabe que está siendo confundida.
-                        </p>
+
+                    <div className="flex flex-col gap-1">
+                        <h1 className="text-3xl font-black text-white italic uppercase tracking-tighter">¡EL PLAN SIGUE!</h1>
+                        <p className="text-amber-400 text-xs font-black uppercase tracking-[0.2em] mb-4">MODO JODA ACTIVO</p>
+
+                        <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 mb-2 flex flex-col gap-3">
+                            <div>
+                                <p className="text-white/40 uppercase font-bold text-[10px] tracking-widest mb-1">SOS {localPlayer?.relation || 'CÓMPLICE'}:</p>
+                                <p className="text-2xl font-black text-amber-400 uppercase italic tracking-tighter">{victim?.name}</p>
+                            </div>
+                            <div className="border-t border-amber-500/20 pt-3">
+                                <p className="text-white/40 uppercase font-bold text-[10px] tracking-widest mb-1">LA PALABRA ES:</p>
+                                <p className="text-xl font-black text-white uppercase italic tracking-tighter">
+                                    {useGameStore.getState().settings.secretWord}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="space-y-4">
+                            <p className="text-white/60 text-sm leading-relaxed px-4">
+                                Usá palabras serias pero sin sentido que tengan que ver con <strong>{chosenCategory?.name}</strong>.
+                            </p>
+                            <div className="bg-white/5 border border-white/10 rounded-xl p-3 text-[11px] text-white/30 italic">
+                                "¡Esa palabra tiene un tono muy 'refrunlo'!" <br />
+                                "Yo prefiero cuando es más 'zapinto'..."
+                            </div>
+                        </div>
                     </div>
-                    <Button
-                        fullWidth
-                        onClick={finishGame}
-                        className="h-20 text-xl mt-4 bg-amber-500 hover:bg-amber-400 text-black font-black"
-                    >
-                        <Laugh size={24} />
-                        REVELAR LA BROMA
-                    </Button>
+
+                    <div className="w-full flex flex-col gap-3 mt-4">
+                        <Button
+                            fullWidth
+                            onClick={finishGame}
+                            className="h-16 text-lg bg-amber-500 hover:bg-amber-400 text-black font-black"
+                        >
+                            <Laugh size={24} />
+                            REVELAR LA BROMA
+                        </Button>
+                        <p className="text-[10px] text-white/20 uppercase font-bold tracking-widest">Solo cuando terminen la joda</p>
+                    </div>
                 </Card>
             </motion.div>
         );

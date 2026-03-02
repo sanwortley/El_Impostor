@@ -65,7 +65,7 @@ export const SetupPage: React.FC = () => {
 
                     <Button
                         fullWidth
-                        className="mt-4 h-20 text-2xl animate-pulse-gold"
+                        className="mt-4 h-20 text-2xl animate-pulse-gold shadow-primary/20"
                         disabled={!canStart}
                         onClick={startGame}
                     >
