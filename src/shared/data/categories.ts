@@ -17,10 +17,78 @@ export const CATEGORIES: Category[] = [
             'Asado': 'Achurra', 'Paella': 'Azafrán', 'Empanadas': 'Repulgue', 'Lasagna': 'Capas', 'Ceviche': 'Tiradito',
             'Ravioles': 'Sorrento', 'Milanesa': 'Cotoletta', 'Hot Dog': 'Dachshund', 'Locro': 'Pulsada', 'Gnocchi': 'Patata',
             'Alfajor': 'Fécula', 'Medialunas': 'Creciente', 'Tiramisú': 'Treviso', 'Churros': 'Porras', 'Provoleta': 'Parrilla',
-            'Tarta': 'Quiche', 'Sándwich': 'Montagu', 'Quesadilla': 'Fundido', 'Ramen': 'Umami', 'Burritos': 'Misión',
+            'Tarta': 'Quiche', 'Sándwich': 'Montagu', 'Quesadilla': 'Comal', 'Ramen': 'Umami', 'Burritos': 'Misión',
             'Cheesecake': 'Graham', 'Flan': 'María', 'Dulce de leche': 'Conaprole', 'Humita': 'Chala', 'Polenta': 'Grano',
             'Shawarma': 'Vertical', 'Wrap': 'Enrollado', 'Wok': 'Salteado', 'Bondiola': 'Cerdo', 'Choripán': 'Costanera',
             'Tortilla': 'Huevo', 'Risotto': 'Arborio'
+        },
+    },
+    {
+        id: '16',
+        name: 'Futbolistas',
+        description: 'Jugadores históricos y actuales',
+        items: [
+            'Messi', 'Maradona', 'Cristiano Ronaldo', 'Pelé', 'Neymar', 'Mbappé', 'Ronaldinho', 'Zidane', 'Ronaldo Nazario', 'Cruyff',
+            'Di Stefano', 'Puskas', 'Lev Yashin', 'Beckenbauer', 'Platini', 'Zico', 'Henry', 'Eto\'o', 'Iniesta', 'Xavi',
+            'Modric', 'Benzema', 'Haaland', 'Lewandowski', 'Dibu Martínez', 'Julián Álvarez', 'Di María', 'Hulk', 'Vinícius Jr', 'Lautaro Martínez'
+        ],
+        hint: 'Balompié',
+        itemHints: {
+            'Messi': 'La-Pulga', 'Maradona': 'Pelusa', 'Cristiano Ronaldo': 'Bicho', 'Pelé': 'O-Rei', 'Neymar': 'Santos',
+            'Mbappé': 'Bondy', 'Ronaldinho': 'Sonrisa', 'Zidane': 'Marsella', 'Ronaldo Nazario': 'Fenómeno', 'Cruyff': 'Naranja',
+            'Di Stefano': 'Saeta', 'Puskas': 'Cañoncito', 'Lev Yashin': 'Araña', 'Beckenbauer': 'Kaiser', 'Platini': 'General',
+            'Zico': 'Galinho', 'Henry': 'Titi', 'Eto\'o': 'León', 'Iniesta': 'Fuentealbilla', 'Xavi': 'Terrassa',
+            'Modric': 'Zadar', 'Benzema': 'Lyon', 'Haaland': 'Androide', 'Lewandowski': 'Varsovia', 'Dibu Martínez': 'Mar-del-Plata',
+            'Julián Álvarez': 'Calchín', 'Di María': 'Fideo', 'Hulk': 'Paraíba', 'Vinícius Jr': 'Bailá', 'Lautaro Martínez': 'Toro'
+        },
+    },
+    {
+        id: '19',
+        name: 'Rugbiers',
+        description: 'Jugadores mundiales de elite',
+        items: [
+            'Agustín Pichot', 'Hugo Porta', 'Pablo Matera', 'Agustín Creevy', 'Jonah Lomu', 'Dan Carter', 'Richie McCaw', 'Jonny Wilkinson', 'Siya Kolisi', 'Santi Cordero',
+            'Emiliano Boffelli', 'Juan Martín Hernández', 'Felipe Contepomi', 'Marcos Kremer', 'Julian Montoya', 'Antonne Dupont', 'Beauden Barrett', 'Ardie Savea', 'Cheslin Kolbe', 'Owen Farrell',
+            'Maro Itoje', 'Alun Wyn Jones', 'Bryan Habana', 'Sergio Parisse', 'Gonzalo Quesada', 'Sebastian Bertranou', 'Juan Imhoff', 'Facundo Isa', 'Bautista Delguy', 'Santiago Carreras',
+            'Finn Russell', 'Bundee Aki', 'Charles Ollivon', 'Josh van der Flier', 'Lukhanyo Am', 'Eben Etzebeth', 'Gregory Alldritt', 'Damian Penaud', 'Romain Ntamack', 'Marcus Smith',
+            'Sacha Feinberg-Mngomezulu', 'Tomas Lavanini', 'Matias Alemanno', 'Joaquin Oviedo', 'Thomas Gallo', 'Francisco Gomez Kodela'
+        ],
+        hint: 'Ovalada',
+        itemHints: {
+            'Agustín Pichot': 'Fichaje', 'Hugo Porta': 'Diez', 'Pablo Matera': 'Tercera', 'Agustín Creevy': 'Hooker', 'Jonah Lomu': 'Potencia',
+            'Dan Carter': 'Precisión', 'Richie McCaw': 'Capitán', 'Jonny Wilkinson': 'Drop', 'Siya Kolisi': 'Unidad', 'Santi Cordero': 'Veloz',
+            'Emiliano Boffelli': 'Patada', 'Juan Martín Hernández': 'Mago', 'Felipe Contepomi': 'Mellizo', 'Marcos Kremer': 'Fuerza', 'Julian Montoya': 'Líder',
+            'Antonne Dupont': 'Medio', 'Beauden Barrett': 'Apertura', 'Ardie Savea': 'Energía', 'Cheslin Kolbe': 'Eléctrico', 'Owen Farrell': 'Firme',
+            'Maro Itoje': 'Salto', 'Alun Wyn Jones': 'Récord', 'Bryan Habana': 'Guepardo', 'Sergio Parisse': 'Etno', 'Gonzalo Quesada': 'Coach',
+            'Sebastian Bertranou': 'Pase', 'Juan Imhoff': 'Try', 'Facundo Isa': 'Empuje', 'Bautista Delguy': 'Quiebre', 'Santiago Carreras': 'Creativo',
+            'Finn Russell': 'Racing', 'Bundee Aki': 'Connacht', 'Charles Ollivon': 'Toulon', 'Josh van der Flier': 'Leinster', 'Lukhanyo Am': 'Sharks',
+            'Eben Etzebeth': 'Fisico', 'Gregory Alldritt': 'Rochelle', 'Damian Penaud': 'Bordeaux', 'Romain Ntamack': 'Toulouse', 'Marcus Smith': 'Harlequins',
+            'Sacha Feinberg-Mngomezulu': 'Stormers', 'Tomas Lavanini': 'Segunda', 'Matias Alemanno': 'Cordobes', 'Joaquin Oviedo': 'Perpignan', 'Thomas Gallo': 'Treviso',
+            'Francisco Gomez Kodela': 'Lyon'
+        },
+    },
+    {
+        id: '20',
+        name: 'Equipos de Rugby',
+        description: 'Franquicias y selecciones top',
+        items: [
+            'All Blacks', 'Springboks', 'Los Pumas', 'Wallabies', 'Tala RC', 'La Tablada', 'Urú Curé', 'Jockey Club Córdoba', 'Córdoba Athletic', 'Palermo Bajo',
+            'Saracens', 'Leinster', 'Crusaders', 'Toulouse', 'Jaguares', 'Dogos XV', 'Pampas', 'England Rugby', 'France Rugby', 'Ireland Rugby',
+            'Wales Rugby', 'Scotland Rugby', 'Fiji Rugby', 'Japan Rugby', 'Leicester Tigers', 'Harlequins', 'Munster', 'Stormers', 'Brumbies', 'Blues',
+            'Peñarol Rugby', 'Selknam', 'American Raptors', 'Highlanders', 'Hurricanes', 'Chiefs', 'La Rochelle', 'Bordeaux Begles', 'Racing 92', 'Sale Sharks',
+            'Northampton Saints', 'Bath Rugby', 'London Irish', 'Stade Francais', 'Toulon'
+        ],
+        hint: 'Haka',
+        itemHints: {
+            'All Blacks': 'Helecho', 'Springboks': 'Gacela', 'Los Pumas': 'Yaguareté', 'Wallabies': 'Marsupial', 'Tala RC': 'Warcalde',
+            'La Tablada': 'Urca', 'Urú Curé': 'Lechuza', 'Jockey Club Córdoba': 'Hípico', 'Córdoba Athletic': 'Ingleses', 'Palermo Bajo': 'Escarabajo',
+            'Saracens': 'Londres', 'Leinster': 'Dublín', 'Crusaders': 'Christchurch', 'Toulouse': 'Francia', 'Jaguares': 'Súper',
+            'Dogos XV': 'Cachorro', 'Pampas': 'Buenos-Aires', 'England Rugby': 'Rosa', 'France Rugby': 'Gallo', 'Ireland Rugby': 'Trébol',
+            'Wales Rugby': 'Dragón', 'Scotland Rugby': 'Cardo', 'Fiji Rugby': 'Palmera', 'Japan Rugby': 'Cerezo', 'Leicester Tigers': 'Tigres',
+            'Harlequins': 'Arlequín', 'Munster': 'Limerick', 'Stormers': 'Ciudad-del-Cabo', 'Brumbies': 'Caballo-Salvaje', 'Blues': 'Auckland',
+            'Peñarol Rugby': 'Uruguay', 'Selknam': 'Chile', 'American Raptors': 'Colorado', 'Highlanders': 'Dunedin', 'Hurricanes': 'Wellington',
+            'Chiefs': 'Hamilton', 'La Rochelle': 'Amarillo', 'Bordeaux Begles': 'Burdeos', 'Racing 92': 'Paris', 'Sale Sharks': 'Tiburones',
+            'Northampton Saints': 'Santos', 'Bath Rugby': 'Termas', 'London Irish': 'Exiliados', 'Stade Francais': 'Rayos', 'Toulon': 'Rojo'
         },
     },
     {
@@ -68,101 +136,6 @@ export const CATEGORIES: Category[] = [
         },
     },
     {
-        id: '16',
-        name: 'Futbolistas',
-        description: 'Jugadores históricos y actuales',
-        items: [
-            'Messi', 'Maradona', 'Cristiano Ronaldo', 'Pelé', 'Neymar', 'Mbappé', 'Ronaldinho', 'Zidane', 'Ronaldo Nazario', 'Cruyff',
-            'Di Stefano', 'Puskas', 'Lev Yashin', 'Beckenbauer', 'Platini', 'Zico', 'Henry', 'Eto\'o', 'Iniesta', 'Xavi',
-            'Modric', 'Benzema', 'Haaland', 'Lewandowski', 'Dibu Martínez', 'Julián Álvarez', 'Di María', 'Hulk', 'Vinícius Jr', 'Lautaro Martínez'
-        ],
-        hint: 'Balompié',
-        itemHints: {
-            'Messi': 'La-Pulga', 'Maradona': 'Pelusa', 'Cristiano Ronaldo': 'Bicho', 'Pelé': 'O-Rei', 'Neymar': 'Santos',
-            'Mbappé': 'Bondy', 'Ronaldinho': 'Sonrisa', 'Zidane': 'Marsella', 'Ronaldo Nazario': 'Fenómeno', 'Cruyff',
-            'Di Stefano', 'Puskas', 'Lev Yashin': 'Araña', 'Beckenbauer': 'Kaiser', 'Platini', 'Zico', 'Henry',
-            'Eto\'o', 'Iniesta': 'Fuentealbilla', 'Xavi': 'Terrassa', 'Modric': 'Zadar', 'Benzema': 'Lyon',
-            'Haaland': 'Androide', 'Lewandowski': 'Varsovia', 'Dibu Martínez': 'Mar-del-Plata', 'Julián Álvarez': 'Calchín', 'Di María': 'Fideo',
-            'Hulk': 'Paraíba', 'Vinícius Jr': 'Bailá', 'Lautaro Martínez': 'Toro'
-        },
-    },
-    {
-        id: '17',
-        name: 'Equipos de Fútbol',
-        description: 'Clubes grandes del mundo',
-        items: [
-            'Boca Juniors', 'River Plate', 'Real Madrid', 'Barcelona', 'Manchester City', 'Manchester United', 'Liverpool', 'Bayern Múnich', 'Juventus', 'Milan',
-            'Inter', 'PSG', 'Atlético Madrid', 'Arsenal', 'Chelsea', 'Flamengo', 'Palmeiras', 'Independiente', 'Racing', 'San Lorenzo',
-            'Talleres', 'Belgrano', 'Ajax', 'Borussia Dortmund', 'Napoli', 'Roma', 'Benfica', 'Porto', 'Peñarol', 'Nacional'
-        ],
-        hint: 'Institución',
-        itemHints: {
-            'Boca Juniors': 'Xeneize', 'River Plate': 'Millonario', 'Real Madrid': 'Merengue', 'Barcelona': 'Culé', 'Manchester City': 'Citizen',
-            'Manchester United': 'Red-Devil', 'Liverpool': 'Anfield', 'Bayern Múnich': 'Bávaro', 'Juventus': 'Vecchia-Signora', 'Milan': 'Rossonero',
-            'Inter': 'Nerazzurro', 'PSG': 'Príncipes', 'Atlético Madrid': 'Colchonero', 'Arsenal': 'Gunner', 'Chelsea': 'Blue',
-            'Flamengo': 'Mengao', 'Palmeiras': 'Verdao', 'Independiente': 'Diablo', 'Racing': 'Academia', 'San Lorenzo': 'Cuervo',
-            'Talleres': 'Matador', 'Belgrano': 'Pirata', 'Ajax': 'Ámsterdam', 'Borussia Dortmund': 'Muro-Amarillo', 'Napoli': 'Partenopeo',
-            'Roma': 'Loba', 'Benfica': 'Águilas', 'Porto': 'Dragones', 'Peñarol': 'Carbonero', 'Nacional': 'Bolso'
-        },
-    },
-    {
-        id: '18',
-        name: 'Equipos de Básquet',
-        description: 'Franquicias de la NBA y más',
-        items: [
-            'Los Angeles Lakers', 'Golden State Warriors', 'Chicago Bulls', 'Boston Celtics', 'Miami Heat', 'San Antonio Spurs', 'Dallas Mavericks', 'Brooklyn Nets', 'Milwaukee Bucks', 'Phoenix Suns',
-            'New York Knicks', 'Philadelphia 76ers', 'Houston Rockets', 'Cleveland Cavaliers', 'Denver Nuggets', 'Toronto Raptors', 'Utah Jazz', 'Atlanta Hawks', 'Detroit Pistons', 'Portland Trail Blazers',
-            'Real Madrid Básquet', 'Barcelona Básquet', 'Atenas de Córdoba', 'Instituto de Córdoba', 'Quimsa', 'San Lorenzo Básquet', 'Olimpia Milano', 'Maccabi Tel Aviv', 'Panathinaikos', 'Fenerbahçe'
-        ],
-        hint: 'Parquet',
-        itemHints: {
-            'Los Angeles Lakers': 'Púrpura', 'Golden State Warriors': 'Bahía', 'Chicago Bulls': 'Dinastía', 'Boston Celtics': 'Trébol', 'Miami Heat': 'South-Beach',
-            'San Antonio Spurs': 'Espuela', 'Dallas Mavericks': 'Cowboy', 'Brooklyn Nets': 'Puente', 'Milwaukee Bucks': 'Ciervo', 'Phoenix Suns': 'Desierto',
-            'New York Knicks': 'Madison', 'Philadelphia 76ers': 'Campana', 'Houston Rockets': 'Despegue', 'Cleveland Cavaliers': 'Ohio', 'Denver Nuggets': 'Milla',
-            'Toronto Raptors': 'Garra', 'Utah Jazz': 'Notas', 'Atlanta Hawks': 'Halcón', 'Detroit Pistons': 'Motores', 'Portland Trail Blazers': 'Oregón',
-            'Real Madrid Básquet': 'Palacio', 'Barcelona Básquet': 'Palau', 'Atenas de Córdoba': 'Griego', 'Instituto de Córdoba': 'Gloria', 'Quimsa': 'Santiago',
-            'San Lorenzo Básquet': 'Boedo', 'Olimpia Milano': 'Moda', 'Maccabi Tel Aviv': 'Amarillos', 'Panathinaikos': 'Trébol-Verde', 'Fenerbahçe': 'Estambul'
-        },
-    },
-    {
-        id: '19',
-        name: 'Rugbiers',
-        description: 'Jugadores icónicos de la ovalada',
-        items: [
-            'Agustín Pichot', 'Hugo Porta', 'Pablo Matera', 'Agustín Creevy', 'Jonah Lomu', 'Dan Carter', 'Richie McCaw', 'Jonny Wilkinson', 'Siya Kolisi', 'Santi Cordero',
-            'Emiliano Boffelli', 'Juan Martín Hernández', 'Felipe Contepomi', 'Marcos Kremer', 'Julian Montoya', 'Antonne Dupont', 'Beauden Barrett', 'Ardie Savea', 'Cheslin Kolbe', 'Owen Farrell',
-            'Maro Itoje', 'Alun Wyn Jones', 'Bryan Habana', 'Sergio Parisse', 'Gonzalo Quesada', 'Sebastian Bertranou', 'Juan Imhoff', 'Facundo Isa', 'Bautista Delguy', 'Santiago Carreras'
-        ],
-        hint: 'Ovalada',
-        itemHints: {
-            'Agustín Pichot': 'Fichaje', 'Hugo Porta': 'Diez', 'Pablo Matera': 'Tercera', 'Agustín Creevy': 'Hooker', 'Jonah Lomu': 'Potencia',
-            'Dan Carter': 'Precisión', 'Richie McCaw': 'Capitán', 'Jonny Wilkinson': 'Drop', 'Siya Kolisi': 'Unidad', 'Santi Cordero': 'Veloz',
-            'Emiliano Boffelli': 'Patada', 'Juan Martín Hernández': 'Mago', 'Felipe Contepomi': 'Mellizo', 'Marcos Kremer': 'Fuerza', 'Julian Montoya': 'Líder',
-            'Antonne Dupont': 'Medio', 'Beauden Barrett': 'Apertura', 'Ardie Savea': 'Energía', 'Cheslin Kolbe': 'Eléctrico', 'Owen Farrell': 'Firme',
-            'Maro Itoje': 'Salto', 'Alun Wyn Jones': 'Récord', 'Bryan Habana': 'Guepardo', 'Sergio Parisse': 'Etno', 'Gonzalo Quesada': 'Coach',
-            'Sebastian Bertranou': 'Pase', 'Juan Imhoff': 'Try', 'Facundo Isa': 'Empuje', 'Bautista Delguy': 'Quiebre', 'Santiago Carreras': 'Creativo'
-        },
-    },
-    {
-        id: '20',
-        name: 'Equipos de Rugby',
-        description: 'Seleccionados y clubes de rugby',
-        items: [
-            'All Blacks', 'Springboks', 'Los Pumas', 'Wallabies', 'Tala RC', 'La Tablada', 'Urú Curé', 'Jockey Club Córdoba', 'Córdoba Athletic', 'Palermo Bajo',
-            'Saracens', 'Leinster', 'Crusaders', 'Toulouse', 'Jaguares', 'Dogos XV', 'Pampas', 'England Rugby', 'France Rugby', 'Ireland Rugby',
-            'Wales Rugby', 'Scotland Rugby', 'Fiji Rugby', 'Japan Rugby', 'Leicester Tigers', 'Harlequins', 'Munster', 'Stormers', 'Brumbies', 'Blues'
-        ],
-        hint: 'Haka',
-        itemHints: {
-            'All Blacks': 'Helecho', 'Springboks': 'Gacela', 'Los Pumas': 'Yaguareté', 'Wallabies': 'Marsupial', 'Tala RC': 'Warcalde',
-            'La Tablada': 'Urca', 'Urú Curé': 'Lechuza', 'Jockey Club Córdoba': 'Hípico', 'Córdoba Athletic': 'Ingleses', 'Palermo Bajo': 'Escarabajo',
-            'Saracens': 'Londres', 'Leinster': 'Dublín', 'Crusaders': 'Christchurch', 'Toulouse': 'Francia', 'Jaguares': 'Súper',
-            'Dogos XV': 'Cachorro', 'Pampas': 'Buenos-Aires', 'England Rugby': 'Rosa', 'France Rugby': 'Gallo', 'Ireland Rugby': 'Trébol',
-            'Wales Rugby': 'Dragón', 'Scotland Rugby': 'Cardo', 'Fiji Rugby': 'Palmera', 'Japan Rugby': 'Cerezo', 'Leicester Tigers': 'Tigres',
-            'Harlequins': 'Arlequín', 'Munster': 'Limerick', 'Stormers': 'Ciudad-del-Cabo', 'Brumbies': 'Caballo-Salvaje', 'Blues': 'Auckland'
-        },
-    },
-    {
         id: '4',
         name: 'Lugares de Córdoba',
         description: 'Sitios emblemáticos de la provincia',
@@ -176,9 +149,9 @@ export const CATEGORIES: Category[] = [
             'La Cañada': 'Encauce', 'Catedral': 'Cúpula', 'Villa Carlos Paz': 'Reloj', 'Cosquín': 'Folklor', 'Río Cuarto': 'Imperio',
             'Alta Gracia': 'Virrey', 'La Falda': 'Eden', 'Mina Clavero': 'Río-frío', 'Patio Olmos': 'Prisión', 'Nueva Córdoba': 'Estudiante',
             'Barrio Güemes': 'Anticuario', 'Estadio Kempes': 'Mundial', 'Parque Sarmiento': 'Rosedal', 'Buen Pastor': 'Agua-danzante',
-            'Capilla del Monte': 'Uritorco', 'Jesús María': 'Doma', 'Villa María': 'Anfiteatro', 'Los Reartes': 'Abuelo', 'Calamuchita': 'Valle',
+            'Capilla del Monte': 'Uritorco', 'Jesús María': 'Jineteada', 'Villa María': 'Anfiteatro', 'Los Reartes': 'Abuelo', 'Calamuchita': 'Valle',
             'Villa Belgrano': 'Oktoberfest', 'Cerro Colorado': 'Pintura', 'San Marcos Sierras': 'Hippy', 'Nono': 'Río', 'Yacanto': 'Champaquí',
-            'La Cumbrecita': 'Peatonal', 'Villa General Belgrano': 'Tirol', 'Miramar': 'Salada', 'Los Terrones': 'Rojizo', 'Ongamira': 'Indio'
+            'La Cumbrecita': 'Peatonal', 'Villa General Belgrano': 'Alemán', 'Miramar': 'Salada', 'Los Terrones': 'Rojizo', 'Ongamira': 'Indio'
         },
     },
     {
@@ -239,163 +212,9 @@ export const CATEGORIES: Category[] = [
             'Fútbol': 'Goles', 'Tenis': 'Sets', 'Básquet': 'Dobles', 'Rugby': 'Try', 'Natación': 'Largo',
             'Boxeo': 'K.O.', 'Golf': 'Hoyo', 'Hockey': 'Córner', 'Vóley': 'Punto', 'Automovilismo': 'Pole',
             'Ciclismo': 'Tour', 'Surf': 'Tubo', 'Padel': 'Pared', 'Béisbol': 'Home', 'Gimnasia': 'Suelo',
-            'Esquí': 'Nieve', 'Atletismo': 'Pista', 'Handball', 'Esgrima': 'Toque', 'Karate': 'Kiai',
+            'Esquí': 'Nieve', 'Atletismo': 'Pista', 'Handball': 'Salto', 'Esgrima': 'Toque', 'Karate': 'Kiai',
             'Judo': 'Tatami', 'Remo': 'Pala', 'Vela': 'Viento', 'Waterpolo': 'Gorro', 'Patinaje': 'Filo',
             'Motociclismo': 'Curva', 'Polo': 'Chukker', 'Ping Pong': 'Paleta', 'Ciclismo de montaña': 'Trocha'
         },
-    },
-    {
-        id: '8',
-        name: 'Famosos',
-        description: 'Personajes muy conocidos',
-        items: [
-            'Messi', 'Maradona', 'Shakira', 'Will Smith', 'Elon Musk', 'Beyoncé', 'Ricky Martin', 'Angelina Jolie', 'Cristiano Ronaldo', 'Taylor Swift',
-            'Steve Jobs', 'Barack Obama', 'Papa Francis', 'Michael Jackson', 'Justin Bieber', 'Bad Bunny', 'Mirtha Legrand', 'Susana Giménez', 'Brad Pitt',
-            'Leonardo DiCaprio', 'Lady Gaga', 'Bill Gates', 'Oprah Winfrey', 'Robert Downey Jr.', 'Johnny Depp', 'Jennifer Aniston', 'Marilyn Monroe', 'Elvis Presley', 'Nelson Mandela'
-        ],
-        hint: 'Personaje',
-        itemHints: {
-            'Messi': 'Rosario', 'Maradona': 'Lanús', 'Shakira': 'Waka', 'Will Smith': 'Philadelphia', 'Elon Musk': 'Pretoria',
-            'Beyoncé': 'Houston', 'Ricky Martin': 'San-Juan', 'Angelina Jolie': 'Lara-Croft', 'Cristiano Ronaldo': 'Madeira', 'Taylor Swift': 'Pennsylvania',
-            'Steve Jobs': 'California', 'Barack Obama': 'Honolulu', 'Papa Francis': 'Flores', 'Michael Jackson': 'Indiana', 'Justin Bieber': 'Ontario',
-            'Bad Bunny': 'Puerto-Rico', 'Mirtha Legrand': 'Villa-Cañás', 'Susana Giménez': 'Buenos-Aires', 'Brad Pitt': 'Oklahoma', 'Leonardo DiCaprio': 'Los-Angeles',
-            'Lady Gaga': 'New-York', 'Bill Gates': 'Seattle', 'Oprah Winfrey': 'Mississippi', 'Robert Downey Jr.': 'Manhattan', 'Johnny Depp': 'Kentucky',
-            'Jennifer Aniston': 'California', 'Marilyn Monroe': 'Norma', 'Elvis Presley': 'Memphis', 'Nelson Mandela': 'Mvezo'
-        },
-    },
-    {
-        id: '9',
-        name: 'Objetos',
-        description: 'Cosas de todos los días',
-        items: [
-            'Celular', 'Llaves', 'Reloj', 'Lentes', 'Mochila', 'Billetera', 'Silla', 'Mesa', 'Cama', 'Televisor',
-            'Control remoto', 'Espejo', 'Ventilador', 'Paraguas', 'Sombrero', 'Tijeras', 'Cuchillo', 'Tenedor', 'Cuchara', 'Plato',
-            'Taza', 'Botella', 'Termo', 'Mate', 'Escoba', 'Martillo', 'Almohada', 'Lámpara', 'Cargador', 'Auriculares', 'Maleta',
-            'Guitarras', 'Cuadernos', 'Pinceles', 'Secador de pelo', 'Plancha', 'Abridor', 'Sacacorchos', 'Libro', 'Mapa', 'Perchero'
-        ],
-        hint: 'Útil',
-        itemHints: {
-            'Celular': 'Chip', 'Llaves': 'Cerradura', 'Reloj': 'Manecilla', 'Lentes': 'Cristal', 'Mochila': 'Espaldera',
-            'Billetera': 'Billetes', 'Silla': 'Respaldo', 'Mesa': 'Pata', 'Cama': 'Colchón', 'Televisor': 'Pantalla',
-            'Control remoto': 'Pila', 'Espejo': 'Reflejo', 'Ventilador': 'Aspa', 'Paraguas': 'Tela', 'Sombrero': 'Copa',
-            'Tijeras': 'Filo', 'Cuchillo': 'Hoja', 'Tenedor': 'Pincho', 'Cuchara': 'Mango', 'Plato': 'Base',
-            'Taza': 'Asa', 'Botella': 'Tapa', 'Termo': 'Tapa', 'Mate': 'Bombilla', 'Escoba': 'Cerda',
-            'Martillo': 'Mango', 'Almohada': 'Relleno', 'Lámpara': 'Soporte', 'Cargador': 'Enchufe', 'Auriculares': 'Almohadilla',
-            'Maleta': 'Asa', 'Guitarras': 'Cuerda', 'Cuadernos': 'Hoja', 'Pinceles': 'Cerdas', 'Secador de pelo': 'Aire',
-            'Plancha': 'Calor', 'Abridor': 'Chapa', 'Sacacorchos': 'Corcho', 'Libro': 'Página', 'Mapa': 'Plano', 'Perchero': 'Gancho'
-        },
-    },
-    {
-        id: '10',
-        name: 'Apps',
-        description: 'Apps famosas',
-        items: [
-            'WhatsApp', 'Instagram', 'TikTok', 'Spotify', 'YouTube', 'Facebook', 'Twitter', 'Tinder', 'Uber', 'Airbnb',
-            'Telegram', 'Google Maps', 'Pinterest', 'Netflix', 'Pedidos Ya', 'Mercado Pago', 'Snapchat', 'Reddit', 'LinkedIn', 'Twitch',
-            'Duolingo', 'Slack', 'Discord', 'Chrome', 'Gmail', 'Zoom', 'Canva', 'Shazam', 'CapCut'
-        ],
-        hint: 'Código',
-        itemHints: {
-            'WhatsApp': 'Chat', 'Instagram': 'Foto', 'TikTok': 'Video', 'Spotify': 'Podcast', 'YouTube': 'Stream',
-            'Facebook': 'Perfil', 'Twitter': 'X', 'Tinder': 'Cita', 'Uber': 'Auto', 'Airbnb': 'Casa',
-            'Telegram': 'Mensaje', 'Google Maps': 'Ruta', 'Pinterest': 'Pin', 'Netflix': 'Serie', 'Pedidos Ya': 'Comida',
-            'Mercado Pago': 'Dinero', 'Snapchat': 'Fuego', 'Reddit': 'Hilo', 'LinkedIn': 'Trabajo', 'Twitch': 'Vivo',
-            'Duolingo': 'Idioma', 'Slack': 'Equipo', 'Discord': 'Comunidad', 'Chrome': 'Navegador', 'Gmail': 'Correo',
-            'Zoom': 'Reunión', 'Canva': 'Diseño', 'Shazam': 'Música', 'CapCut': 'Edición'
-        },
-    },
-    {
-        id: '11',
-        name: 'Países',
-        description: 'Naciones del mundo',
-        items: [
-            'Argentina', 'Brasil', 'España', 'Japón', 'Italia', 'Francia', 'México', 'Estados Unidos', 'China', 'Alemania',
-            'Canadá', 'Australia', 'Egipto', 'Uruguay', 'Chile', 'Rusia', 'India', 'Portugal', 'Grecia', 'Turquía',
-            'Suiza', 'Holanda', 'Bélgica', 'Corea del Sur', 'Colombia', 'Perú', 'Islandia', 'Noruega', 'Suecia'
-        ],
-        hint: 'Soberanía',
-        itemHints: {
-            'Argentina': 'Buenos-Aires', 'Brasil': 'Río-de-Janeiro', 'España': 'Madrid', 'Japón': 'Tokio', 'Italia': 'Roma',
-            'Francia': 'París', 'México': 'D.F.', 'Estados Unidos': 'New-York', 'China': 'Pekín', 'Alemania': 'Berlín',
-            'Canadá': 'Toronto', 'Australia': 'Sídney', 'Egipto': 'El-Cairo', 'Uruguay': 'Montevideo', 'Chile': 'Santiago',
-            'Rusia': 'Moscú', 'India': 'Mumbai', 'Portugal': 'Lisboa', 'Grecia': 'Atenas', 'Turquía': 'Estambul',
-            'Suiza': 'Berna', 'Holanda': 'Ámsterdam', 'Bélgica': 'Bruselas', 'Corea del Sur': 'Seúl', 'Colombia': 'Bogotá',
-            'Perú': 'Lima', 'Islandia': 'Reikiavik', 'Noruega': 'Oslo', 'Suecia': 'Estocolmo'
-        },
-    },
-    {
-        id: '12',
-        name: 'Música',
-        description: 'Géneros y estilos',
-        items: [
-            'Rock', 'Pop', 'Reggaeton', 'Jazz', 'Cuarteto', 'Trap', 'Clásica', 'Blues', 'Salsa', 'Tango',
-            'Cumbia', 'Reggae', 'Heavy Metal', 'Hip Hop', 'Folklore', 'Bachata', 'Soul', 'Funk', 'Disco', 'Techno',
-            'Indie', 'Punk', 'Flamenco', 'Bossa Nova', 'Samba', 'K-pop', 'Electro-pop', 'House', 'Country'
-        ],
-        hint: 'Ritmo',
-        itemHints: {
-            'Rock': 'Guitarra', 'Pop': 'Estrella', 'Reggaeton': 'Dembow', 'Jazz': 'Saxofón', 'Cuarteto': 'Tunga',
-            'Trap': '808', 'Clásica': 'Bach', 'Blues': 'Harmónica', 'Salsa': 'Clave', 'Tango': 'Bandoneón',
-            'Cumbia': 'Güiro', 'Reggae': 'Marley', 'Heavy Metal': 'Distorsión', 'Hip Hop': 'Breakdance', 'Folklore': 'Bombo',
-            'Bachata': 'Romeo', 'Soul': 'Voz', 'Funk': 'Bajo', 'Disco': 'Bola', 'Techno': 'Sinte',
-            'Indie': 'Alternativo', 'Punk': 'Rebelión', 'Flamenco': 'Cante', 'Bossa Nova': 'Jobim', 'Samba': 'Carnaval',
-            'K-pop': 'BTS', 'Electro-pop': 'Sinte', 'House': 'Club', 'Country': 'Banjo'
-        },
-    },
-    {
-        id: '13',
-        name: 'Superhéroes',
-        description: 'Personajes con poderes',
-        items: [
-            'Spider-Man', 'Iron Man', 'Wonder Woman', 'Superman', 'Hulk', 'Flash', 'Thor', 'Batman', 'Capitán América', 'Aquaman',
-            'Wolverine', 'Deadpool', 'Pantera Negra', 'Ant-Man', 'Doctor Strange', 'Bruja Escarlata', 'Green Lantern', 'Shazam', 'Daredevil', 'Robin',
-            'Catwoman', 'Joker', 'Lex Luthor', 'Venom', 'Storm', 'Groot', 'Star-Lord'
-        ],
-        hint: 'Justicia',
-        itemHints: {
-            'Spider-Man': 'Tela', 'Iron Man': 'Traje', 'Wonder Woman': 'Lazo', 'Superman': 'Capa', 'Hulk': 'Furia',
-            'Flash': 'Velocidad', 'Thor': 'Martillo', 'Batman': 'Batmovil', 'Capitán América': 'Escudo', 'Aquaman': 'Tridente',
-            'Wolverine': 'Garras', 'Deadpool': 'Espadas', 'Pantera Negra': 'Garra', 'Ant-Man': 'Hormiga', 'Doctor Strange': 'Capa',
-            'Bruja Escarlata': 'Magia', 'Green Lantern': 'Anillo', 'Shazam': 'Rayo', 'Daredevil': 'Bastón', 'Robin': 'Ayudante',
-            'Catwoman': 'Látigo', 'Joker': 'Risa', 'Lex Luthor': 'Genio', 'Venom': 'Simbionte', 'Storm': 'Clima', 'Groot': 'Rama',
-            'Star-Lord': 'Mix'
-        },
-    },
-    {
-        id: '14',
-        name: 'Videojuegos',
-        description: 'Títulos conocidos',
-        items: [
-            'Mario Bros', 'Minecraft', 'FIFA', 'GTA', 'Fortnite', 'Zelda', 'Pac-Man', 'Tetris', 'Counter-Strike', 'Among Us',
-            'Candy Crush', 'Sonic', 'Pokémon', 'Roblox', 'Mortal Kombat', 'Call of Duty', 'LoL', 'Valorant', 'God of War', 'The Last of Us',
-            'Street Fighter', 'Final Fantasy', 'The Sims', 'Clash Royale', 'Free Fire', 'Subway Surfers', 'Doom'
-        ],
-        hint: 'Software',
-        itemHints: {
-            'Mario Bros': 'Hongo', 'Minecraft': 'Cubo', 'FIFA': 'Balón', 'GTA': 'Ciudad', 'Fortnite': 'Baile',
-            'Zelda': 'Link', 'Pac-Man': 'Fantasma', 'Tetris': 'Línea', 'Counter-Strike': 'Bomba', 'Among Us': 'Impostor',
-            'Candy Crush': 'Nivel', 'Sonic': 'Anillo', 'Pokémon': 'Bola', 'Roblox': 'Avatar', 'Mortal Kombat': 'Fatality',
-            'Call of Duty': 'Fusil', 'LoL': 'Nexo', 'Valorant': 'Agente', 'God of War': 'Kratos', 'The Last of Us': 'Joel',
-            'Street Fighter': 'Hadouken', 'Final Fantasy': 'Cloud', 'The Sims': 'Casa', 'Clash Royale': 'Cofre', 'Free Fire': 'Salto',
-            'Subway Surfers': 'Tren', 'Doom': 'Infierno'
-        },
-    },
-    {
-        id: '15',
-        name: 'Series de TV',
-        description: 'Programas famosos',
-        items: [
-            'Friends', 'The Office', 'Stranger Things', 'Breaking Bad', 'The Simpsons', 'Game of Thrones', 'Grey\'s Anatomy', 'Casados con Hijos', 'La Casa de Papel', 'El Encargado',
-            'Okupas', 'Los Simuladores', 'South Park', 'Narcos', 'El marginal', 'Black Mirror', 'Euphoria', 'Succession', 'The Bear', 'Lost',
-            'How I Met Your Mother', 'The Big Bang Theory', 'Modern Family', 'The Crown', 'Dark', 'Chernobyl'
-        ],
-        hint: 'Episodio',
-        itemHints: {
-            'Friends': 'Central-Perk', 'The Office': 'Dunder-Mifflin', 'Stranger Things': 'Upside-Down', 'Breaking Bad': 'Heisenberg', 'The Simpsons': 'Springfield',
-            'Game of Thrones': 'Westeros', 'Grey\'s Anatomy': 'Seattle-Grace', 'Casados con Hijos': 'Argento', 'La Casa de Papel': 'Dalí', 'El Encargado': 'Eliseo',
-            'Okupas': 'Ricardo', 'Los Simuladores': 'Santos', 'South Park': 'Cartman', 'Narcos': 'Escobar', 'El marginal': 'Diosito', 'Black Mirror': 'Tecnología',
-            'Euphoria': 'Rue', 'Succession': 'Roy', 'The Bear': 'Cocinero', 'Lost': 'Isla', 'How I Met Your Mother': 'Ted',
-            'The Big Bang Theory': 'Sheldon', 'Modern Family': 'Dunphy', 'The Crown': 'Reina', 'Dark': 'Winden', 'Chernobyl': 'Planta'
-        },
-    },
+    }
 ];
