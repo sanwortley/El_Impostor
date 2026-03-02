@@ -48,6 +48,23 @@ export const PlayingPage: React.FC = () => {
                             </div>
                         </div>
 
+                        {/* Who Starts Info in Prank Mode */}
+                        {starterPlayerId && (
+                            <div className="w-full bg-amber-500/5 border border-amber-500/10 rounded-2xl p-4 flex flex-col items-center gap-2 mb-2">
+                                <div className="flex flex-col items-center gap-0.5">
+                                    <span className="text-[9px] text-amber-500/60 font-black uppercase tracking-[0.3em]">ARRANCA</span>
+                                    <span className="text-xl font-black text-white uppercase italic tracking-tighter">
+                                        {players.find(p => p.id === starterPlayerId)?.name}
+                                    </span>
+                                </div>
+                                {turnOrder && (
+                                    <span className="text-[8px] font-extrabold text-amber-500/40 uppercase tracking-widest">
+                                        SENTIDO {turnOrder === 'clockwise' ? 'HORARIO' : 'ANTI-HORARIO'}
+                                    </span>
+                                )}
+                            </div>
+                        )}
+
                         <div className="space-y-4">
                             <p className="text-white/60 text-sm leading-relaxed px-4">
                                 Usá palabras serias pero sin sentido que tengan que ver con <strong>{chosenCategory?.name}</strong>.
