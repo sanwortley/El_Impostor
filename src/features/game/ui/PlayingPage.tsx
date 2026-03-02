@@ -169,7 +169,7 @@ export const PlayingPage: React.FC = () => {
                 {starterPlayerId && (
                     <div className="w-full bg-primary/5 border border-primary/10 rounded-3xl p-5 flex flex-col items-center gap-3 relative overflow-hidden">
                         <div className="flex flex-col items-center gap-1 relative z-10 w-full">
-                            <span className="text-[10px] text-primary/60 font-black uppercase tracking-[0.3em]">ARRANCA HABLANDO</span>
+                            <span className="text-[10px] text-primary/60 font-black uppercase tracking-[0.3em]">ARRANCA</span>
                             <span className="text-3xl font-black text-white uppercase italic tracking-tighter">
                                 {players.find(p => p.id === starterPlayerId)?.name || 'Aleatorio'}
                             </span>
