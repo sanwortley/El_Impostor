@@ -13,14 +13,14 @@ export const CATEGORIES: Category[] = [
         ],
         hint: 'Ingesta',
         itemHints: {
-            'Pizza': 'Parténope', 'Hamburguesa': 'Tartaria', 'Sushi': 'Shari', 'Tacos': 'Nixtamal', 'Pasta': 'Semolina',
-            'Asado': 'Quebracho', 'Paella': 'Socarrat', 'Empanadas': 'Salteña', 'Lasagna': 'Béchamel', 'Ceviche': 'Tiradito',
-            'Ravioles': 'Sorrento', 'Milanesa': 'Cotoletta', 'Hot Dog': 'Dachshund', 'Locro': 'Pulsada', 'Gnocchi': 'Patata',
-            'Alfajor': 'Fécula', 'Medialunas': 'Creciente', 'Tiramisú': 'Treviso', 'Churros': 'Porras', 'Provoleta': 'Hilado',
-            'Tarta': 'Quiche', 'Sándwich': 'Montagu', 'Quesadilla': 'Comal', 'Ramen': 'Umami', 'Burritos': 'Misión',
-            'Cheesecake': 'Graham', 'Flan': 'María', 'Dulce de leche': 'Maillard', 'Humita': 'Chala', 'Polenta': 'Grano',
-            'Shawarma': 'Espiedo', 'Wrap': 'Enrollado', 'Wok': 'Salteado', 'Bondiola': 'Cerdo', 'Choripán': 'Costanera',
-            'Tortilla': 'Huevo', 'Risotto': 'Arborio'
+            'Pizza': 'Borde-relleno', 'Hamburguesa': 'Molienda', 'Sushi': 'Gari', 'Tacos': 'Cilantro', 'Pasta': 'Bronce',
+            'Asado': 'Salmuera', 'Paella': 'Socarrat', 'Empanadas': 'Frepue', 'Lasagna': 'Gratinado', 'Ceviche': 'Tiradito',
+            'Ravioles': 'Sorrento', 'Milanesa': 'Cotoletta', 'Hot Dog': 'Relish', 'Locro': 'Charqui', 'Gnocchi': 'Madera',
+            'Alfajor': 'Fécula', 'Medialunas': 'Almíbar', 'Tiramisú': 'Savoiardi', 'Churros': 'Lazo', 'Provoleta': 'Hilado',
+            'Tarta': 'Quebrada', 'Sándwich': 'Miga', 'Quesadilla': 'Epazote', 'Ramen': 'Kansui', 'Burritos': 'Misión',
+            'Cheesecake': 'Graham', 'Flan': 'Baño-maría', 'Dulce de leche': 'Maillard', 'Humita': 'Chala', 'Polenta': 'Grano',
+            'Shawarma': 'Espiedo', 'Wrap': 'Enrollado', 'Wok': 'Salteado', 'Bondiola': 'Red', 'Choripán': 'Mariposa',
+            'Tortilla': 'Babé', 'Risotto': 'Arborio'
         },
     },
     {
@@ -34,12 +34,12 @@ export const CATEGORIES: Category[] = [
         ],
         hint: 'Balompié',
         itemHints: {
-            'Messi': 'Ankara', 'Maradona': 'Fiorito', 'Cristiano Ronaldo': 'Madeira', 'Pelé': 'Tres-Coracoes', 'Neymar': 'Santos',
-            'Mbappé': 'Bondy', 'Ronaldinho': 'Querétaro', 'Zidane': 'Cabezazo', 'Ronaldo Nazario': 'Fenómeno', 'Cruyff': 'Naranja',
-            'Di Stefano': 'Saeta', 'Puskas': 'Cañoncito', 'Lev Yashin': 'Araña', 'Beckenbauer': 'Kaiser', 'Platini': 'General',
-            'Zico': 'Galinho', 'Henry': 'Titi', 'Eto\'o': 'Indomable', 'Iniesta': 'Fuentealbilla', 'Xavi': 'Terrassa',
-            'Modric': 'Zadar', 'Benzema': 'Valbuena', 'Haaland': 'Androide', 'Lewandowski': 'Varsovia', 'Dibu Martínez': 'Emi',
-            'Julián Álvarez': 'Calchín', 'Di María': 'Rosarino', 'Hulk': 'Paraíba', 'Vinícius Jr': 'Bailá', 'Lautaro Martínez': 'Toro'
+            'Messi': 'Servilleta', 'Maradona': 'Cebollita', 'Cristiano Ronaldo': 'Funchal', 'Pelé': 'Tres-Coracoes', 'Neymar': 'Mogi',
+            'Mbappé': 'Bondy', 'Ronaldinho': 'Querétaro', 'Zidane': 'Argelia', 'Ronaldo Nazario': 'Fenómeno', 'Cruyff': 'Naranja',
+            'Di Stefano': 'Saeta', 'Puskas': 'Cañoncito', 'Lev Yashin': 'Gorra', 'Beckenbauer': 'Kaiser', 'Platini': 'Nancy',
+            'Zico': 'Galinho', 'Henry': 'Les-Ulis', 'Eto\'o': 'Indomable', 'Iniesta': 'Fuentealbilla', 'Xavi': 'Terrassa',
+            'Modric': 'Zadar', 'Benzema': 'Lyon', 'Haaland': 'Bryne', 'Lewandowski': 'Varsovia', 'Dibu Martínez': 'Emi',
+            'Julián Álvarez': 'Calchín', 'Di María': 'Perdriel', 'Hulk': 'Campina', 'Vinícius Jr': 'Sao-Goncalo', 'Lautaro Martínez': 'Bahía'
         },
     },
     {
@@ -53,12 +53,12 @@ export const CATEGORIES: Category[] = [
         ],
         hint: 'Institución',
         itemHints: {
-            'Boca Juniors': 'Brandzen', 'River Plate': 'Udaondo', 'Real Madrid': 'Chamartín', 'Barcelona': 'Masía', 'Manchester City': 'Etihad',
-            'Manchester United': 'Munich', 'Liverpool': 'Hillsborough', 'Bayern Múnich': 'Bávaro', 'Juventus': 'Agnelli', 'Milan': 'Berlusconi',
-            'Inter': 'Moratti', 'PSG': 'Al-Khelaifi', 'Atlético Madrid': 'Manzanares', 'Arsenal': 'Highbury', 'Chelsea': 'Abramovich',
-            'Flamengo': 'Gávea', 'Palmeiras': 'Leila', 'Independiente': 'Bocha', 'Racing': 'Academia', 'San Lorenzo': 'Boedo',
-            'Talleres': 'Fassi', 'Belgrano': 'Gigante', 'Ajax': 'Cruyff', 'Borussia Dortmund': 'Westfalen', 'Napoli': 'Diego',
-            'Roma': 'Totti', 'Benfica': 'Eusebio', 'Porto': 'Dragones', 'Peñarol': 'Carbonero', 'Nacional': 'Bolso'
+            'Boca Juniors': 'Brandzen', 'River Plate': 'Udaondo', 'Real Madrid': 'Chamartín', 'Barcelona': 'San-Jordi', 'Manchester City': 'Maine',
+            'Manchester United': 'Munich', 'Liverpool': 'Hillsborough', 'Bayern Múnich': 'Bávaro', 'Juventus': 'Cebra', 'Milan': 'Invernales',
+            'Inter': 'Serpiente', 'PSG': 'Príncipes', 'Atlético Madrid': 'Indio', 'Arsenal': 'Cañón', 'Chelsea': 'Stamford',
+            'Flamengo': 'Gávea', 'Palmeiras': 'Porco', 'Independiente': 'Avellaneda', 'Racing': 'Cilindro', 'San Lorenzo': 'Boedo',
+            'Talleres': 'Fassi', 'Belgrano': 'Gigante', 'Ajax': 'Godenzonen', 'Borussia Dortmund': 'Muro', 'Napoli': 'Diego',
+            'Roma': 'Totti', 'Benfica': 'Encarnizados', 'Porto': 'Dragones', 'Peñarol': 'Carbonero', 'Nacional': 'Bolso'
         },
     },
     {
@@ -72,12 +72,12 @@ export const CATEGORIES: Category[] = [
         ],
         hint: 'Parquet',
         itemHints: {
-            'Los Angeles Lakers': 'Showtime', 'Golden State Warriors': 'Bahía', 'Chicago Bulls': 'Dinastía', 'Boston Celtics': 'Parquet', 'Miami Heat': 'Riley',
+            'Los Angeles Lakers': 'Showtime', 'Golden State Warriors': 'Bahía', 'Chicago Bulls': 'Dinastía', 'Boston Celtics': 'Trébol', 'Miami Heat': 'South-Beach',
             'San Antonio Spurs': 'Popovich', 'Dallas Mavericks': 'Cuban', 'Brooklyn Nets': 'Barclays', 'Milwaukee Bucks': 'Giannis', 'Phoenix Suns': 'Desierto',
-            'New York Knicks': 'Ewing', 'Philadelphia 76ers': 'Iverson', 'Houston Rockets': 'Hakeem', 'Cleveland Cavaliers': 'LeBron', 'Denver Nuggets': 'Jokic',
+            'New York Knicks': 'Madison', 'Philadelphia 76ers': 'Iverson', 'Houston Rockets': 'Hakeem', 'Cleveland Cavaliers': 'LeBron', 'Denver Nuggets': 'Jokic',
             'Toronto Raptors': 'Kawhi', 'Utah Jazz': 'Malone', 'Atlanta Hawks': 'Wilkins', 'Detroit Pistons': 'Bad-Boys', 'Portland Trail Blazers': 'Lillard',
             'Real Madrid Básquet': 'Llull', 'Barcelona Básquet': 'Navarro', 'Atenas de Córdoba': 'Milanesio', 'Instituto de Córdoba': 'Gloria', 'Quimsa': 'Santiago',
-            'San Lorenzo Básquet': 'Casla', 'Olimpia Milano': 'Armani', 'Maccabi Tel Aviv': 'Wilbekin', 'Panathinaikos': 'Obradovic', 'Fenerbahçe': 'Estambul'
+            'San Lorenzo Básquet': 'Casla', 'Olimpia Milano': 'Armani', 'Maccabi Tel Aviv': 'Amarillos', 'Panathinaikos': 'Trébol-Verde', 'Fenerbahçe': 'Estambul'
         },
     },
     {
@@ -106,6 +106,68 @@ export const CATEGORIES: Category[] = [
         },
     },
     {
+        id: '15',
+        name: 'Series de TV',
+        description: 'Programas famosos',
+        items: [
+            'Friends', 'The Office', 'Stranger Things', 'Breaking Bad', 'The Simpsons', 'Game of Thrones', 'Grey\'s Anatomy', 'Casados con Hijos', 'La Casa de Papel', 'El Encargado',
+            'Okupas', 'Los Simuladores', 'South Park', 'Narcos', 'El marginal', 'Black Mirror', 'Euphoria', 'Succession', 'The Bear', 'Lost',
+            'How I Met Your Mother', 'The Big Bang Theory', 'Modern Family', 'The Crown', 'Dark', 'Chernobyl'
+        ],
+        hint: 'Episodio',
+        itemHints: {
+            'Friends': 'Bote', 'The Office': 'Remolacha', 'Stranger Things': 'Waffles', 'Breaking Bad': 'Pollos', 'The Simpsons': 'Cerveza',
+            'Game of Thrones': 'Cuervo', 'Grey\'s Anatomy': 'Bisturí', 'Casados con Hijos': 'Zapatos', 'La Casa de Papel': 'Máscara', 'El Encargado': 'Cámaras',
+            'Okupas': 'Perro', 'Los Simuladores': 'Operativo', 'South Park': 'Nieve', 'Narcos': 'Plata', 'El marginal': 'Patio', 'Black Mirror': 'Cerdo',
+            'Euphoria': 'Brillos', 'Succession': 'Jet', 'The Bear': 'Navaja', 'Lost': 'Escotilla', 'How I Met Your Mother': 'Corbatín',
+            'The Big Bang Theory': 'Pizarrón', 'Modern Family': 'Entrevista', 'The Crown': 'Protocolo', 'Dark': 'Cueva', 'Chernobyl': 'Grafito'
+        },
+    },
+    {
+        id: '2',
+        name: 'Profesiones',
+        description: 'Trabajos y oficios',
+        items: [
+            'Médico', 'Bombero', 'Policía', 'Arquitecto', 'Cocinero', 'Programador', 'Dentista', 'Abogado', 'Astronauta', 'Veterinario',
+            'Maestro', 'Carpintero', 'Electricista', 'Enfermero', 'Piloto', 'Taxista', 'Mecánico', 'Plomero', 'Jardinero', 'Panadero',
+            'Periodista', 'Actor', 'Músico', 'Bartender', 'Influencer', 'Árbitro', 'Entrenador', 'Psicólogo', 'Científico', 'Fotógrafo',
+            'Diseñador', 'Escultor', 'Peluquero', 'Cartero', 'Carnicero', 'Soldador', 'Economista'
+        ],
+        hint: 'Expertise',
+        itemHints: {
+            'Médico': 'Guardia', 'Bombero': 'Sirena', 'Policía': 'Patrulla', 'Arquitecto': 'Maqueta', 'Cocinero': 'Batch',
+            'Programador': 'Bug', 'Dentista': 'Fresa', 'Abogado': 'Bufete', 'Astronauta': 'Apolo', 'Veterinario': 'Boza',
+            'Maestro': 'Tiza', 'Carpintero': 'Garlopa', 'Electricista': 'Diferencial', 'Enfermero': 'Coche', 'Piloto': 'Radar',
+            'Taxista': 'Radio', 'Mecánico': 'Fosa', 'Plomero': 'Llave-inglesa', 'Jardinero': 'Tijera', 'Panadero': 'Amasadora',
+            'Periodista': 'Redacción', 'Actor': 'Telón', 'Músico': 'Atril', 'Bartender': 'Macerado', 'Influencer': 'Selfie',
+            'Árbitro': 'Tarjeta', 'Entrenador': 'Silbato', 'Psicólogo': 'Transferencia', 'Científico': 'Probeta', 'Fotógrafo': 'Trípode',
+            'Diseñador': 'Boceto', 'Escultor': 'Hormón', 'Peluquero': 'Navaja', 'Cartero': 'Sacude', 'Carnicero': 'Balanza',
+            'Soldador': 'Mascara', 'Economista': 'Inflación'
+        },
+    },
+    {
+        id: '3',
+        name: 'Marcas',
+        description: 'Empresas famosas',
+        items: [
+            'Nike', 'Apple', 'Coca Cola', 'Samsung', 'Adidas', 'McDonalds', 'Google', 'Netflix', 'Disney', 'Toyota',
+            'Starbucks', 'Amazon', 'Sony', 'Lego', 'Microsoft', 'Pepsi', 'Ferrari', 'Ford', 'Spotify', 'Uber',
+            'Mercado Libre', 'Tesla', 'Instagram', 'BMW', 'Visa', 'Mastercard', 'Rolex', 'IKEA', 'Huawei', 'Zara',
+            'Puma', 'Honda', 'Dell', 'Canon', 'Nintendo', 'Vans', 'Red Bull'
+        ],
+        hint: 'Corporación',
+        itemHints: {
+            'Nike': 'Pipino', 'Apple': 'Woz', 'Coca Cola': 'Jarabe', 'Samsung': 'Chaebol', 'Adidas': 'Adi',
+            'McDonalds': 'Kroc', 'Google': 'Garage', 'Netflix': 'Randolph', 'Disney': 'Mickey', 'Toyota': 'Toyoda',
+            'Starbucks': 'Schultz', 'Amazon': 'Bezos', 'Sony': 'Ibuka', 'Lego': 'Christiansen', 'Microsoft': 'Gates',
+            'Pepsi': 'Bradham', 'Ferrari': 'Enzo', 'Ford': 'Henry', 'Spotify': 'Ek', 'Uber': 'Kalanick',
+            'Mercado Libre': 'Galperin', 'Tesla': 'Musk', 'Instagram': 'Kevin', 'BMW': 'Bayerische', 'Visa': 'Dee-Hock',
+            'Mastercard': 'Purchase', 'Rolex': 'Wilsdorf', 'IKEA': 'Kamprad', 'Huawei': 'Ren', 'Zara': 'Amancio',
+            'Puma': 'Rudolf', 'Honda': 'Soichiro', 'Dell': 'Michael', 'Canon': 'Ota', 'Nintendo': 'Yamauchi', 'Vans': 'Van-Doren',
+            'Red Bull': 'Mateschitz'
+        },
+    },
+    {
         id: '20',
         name: 'Equipos de Rugby',
         description: 'Franquicias y selecciones top',
@@ -130,68 +192,6 @@ export const CATEGORIES: Category[] = [
         },
     },
     {
-        id: '15',
-        name: 'Series de TV',
-        description: 'Programas famosos',
-        items: [
-            'Friends', 'The Office', 'Stranger Things', 'Breaking Bad', 'The Simpsons', 'Game of Thrones', 'Grey\'s Anatomy', 'Casados con Hijos', 'La Casa de Papel', 'El Encargado',
-            'Okupas', 'Los Simuladores', 'South Park', 'Narcos', 'El marginal', 'Black Mirror', 'Euphoria', 'Succession', 'The Bear', 'Lost',
-            'How I Met Your Mother', 'The Big Bang Theory', 'Modern Family', 'The Crown', 'Dark', 'Chernobyl'
-        ],
-        hint: 'Episodio',
-        itemHints: {
-            'Friends': 'Manhattan', 'The Office': 'Scranton', 'Stranger Things': 'Hawkins', 'Breaking Bad': 'Albuquerque', 'The Simpsons': 'Matt',
-            'Game of Thrones': 'Westeros', 'Grey\'s Anatomy': 'Shonda', 'Casados con Hijos': 'Argento', 'La Casa de Papel': 'Dalí', 'El Encargado': 'Eliseo',
-            'Okupas': 'Dock-Sud', 'Los Simuladores': 'Lampone', 'South Park': 'Colorado', 'Narcos': 'Patrón', 'El marginal': 'San-Onofre', 'Black Mirror': 'Pantalla',
-            'Euphoria': 'Zendaya', 'Succession': 'Roy', 'The Bear': 'Yes-Chef', 'Lost': 'Dharma', 'How I Met Your Mother': 'MacLaren',
-            'The Big Bang Theory': 'Bazinga', 'Modern Family': 'Mockumentary', 'The Crown': 'Windsor', 'Dark': 'Winden', 'Chernobyl': 'Pripyat'
-        },
-    },
-    {
-        id: '2',
-        name: 'Profesiones',
-        description: 'Trabajos y oficios',
-        items: [
-            'Médico', 'Bombero', 'Policía', 'Arquitecto', 'Cocinero', 'Programador', 'Dentista', 'Abogado', 'Astronauta', 'Veterinario',
-            'Maestro', 'Carpintero', 'Electricista', 'Enfermero', 'Piloto', 'Taxista', 'Mecánico', 'Plomero', 'Jardinero', 'Panadero',
-            'Periodista', 'Actor', 'Músico', 'Bartender', 'Influencer', 'Árbitro', 'Entrenador', 'Psicólogo', 'Científico', 'Fotógrafo',
-            'Diseñador', 'Escultor', 'Peluquero', 'Cartero', 'Carnicero', 'Soldador', 'Economista'
-        ],
-        hint: 'Expertise',
-        itemHints: {
-            'Médico': 'Caduceo', 'Bombero': 'Ignífugo', 'Policía': 'Insignia', 'Arquitecto': 'Fachada', 'Cocinero': 'Batch',
-            'Programador': 'Binario', 'Dentista': 'Esmalte', 'Abogado': 'Litigio', 'Astronauta': 'Gravedad', 'Veterinario': 'Pelaje',
-            'Maestro': 'Pizarrón', 'Carpintero': 'Viruta', 'Electricista': 'Voltaje', 'Enfermero': 'Suero', 'Piloto': 'Cabina',
-            'Taxista': 'Bajada', 'Mecánico': 'Engranaje', 'Plomero': 'Sifón', 'Jardinero': 'Poda', 'Panadero': 'Levadura',
-            'Periodista': 'Primicia', 'Actor': 'Guion', 'Músico': 'Pentagrama', 'Bartender': 'Coctelera', 'Influencer': 'Scroll',
-            'Árbitro': 'Silbato', 'Entrenador': 'Táctica', 'Psicólogo': 'Diván', 'Científico': 'Hipótesis', 'Fotógrafo': 'Obturador',
-            'Diseñador': 'Vector', 'Escultor': 'Cincel', 'Peluquero': 'Tijera', 'Cartero': 'Buzón', 'Carnicero': 'Cuchilla',
-            'Soldador': 'Chispa', 'Economista': 'Índice'
-        },
-    },
-    {
-        id: '3',
-        name: 'Marcas',
-        description: 'Empresas famosas',
-        items: [
-            'Nike', 'Apple', 'Coca Cola', 'Samsung', 'Adidas', 'McDonalds', 'Google', 'Netflix', 'Disney', 'Toyota',
-            'Starbucks', 'Amazon', 'Sony', 'Lego', 'Microsoft', 'Pepsi', 'Ferrari', 'Ford', 'Spotify', 'Uber',
-            'Mercado Libre', 'Tesla', 'Instagram', 'BMW', 'Visa', 'Mastercard', 'Rolex', 'IKEA', 'Huawei', 'Zara',
-            'Puma', 'Honda', 'Dell', 'Canon', 'Nintendo', 'Vans', 'Red Bull'
-        ],
-        hint: 'Corporación',
-        itemHints: {
-            'Nike': 'Olimpo', 'Apple': 'Wozniak', 'Coca Cola': 'Atlanta', 'Samsung': 'Corea', 'Adidas': 'Dassler',
-            'McDonalds': 'Ray-Kroc', 'Google': 'Alphabet', 'Netflix': 'Reed', 'Disney': 'Burbank', 'Toyota': 'Nagoya',
-            'Starbucks': 'Seattle', 'Amazon': 'Bezos', 'Sony': 'Minato', 'Lego': 'Billund', 'Microsoft': 'Redmond',
-            'Pepsi': 'Bradham', 'Ferrari': 'Maranello', 'Ford': 'Detroit', 'Spotify': 'Estocolmo', 'Uber': 'Kalanick',
-            'Mercado Libre': 'Galperin', 'Tesla': 'Musk', 'Instagram': 'Systrom', 'BMW': 'Múnich', 'Visa': 'Foster-City',
-            'Mastercard': 'Purchase', 'Rolex': 'Ginebra', 'IKEA': 'Almhult', 'Huawei': 'Shenzhen', 'Zara': 'Arteixo',
-            'Puma': 'Herzogenaurach', 'Honda': 'Hamamatsu', 'Dell': 'Round-Rock', 'Canon': 'Ota', 'Nintendo': 'Kioto', 'Vans': 'Skate',
-            'Red Bull': 'Fuschl'
-        },
-    },
-    {
         id: '4',
         name: 'Lugares de Córdoba',
         description: 'Sitios emblemáticos de la provincia',
@@ -208,69 +208,6 @@ export const CATEGORIES: Category[] = [
             'Capilla del Monte': 'Uritorco', 'Jesús María': 'Doma', 'Villa María': 'Anfiteatro', 'Los Reartes': 'Abuelo', 'Calamuchita': 'Valle',
             'Villa Belgrano': 'Oktoberfest', 'Cerro Colorado': 'Pintura', 'San Marcos Sierras': 'Hippy', 'Nono': 'Río', 'Yacanto': 'Champaquí',
             'La Cumbrecita': 'Peatonal', 'Villa General Belgrano': 'Tirol', 'Miramar': 'Salada', 'Los Terrones': 'Rojizo', 'Ongamira': 'Indio'
-        },
-    },
-    {
-        id: '5',
-        name: 'Películas',
-        description: 'Cine clásico y moderno',
-        items: [
-            'Titanic', 'Batman', 'El Padrino', 'Shrek', 'Harry Potter', 'Avatar', 'Star Wars', 'Joker', 'Toy Story', 'El Rey León',
-            'Gladiador', 'Matrix', 'Rocky', 'Jurassic Park', 'John Wick', 'Frozen', 'Buscando a Nemo', 'Coco', 'Iron Man', 'Terminator',
-            'Pulp Fiction', 'Inception', 'Spider-Man', 'Moana', 'Rápido y Furioso', 'El Exorcista', 'Batman Begins', 'Interstellar', 'The Avengers',
-            'Dune', 'Parasite', 'Fight Club', 'Forrest Gump', 'Braveheart', 'Indiana Jones', 'Top Gun'
-        ],
-        hint: 'Guion',
-        itemHints: {
-            'Titanic': 'Calpathia', 'Batman': 'Wayne', 'El Padrino': 'Corleone', 'Shrek': 'Farquaad', 'Harry Potter': 'Hogwarts',
-            'Avatar': 'Pandora', 'Star Wars': 'Skywalker', 'Joker': 'Gotham', 'Toy Story': 'Andy', 'El Rey León': 'Mufasa',
-            'Gladiador': 'Máximo', 'Matrix': 'Zion', 'Rocky': 'Balboa', 'Jurassic Park': 'Nublar', 'John Wick': 'Continental',
-            'Frozen': 'Arendelle', 'Buscando a Nemo': 'Sydney', 'Coco': 'Mictlán', 'Iron Man': 'Stark', 'Terminator': 'Skynet',
-            'Pulp Fiction': 'Tarantino', 'Inception': 'Nolan', 'Spider-Man': 'Parker', 'Moana': 'Motunui', 'Rápido y Furioso': 'Toretto',
-            'El Exorcista': 'Regan', 'Batman Begins': 'Ra\'s', 'Interstellar': 'Gargantúa', 'The Avengers': 'Stark-Tower', 'Dune': 'Arrakis',
-            'Parasite': 'Kiwis', 'Fight Club': 'Durden', 'Forrest Gump': 'Gump', 'Braveheart': 'Wallace', 'Indiana Jones': 'Jones',
-            'Top Gun': 'Maverick'
-        },
-    },
-    {
-        id: '6',
-        name: 'Animales',
-        description: 'Fauna de todo tipo',
-        items: [
-            'León', 'Elefante', 'Perro', 'Pingüino', 'Tiburón', 'Águila', 'Mono', 'Canguro', 'Jirafa', 'Cebra',
-            'Oso Panda', 'Gato', 'Caballo', 'Delfín', 'Serpiente', 'Cocodrilo', 'Lobo', 'Oso', 'Vaca', 'Gallina',
-            'Abeja', 'Ballena', 'Murciélago', 'Zorro', 'Águila Real', 'Rinoceronte', 'Hipopótamo', 'Búho', 'Koala', 'Flamenco',
-            'Ardilla', 'Camello', 'Tortuga', 'Pulpo', 'Medusa', 'Tigre', 'Hormiga'
-        ],
-        hint: 'Taxonomía',
-        itemHints: {
-            'León': 'Panthera', 'Elefante': 'Proboscídeo', 'Perro': 'Canis', 'Pingüino': 'Spheniscidae', 'Tiburón': 'Selachimorpha',
-            'Águila': 'Accipitridae', 'Mono': 'Primate', 'Canguro': 'Macropodidae', 'Jirafa': 'Giraffa', 'Cebra': 'Hippotigris',
-            'Oso Panda': 'Ailuropoda', 'Gato': 'Felis', 'Caballo': 'Equus', 'Delfín': 'Delphinidae', 'Serpiente': 'Serpentes',
-            'Cocodrilo': 'Crocodilia', 'Lobo': 'Lupus', 'Oso': 'Ursidae', 'Vaca': 'Bos', 'Gallina': 'Gallus',
-            'Abeja': 'Apis', 'Ballena': 'Cetacea', 'Murciélago': 'Chiroptera', 'Zorro': 'Vulpes', 'Águila Real': 'Aquila',
-            'Rinoceronte': 'Rhinocerotidae', 'Hipopótamo': 'Hippopotamus', 'Búho': 'Strigiformes', 'Koala': 'Phascolarctos', 'Flamenco': 'Phoenicopterus',
-            'Ardilla': 'Sciuridae', 'Camello': 'Camelus', 'Tortuga': 'Testudines', 'Pulpo': 'Octopoda', 'Medusa': 'Medusozoa',
-            'Tigre': 'Tigris', 'Hormiga': 'Formicidae'
-        },
-    },
-    {
-        id: '10',
-        name: 'Apps',
-        description: 'Apps famosas',
-        items: [
-            'WhatsApp', 'Instagram', 'TikTok', 'Spotify', 'YouTube', 'Facebook', 'Twitter', 'Tinder', 'Uber', 'Airbnb',
-            'Telegram', 'Google Maps', 'Pinterest', 'Netflix', 'Pedidos Ya', 'Mercado Pago', 'Snapchat', 'Reddit', 'LinkedIn', 'Twitch',
-            'Duolingo', 'Slack', 'Discord', 'Chrome', 'Gmail', 'Zoom', 'Canva', 'Shazam', 'CapCut'
-        ],
-        hint: 'Binary',
-        itemHints: {
-            'WhatsApp': 'Koum', 'Instagram': 'Krieger', 'TikTok': 'Bytedance', 'Spotify': 'Ek', 'YouTube': 'Susan',
-            'Facebook': 'Zuck', 'Twitter': 'Dorsey', 'Tinder': 'Rad', 'Uber': 'Camp', 'Airbnb': 'Chesky',
-            'Telegram': 'Durov', 'Google Maps': 'Page', 'Pinterest': 'Silbermann', 'Netflix': 'Randolph', 'Pedidos Ya': 'Ariel',
-            'Mercado Pago': 'Galperin', 'Snapchat': 'Spiegel', 'Reddit': 'Huffman', 'LinkedIn': 'Reid', 'Twitch': 'Shear',
-            'Duolingo': 'Von-Ahn', 'Slack': 'Butterfield', 'Discord': 'Citron', 'Chrome': 'Pichai', 'Gmail': 'Buchheit',
-            'Zoom': 'Yuan', 'Canva': 'Melanie', 'Shazam': 'Barton', 'CapCut': 'Edición'
         },
     }
 ];
