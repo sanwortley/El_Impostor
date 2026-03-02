@@ -55,6 +55,7 @@ interface Room {
     votes: Record<string, string>; // voterId -> targetId
     winner?: 'impostors' | 'normals' | null;
     starterPlayerId?: string;
+    turnOrder?: 'clockwise' | 'counter-clockwise';
     lastVoteResults?: {
         votes: Array<{ voterName: string, targetName: string }>;
         eliminatedPlayerName?: string;
@@ -160,6 +161,7 @@ io.on('connection', (socket) => {
             if (alivePlayers.length > 0) {
                 const randomIndex = Math.floor(Math.random() * alivePlayers.length);
                 room.starterPlayerId = alivePlayers[randomIndex].id;
+                room.turnOrder = Math.random() > 0.5 ? 'clockwise' : 'counter-clockwise';
             }
 
             io.to(code).emit('game_started', formatRoom(room));
@@ -199,6 +201,7 @@ io.on('connection', (socket) => {
                 if (alivePlayers.length > 0) {
                     const randomIndex = Math.floor(Math.random() * alivePlayers.length);
                     room.starterPlayerId = alivePlayers[randomIndex].id;
+                    room.turnOrder = Math.random() > 0.5 ? 'clockwise' : 'counter-clockwise';
                 }
             }
             io.to(code).emit('room_updated', formatRoom(room));
@@ -286,6 +289,7 @@ io.on('connection', (socket) => {
                     if (alivePlayers.length > 0) {
                         const randomIndex = Math.floor(Math.random() * alivePlayers.length);
                         room.starterPlayerId = alivePlayers[randomIndex].id;
+                        room.turnOrder = Math.random() > 0.5 ? 'clockwise' : 'counter-clockwise';
                     }
                 }
             }
@@ -296,6 +300,7 @@ io.on('connection', (socket) => {
             if (alivePlayers.length > 0) {
                 const randomIndex = Math.floor(Math.random() * alivePlayers.length);
                 room.starterPlayerId = alivePlayers[randomIndex].id;
+                room.turnOrder = Math.random() > 0.5 ? 'clockwise' : 'counter-clockwise';
             }
         }
         io.to(room.code).emit('room_updated', formatRoom(room));

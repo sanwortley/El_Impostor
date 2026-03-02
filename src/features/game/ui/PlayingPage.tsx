@@ -6,7 +6,7 @@ import { Target, Flag, ShieldAlert, Laugh } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const PlayingPage: React.FC = () => {
-    const { finishGame, gameMode, localPlayer, lastVoteResults, players, starterPlayerId } = useGameStore();
+    const { finishGame, gameMode, localPlayer, lastVoteResults, players, starterPlayerId, turnOrder } = useGameStore();
 
     // Prank round: triggered automatically when any player has role 'victim'
     const isPrankRound = players.some(p => p.role === 'victim');
@@ -167,11 +167,31 @@ export const PlayingPage: React.FC = () => {
 
                 {/* Who Starts Section */}
                 {starterPlayerId && (
-                    <div className="w-full bg-primary/5 border border-primary/10 rounded-2xl p-4 flex flex-col gap-1">
-                        <span className="text-[10px] text-primary/60 font-black uppercase tracking-[0.2em]">ARRANCA HABLANDO:</span>
-                        <span className="text-2xl font-black text-primary uppercase italic tracking-tighter">
-                            {players.find(p => p.id === starterPlayerId)?.name || 'Aleatorio'}
-                        </span>
+                    <div className="w-full bg-primary/5 border border-primary/10 rounded-3xl p-5 flex flex-col items-center gap-3 relative overflow-hidden">
+                        <div className="flex flex-col items-center gap-1 relative z-10 w-full">
+                            <span className="text-[10px] text-primary/60 font-black uppercase tracking-[0.3em]">ARRANCA HABLANDO</span>
+                            <span className="text-3xl font-black text-white uppercase italic tracking-tighter">
+                                {players.find(p => p.id === starterPlayerId)?.name || 'Aleatorio'}
+                            </span>
+                        </div>
+
+                        {turnOrder && (
+                            <div className="flex items-center gap-3 bg-white/5 px-4 py-2 rounded-full border border-white/10 relative z-10">
+                                <motion.div
+                                    animate={{ rotate: turnOrder === 'clockwise' ? 360 : -360 }}
+                                    transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                                    className="text-primary"
+                                >
+                                    <Target size={16} />
+                                </motion.div>
+                                <span className="text-[11px] font-extrabold text-white/70 uppercase tracking-widest text-center">
+                                    SENTIDO {turnOrder === 'clockwise' ? 'HORARIO' : 'ANTI-HORARIO'}
+                                </span>
+                            </div>
+                        )}
+
+                        {/* Background subtle decoration */}
+                        <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent opacity-30" />
                     </div>
                 )}
 

@@ -41,6 +41,7 @@ export interface GameState {
     phase: GamePhase;
     winner?: 'impostors' | 'normals' | null;
     starterPlayerId?: string;
+    turnOrder?: 'clockwise' | 'counter-clockwise';
     currentVotes?: Record<string, string>; // voterId -> targetId
     lastVoteResults?: {
         votes: Array<{ voterName: string, targetName: string }>;

@@ -141,6 +141,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 phase: (room.phase === 'lobby' ? 'setup' : room.phase) as GamePhase,
                 winner: room.winner,
                 starterPlayerId: room.starterPlayerId,
+                turnOrder: room.turnOrder,
                 lastVoteResults: room.lastVoteResults,
                 currentVotes: room.currentVotes || {}
             });
@@ -164,6 +165,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 currentRevealIndex: 0,
                 winner: null,
                 starterPlayerId: room.starterPlayerId,
+                turnOrder: room.turnOrder,
                 lastVoteResults: null,
                 currentVotes: {}
             });
@@ -304,7 +306,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 currentRevealIndex: 0,
                 phase: 'reveal',
                 settings: updatedSettings,
-                starterPlayerId: playersWithRoles[Math.floor(Math.random() * playersWithRoles.length)].id
+                starterPlayerId: playersWithRoles[Math.floor(Math.random() * playersWithRoles.length)].id,
+                turnOrder: Math.random() > 0.5 ? 'clockwise' : 'counter-clockwise'
             });
         }
     },
