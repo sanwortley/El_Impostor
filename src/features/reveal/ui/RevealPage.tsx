@@ -6,7 +6,7 @@ import { ChevronRight, ShieldAlert, Eye, Laugh } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const RevealPage: React.FC = () => {
-    const { players, localPlayer, settings, nextReveal, gameMode, currentRevealIndex, starterPlayerId, turnOrder } = useGameStore();
+    const { players, localPlayer, settings, nextReveal, gameMode, currentRevealIndex } = useGameStore();
     const [isRevealing, setIsRevealing] = useState(false);
     const [hasRevealed, setHasRevealed] = useState(false);
     const [buttonReady, setButtonReady] = useState(false);
@@ -90,28 +90,7 @@ export const RevealPage: React.FC = () => {
                             animate={{ opacity: 1, y: 0 }}
                             className="flex flex-col gap-3"
                         >
-                            {/* Who Starts Info on Final Reveal / Host Screen */}
-                            {((gameMode === 'local' && isLastPlayer) || (gameMode === 'online')) && hasRevealed && starterPlayerId && (
-                                <motion.div
-                                    initial={{ opacity: 0, scale: 0.95 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    className="mb-4 bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col items-center gap-3"
-                                >
-                                    <div className="flex flex-col items-center gap-0.5">
-                                        <span className="text-[10px] text-primary/60 font-black uppercase tracking-[0.3em]">ARRANCA</span>
-                                        <span className="text-3xl font-black text-white uppercase italic tracking-tighter">
-                                            {players.find(p => p.id === starterPlayerId)?.name}
-                                        </span>
-                                    </div>
-                                    {turnOrder && (
-                                        <div className="flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-full border border-white/10">
-                                            <span className="text-[9px] font-extrabold text-white/50 uppercase tracking-widest text-center">
-                                                SENTIDO {turnOrder === 'clockwise' ? 'HORARIO' : 'ANTI-HORARIO'}
-                                            </span>
-                                        </div>
-                                    )}
-                                </motion.div>
-                            )}
+
                             {gameMode === 'local' ? (
                                 <Button
                                     fullWidth

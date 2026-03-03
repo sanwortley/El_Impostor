@@ -182,9 +182,14 @@ export const PlayingPage: React.FC = () => {
                     </p>
                 </div>
 
-                {/* Who Starts Section */}
+                {/* Who Starts Section - Enhanced Animation */}
                 {starterPlayerId && (
-                    <div className="w-full bg-primary/5 border border-primary/10 rounded-3xl p-5 flex flex-col items-center gap-3 relative overflow-hidden">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        transition={{ delay: 0.3, duration: 0.6, type: "spring" }}
+                        className="w-full bg-primary/5 border border-primary/10 rounded-3xl p-5 flex flex-col items-center gap-3 relative overflow-hidden"
+                    >
                         <div className="flex flex-col items-center gap-1 relative z-10 w-full">
                             <span className="text-[10px] text-primary/60 font-black uppercase tracking-[0.3em]">ARRANCA</span>
                             <span className="text-3xl font-black text-white uppercase italic tracking-tighter">
@@ -209,7 +214,7 @@ export const PlayingPage: React.FC = () => {
 
                         {/* Background subtle decoration */}
                         <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent opacity-30" />
-                    </div>
+                    </motion.div>
                 )}
 
                 <div className="flex flex-col w-full gap-3 mt-4">
