@@ -44,6 +44,8 @@ interface Player {
     isHost: boolean;
     role?: 'impostor' | 'normal' | 'victim' | 'prankster';
     isEliminated?: boolean;
+    relation?: string;
+    word?: string;
 }
 
 interface Room {
@@ -147,6 +149,7 @@ io.on('connection', (socket) => {
                     ...p,
                     role: finalRole as any,
                     relation: roleData?.relation,
+                    word: roleData?.word,
                     isEliminated: false
                 };
             });

@@ -17,6 +17,7 @@ export interface Player {
     isEliminated?: boolean;
     votes?: number;
     relation?: string;
+    word?: string;
 }
 
 export interface GameSettings {
@@ -32,6 +33,7 @@ export interface GameSettings {
     anonymousVoting: boolean;
     impostorsKnowEachOther: boolean;
     oledMode: boolean;
+    isTotalChaos?: boolean;
 }
 
 export type GameMode = 'local' | 'online';

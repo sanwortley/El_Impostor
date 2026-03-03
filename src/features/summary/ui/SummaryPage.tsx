@@ -5,7 +5,12 @@ import { RefreshCcw, ShieldAlert, User, Laugh, Home, Target } from 'lucide-react
 import { motion } from 'framer-motion';
 
 export const SummaryPage: React.FC = () => {
-    const { players, settings, resetGame, gameMode, winner, setPhase, localPlayer } = useGameStore();
+    const { players, settings, startGame, gameMode, winner, setPhase, localPlayer } = useGameStore();
+
+    // Freeze the secret word when the summary mounts to avoid flashing the NEW word 
+    // when startGame is clicked (since the secret word updates immediately in the store)
+    const displayedSecretWord = React.useMemo(() => settings.secretWord, []);
+    const displayedCategoryName = React.useMemo(() => settings.chosenCategory?.name, []);
 
     const isOnline = gameMode === 'online';
     const canRestart = !isOnline || localPlayer?.isHost === true;
@@ -51,7 +56,7 @@ export const SummaryPage: React.FC = () => {
 
                 <div className="flex flex-col gap-3 mt-4">
                     {canRestart && (
-                        <Button fullWidth onClick={resetGame} className="h-20 text-xl bg-amber-500 hover:bg-amber-400 text-black font-black italic tracking-tighter shadow-lg shadow-amber-500/20">
+                        <Button fullWidth onClick={startGame} className="h-20 text-xl bg-amber-500 hover:bg-amber-400 text-black font-black italic tracking-tighter shadow-lg shadow-amber-500/20">
                             <Laugh size={24} />
                             NUEVA PARTIDA
                         </Button>
@@ -84,7 +89,7 @@ export const SummaryPage: React.FC = () => {
                     </motion.div>
                 )}
                 <h1 className="text-4xl sm:text-6xl font-black text-white italic uppercase tracking-tighter italic">
-                    RESULTADOS
+                    {settings.isTotalChaos ? '¡MODO TOTAL CHAOS!' : 'RESULTADOS'}
                 </h1>
             </header>
 
@@ -107,12 +112,18 @@ export const SummaryPage: React.FC = () => {
                             <div className="flex flex-col">
                                 <span className={`text-xl font-black italic uppercase tracking-tight ${player.role === 'impostor' ? 'text-red-400' : 'text-white/90'}`}>{player.name}</span>
                                 <span className="text-[9px] font-black uppercase tracking-widest text-white/20">
-                                    {player.role === 'impostor' ? 'AGENTE INFILTRADO' : 'PERSONAL CIVIL'}
+                                    {settings.isTotalChaos ? 'SUJETO BAJO CAOS' : (player.role === 'impostor' ? 'AGENTE INFILTRADO' : 'PERSONAL CIVIL')}
                                 </span>
                             </div>
                         </div>
 
-                        {player.role === 'impostor' && (
+                        {settings.isTotalChaos && player.word && (
+                            <div className="bg-primary/10 border border-primary/20 text-primary text-[10px] font-black px-3 py-1.5 rounded-xl uppercase tracking-tighter italic">
+                                {player.word}
+                            </div>
+                        )}
+
+                        {player.role === 'impostor' && !settings.isTotalChaos && (
                             <div className="bg-red-500 text-white text-[9px] font-black px-3 py-1.5 rounded-xl uppercase tracking-widest italic animate-pulse">
                                 IMPOSTOR
                             </div>
@@ -124,19 +135,21 @@ export const SummaryPage: React.FC = () => {
                 ))}
             </div>
 
-            <div className="p-8 rounded-[2rem] glass text-center relative overflow-hidden border-primary/20">
-                <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-                    <Target size={120} className="text-primary" />
+            {!settings.isTotalChaos && (
+                <div className="p-8 rounded-[2rem] glass text-center relative overflow-hidden border-primary/20">
+                    <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                        <Target size={120} className="text-primary" />
+                    </div>
+                    <p className="text-white/40 uppercase font-black text-[10px] tracking-widest mb-1">La palabra era:</p>
+                    <h3 className="text-3xl sm:text-5xl font-black text-primary uppercase mb-3 text-glow italic tracking-tighter">{displayedSecretWord}</h3>
+                    <div className="inline-block px-3 py-1 rounded-full bg-primary/5 border border-primary/20">
+                        <span className="text-primary/60 text-[10px] uppercase font-black tracking-widest">Sector: {displayedCategoryName}</span>
+                    </div>
                 </div>
-                <p className="text-white/40 uppercase font-black text-[10px] tracking-widest mb-1">La palabra era:</p>
-                <h3 className="text-3xl sm:text-5xl font-black text-primary uppercase mb-3 text-glow italic tracking-tighter">{settings.secretWord}</h3>
-                <div className="inline-block px-3 py-1 rounded-full bg-primary/5 border border-primary/20">
-                    <span className="text-primary/60 text-[10px] uppercase font-black tracking-widest">Sector: {settings.chosenCategory?.name}</span>
-                </div>
-            </div>
+            )}
 
             {canRestart && (
-                <Button fullWidth onClick={resetGame} className="h-20 text-xl mt-4 font-black italic shadow-lg shadow-primary/10">
+                <Button fullWidth onClick={startGame} className="h-20 text-xl mt-4 font-black italic shadow-lg shadow-primary/10">
                     <RefreshCcw size={24} />
                     NUEVA MISIÓN
                 </Button>

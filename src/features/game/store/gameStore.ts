@@ -147,6 +147,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 turnOrder: room.turnOrder,
                 lastVoteResults: room.lastVoteResults,
                 currentVotes: room.currentVotes || {},
+                winner: room.winner,
                 gameMode: 'online'
             });
             get().setPhase((room.phase === 'lobby' ? 'setup' : room.phase) as GamePhase);
@@ -284,18 +285,33 @@ export const useGameStore = create<GameStore>((set, get) => ({
         const items = randomCategory.items;
         const randomWord = items[Math.floor(Math.random() * items.length)];
 
+        // Modes: Normal, Prank (10%), or Total Chaos (10%)
+        const randomValue = Math.random();
+        const triggerPrank = randomValue < 0.10;
+        const triggerTotalChaos = !triggerPrank && randomValue < 0.20;
+
+        let playersWithRoles = triggerPrank
+            ? assignVictim(players)
+            : assignRoles(players, settings.impostorCount);
+
+        // If Total Chaos, assign each player a random word from the category and make everyone 'normal'
+        if (triggerTotalChaos) {
+            // Shuffle items to give different words to each player
+            const shuffledItems = [...items].sort(() => Math.random() - 0.5);
+            playersWithRoles = playersWithRoles.map((p, index) => {
+                // Cycle through shuffled items if there are more players than words
+                const uniqueWord = shuffledItems[index % shuffledItems.length];
+                return { ...p, word: uniqueWord, role: 'normal' };
+            });
+        }
+
         const updatedSettings = {
             ...settings,
             chosenCategory: randomCategory,
             secretWord: randomWord,
-            playerCount: players.length
+            playerCount: players.length,
+            isTotalChaos: triggerTotalChaos
         };
-
-        // 10% chance of a surprise prank round
-        const triggerPrank = Math.random() < 0.10;
-        const playersWithRoles = triggerPrank
-            ? assignVictim(players)
-            : assignRoles(players, settings.impostorCount);
 
         if (gameMode === 'online' && socket && roomCode) {
             socket.emit('start_game', {

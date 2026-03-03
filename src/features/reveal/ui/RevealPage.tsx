@@ -23,10 +23,16 @@ export const RevealPage: React.FC = () => {
         }
     }, [hasRevealed]);
 
-    // Get the current player based on the game mode
     const currentPlayer = gameMode === 'online'
         ? players.find(p => p.socketId === localPlayer?.socketId)
         : players[currentRevealIndex];
+
+    // Reset reveal state when jumping to a new player or new round
+    useEffect(() => {
+        setIsRevealing(false);
+        setHasRevealed(false);
+        setButtonReady(false);
+    }, [currentPlayer?.id, currentRevealIndex]);
 
     if (!currentPlayer) {
         return (
@@ -214,7 +220,7 @@ export const RevealPage: React.FC = () => {
                                             TU PALABRA ES:
                                         </p>
                                         <h2 className="text-4xl md:text-6xl font-black text-white uppercase italic text-center leading-tight">
-                                            {settings.secretWord}
+                                            {settings.isTotalChaos ? currentPlayer.word : settings.secretWord}
                                         </h2>
                                     </div>
 
