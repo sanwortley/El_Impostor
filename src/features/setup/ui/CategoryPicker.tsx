@@ -29,6 +29,9 @@ export const CategoryPicker: React.FC = () => {
                             </h2>
                             <p className="text-[10px] text-white/40 uppercase tracking-widest font-bold">
                                 {settings.selectedCategories.length} seleccionadas
+                                {settings.selectedCategories.length > 0 && (
+                                    <> — {settings.selectedCategories.reduce((acc, cat) => acc + cat.items.length, 0)} palabras</>
+                                )}
                             </p>
                         </div>
                     </div>
@@ -37,8 +40,8 @@ export const CategoryPicker: React.FC = () => {
                         <button
                             onClick={() => setSettings({ selectedCategories: CATEGORIES })}
                             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all ${allSelected
-                                    ? 'bg-primary text-black shadow-lg shadow-primary/20'
-                                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                                ? 'bg-primary text-black shadow-lg shadow-primary/20'
+                                : 'text-white/60 hover:text-white hover:bg-white/5'
                                 }`}
                         >
                             <Check size={12} strokeWidth={3} />
@@ -47,8 +50,8 @@ export const CategoryPicker: React.FC = () => {
                         <button
                             onClick={() => setSettings({ selectedCategories: [] })}
                             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all ${noneSelected
-                                    ? 'bg-red-500/20 text-red-400 border border-red-500/30'
-                                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                                ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                                : 'text-white/60 hover:text-white hover:bg-white/5'
                                 }`}
                         >
                             <Trash2 size={12} strokeWidth={3} />
@@ -68,8 +71,8 @@ export const CategoryPicker: React.FC = () => {
                                 transition={{ delay: index * 0.03 }}
                                 onClick={() => toggleCategory(cat)}
                                 className={`group/btn relative p-3.5 rounded-2xl border transition-all duration-300 text-left overflow-hidden ${selected
-                                        ? 'bg-primary border-primary shadow-lg shadow-primary/10'
-                                        : 'bg-white/5 border-white/10 hover:border-white/20 hover:bg-white/10'
+                                    ? 'bg-primary border-primary shadow-lg shadow-primary/10'
+                                    : 'bg-white/5 border-white/10 hover:border-white/20 hover:bg-white/10'
                                     }`}
                             >
                                 {/* Active Glow */}
@@ -85,10 +88,7 @@ export const CategoryPicker: React.FC = () => {
                                         }`}>
                                         {cat.name}
                                     </span>
-                                    <span className={`text-[9px] uppercase font-black tracking-tighter transition-colors ${selected ? 'text-black/50' : 'text-white/30'
-                                        }`}>
-                                        {cat.items.length} palabras
-                                    </span>
+
                                 </div>
 
                                 {selected && (
