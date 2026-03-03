@@ -90,6 +90,28 @@ export const RevealPage: React.FC = () => {
                             animate={{ opacity: 1, y: 0 }}
                             className="flex flex-col gap-3"
                         >
+                            {/* Who Starts Info on Final Reveal / Host Screen */}
+                            {((gameMode === 'local' && isLastPlayer) || (gameMode === 'online')) && hasRevealed && starterPlayerId && (
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    className="mb-4 bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col items-center gap-3"
+                                >
+                                    <div className="flex flex-col items-center gap-0.5">
+                                        <span className="text-[10px] text-primary/60 font-black uppercase tracking-[0.3em]">ARRANCA</span>
+                                        <span className="text-3xl font-black text-white uppercase italic tracking-tighter">
+                                            {players.find(p => p.id === starterPlayerId)?.name}
+                                        </span>
+                                    </div>
+                                    {turnOrder && (
+                                        <div className="flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-full border border-white/10">
+                                            <span className="text-[9px] font-extrabold text-white/50 uppercase tracking-widest text-center">
+                                                SENTIDO {turnOrder === 'clockwise' ? 'HORARIO' : 'ANTI-HORARIO'}
+                                            </span>
+                                        </div>
+                                    )}
+                                </motion.div>
+                            )}
                             {gameMode === 'local' ? (
                                 <Button
                                     fullWidth
@@ -207,29 +229,6 @@ export const RevealPage: React.FC = () => {
                                 </>
                             )}
 
-                            {/* Who Starts Info in Secret View */}
-                            {starterPlayerId && (
-                                <motion.div
-                                    initial={{ opacity: 0, scale: 0.9 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    transition={{ delay: 0.5 }}
-                                    className="mt-8 pt-6 border-t border-white/10 w-full flex flex-col items-center gap-2"
-                                >
-                                    <div className="flex flex-col items-center gap-0.5">
-                                        <span className="text-[10px] text-primary/60 font-black uppercase tracking-[0.3em]">ARRANCA</span>
-                                        <span className="text-2xl font-black text-white uppercase italic tracking-tighter">
-                                            {players.find(p => p.id === starterPlayerId)?.name}
-                                        </span>
-                                    </div>
-                                    {turnOrder && (
-                                        <div className="flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-full border border-white/10">
-                                            <span className="text-[9px] font-extrabold text-white/50 uppercase tracking-widest text-center">
-                                                SENTIDO {turnOrder === 'clockwise' ? 'HORARIO' : 'ANTI-HORARIO'}
-                                            </span>
-                                        </div>
-                                    )}
-                                </motion.div>
-                            )}
                         </div>
 
                         <p className="fixed bottom-12 text-white/20 uppercase text-xs font-bold tracking-[0.3em] animate-pulse">
