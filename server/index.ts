@@ -185,6 +185,10 @@ io.on('connection', (socket) => {
             if (room.players.length === 0) {
                 rooms.delete(code);
             } else {
+                // If the game is in progress but we fall below 3 players, go back to lobby
+                if (room.phase !== 'lobby' && room.players.length < 3) {
+                    room.phase = 'lobby';
+                }
                 io.to(code).emit('room_updated', formatRoom(room));
             }
         }
@@ -326,10 +330,16 @@ io.on('connection', (socket) => {
                         const removedPlayer = currentRoom.players.splice(idx, 1)[0];
                         if (currentRoom.players.length === 0) {
                             rooms.delete(code);
-                        } else if (removedPlayer.isHost) {
-                            currentRoom.players[0].isHost = true;
+                        } else {
+                            if (removedPlayer.isHost) {
+                                currentRoom.players[0].isHost = true;
+                            }
+                            // If the game is in progress but we fall below 3 players, go back to lobby
+                            if (currentRoom.phase !== 'lobby' && currentRoom.players.length < 3) {
+                                currentRoom.phase = 'lobby';
+                            }
+                            io.to(code).emit('room_updated', formatRoom(currentRoom));
                         }
-                        io.to(code).emit('room_updated', formatRoom(currentRoom));
                     }
                 }
             }, 120000); // 2 minute grace period
