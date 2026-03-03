@@ -55,31 +55,7 @@ export const SetupPage: React.FC = () => {
                             onChange={(val) => setSettings({ showHint: val })}
                         />
 
-                        {settings.showHint && (
-                            <div className="flex flex-col gap-2 p-4 rounded-2xl bg-white/5 border border-white/10">
-                                <span className="font-bold text-white text-sm">Dificultad de Pista</span>
-                                <div className="flex bg-white/5 p-1 rounded-xl border border-white/10">
-                                    <button
-                                        onClick={() => setSettings({ hintDifficulty: 'easy' })}
-                                        className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase transition-all ${settings.hintDifficulty === 'easy'
-                                            ? 'bg-primary text-black shadow-lg shadow-primary/20'
-                                            : 'text-white/60 hover:text-white hover:bg-white/5'
-                                            }`}
-                                    >
-                                        Cercana
-                                    </button>
-                                    <button
-                                        onClick={() => setSettings({ hintDifficulty: 'hard' })}
-                                        className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase transition-all ${settings.hintDifficulty === 'hard'
-                                            ? 'bg-primary text-black shadow-lg shadow-primary/20'
-                                            : 'text-white/60 hover:text-white hover:bg-white/5'
-                                            }`}
-                                    >
-                                        Críptica
-                                    </button>
-                                </div>
-                            </div>
-                        )}
+
 
                         <Toggle
                             label="Revelar categoría"

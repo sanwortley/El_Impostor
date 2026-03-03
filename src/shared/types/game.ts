@@ -3,9 +3,8 @@ export interface Category {
     name: string;
     description: string;
     items: string[];
-    hint: string; // Pista genérica
-    itemHints?: Record<string, string>; // Pistas 'crípticas' por defecto
-    itemHintsEasy?: Record<string, string>; // Pistas 'cercanas/fáciles'
+    hint: string;
+    itemHints?: Record<string, string>;
 }
 
 export interface Player {
@@ -27,7 +26,6 @@ export interface GameSettings {
     playerCount: number;
     impostorCount: number;
     showHint: boolean;
-    hintDifficulty: 'easy' | 'hard';
     showCategory: boolean;
 }
 

@@ -29,16 +29,6 @@ export const CATEGORIES: Category[] = [
             'Shawarma': 'Espiedo', 'Wrap': 'Enrollado', 'Wok': 'Salteado', 'Bondiola': 'Red', 'Choripán': 'Mariposa',
             'Tortilla': 'Babé', 'Risotto': 'Arborio'
         },
-        itemHintsEasy: {
-            'Pizza': 'Horno', 'Hamburguesa': 'Paty', 'Sushi': 'Pescado', 'Tacos': 'Picante', 'Pasta': 'Fideos',
-            'Asado': 'Carne', 'Paella': 'Arroz', 'Empanadas': 'Repulgue', 'Lasagna': 'Capas', 'Ceviche': 'Limón',
-            'Ravioles': 'Relleno', 'Milanesa': 'Pan', 'Hot Dog': 'Salchicha', 'Locro': 'Maíz', 'Gnocchi': 'Papa',
-            'Alfajor': 'Chocolate', 'Medialunas': 'Desayuno', 'Tiramisú': 'Café', 'Churros': 'Azúcar', 'Provoleta': 'Queso',
-            'Tarta': 'Masa', 'Sándwich': 'Pan', 'Quesadilla': 'Tortilla', 'Ramen': 'Sopa', 'Burritos': 'Frijoles',
-            'Cheesecake': 'Postre', 'Flan': 'Caramelo', 'Dulce de leche': 'Azúcar', 'Humita': 'Choclo', 'Polenta': 'Harina',
-            'Shawarma': 'Carne', 'Wrap': 'Rollo', 'Wok': 'Verduras', 'Bondiola': 'Cerdo', 'Choripán': 'Chorizo',
-            'Tortilla': 'Huevo', 'Risotto': 'Arroz'
-        },
     },
     {
         id: '2',
@@ -60,16 +50,6 @@ export const CATEGORIES: Category[] = [
             'Árbitro': 'VAR', 'Entrenador': 'Táctica', 'Psicólogo': 'Diván', 'Científico': 'Probeta', 'Fotógrafo': 'ISO',
             'Diseñador': 'Bezier', 'Escultor': 'Cincel', 'Peluquero': 'Navaja', 'Cartero': 'Sacude', 'Carnicero': 'Balanza',
             'Soldador': 'Chispa', 'Economista': 'PIB'
-        },
-        itemHintsEasy: {
-            'Médico': 'Salud', 'Bombero': 'Fuego', 'Policía': 'Ley', 'Arquitecto': 'Plano', 'Cocinero': 'Comida',
-            'Programador': 'Código', 'Dentista': 'Dientes', 'Abogado': 'Juicio', 'Astronauta': 'Espacio', 'Veterinario': 'Animales',
-            'Maestro': 'Escuela', 'Carpintero': 'Madera', 'Electricista': 'Luz', 'Enfermero': 'Cura', 'Piloto': 'Avión',
-            'Taxista': 'Auto', 'Mecánico': 'Taller', 'Plomero': 'Agua', 'Jardinero': 'Plantas', 'Panadero': 'Pan',
-            'Periodista': 'Noticias', 'Actor': 'Cine', 'Músico': 'Notas', 'Bartender': 'Tragos', 'Influencer': 'Redes',
-            'Árbitro': 'Fútbol', 'Entrenador': 'Equipo', 'Psicólogo': 'Terapia', 'Científico': 'Ciencia', 'Fotógrafo': 'Cámara',
-            'Diseñador': 'Dibujo', 'Escultor': 'Arte', 'Peluquero': 'Pelo', 'Cartero': 'Cartas', 'Carnicero': 'Carne',
-            'Soldador': 'Metal', 'Economista': 'Dinero'
         },
     },
     {
