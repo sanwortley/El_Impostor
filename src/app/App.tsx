@@ -11,8 +11,17 @@ import { VotingPage } from '../features/game/ui/VotingPage';
 import { ChevronLeft } from 'lucide-react';
 
 const App: React.FC = () => {
-    const { phase, gameMode, localPlayer, leaveRoom, setPhase } = useGameStore();
+    const { phase, gameMode, localPlayer, leaveRoom, setPhase, settings } = useGameStore();
     const [showConfirm, setShowConfirm] = useState(false);
+
+    // Apply OLED mode to body
+    React.useEffect(() => {
+        if (settings.oledMode) {
+            document.body.classList.add('oled');
+        } else {
+            document.body.classList.remove('oled');
+        }
+    }, [settings.oledMode]);
 
     const showBack = phase !== 'mode_select';
 

@@ -27,6 +27,10 @@ export interface GameSettings {
     impostorCount: number;
     showHint: boolean;
     showCategory: boolean;
+    debateTime: number; // in seconds, 0 for infinite
+    anonymousVoting: boolean;
+    impostorsKnowEachOther: boolean;
+    oledMode: boolean;
 }
 
 export type GameMode = 'local' | 'online';
@@ -39,6 +43,7 @@ export interface GameState {
     players: Player[];
     currentRevealIndex: number;
     phase: GamePhase;
+    timeRemaining?: number;
     winner?: 'impostors' | 'normals' | null;
     starterPlayerId?: string;
     turnOrder?: 'clockwise' | 'counter-clockwise';

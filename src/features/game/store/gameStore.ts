@@ -28,6 +28,7 @@ interface GameStore extends GameState {
     resetGame: () => void;
     leaveRoom: () => void;
     setPhase: (phase: GamePhase) => void;
+    tickTimer: () => void;
 }
 
 const DEFAULT_SETTINGS: GameSettings = {
@@ -38,6 +39,10 @@ const DEFAULT_SETTINGS: GameSettings = {
     impostorCount: 1,
     showHint: false,
     showCategory: true,
+    debateTime: 60,
+    anonymousVoting: false,
+    impostorsKnowEachOther: true,
+    oledMode: false,
 };
 
 export const useGameStore = create<GameStore>((set, get) => ({
@@ -377,5 +382,25 @@ export const useGameStore = create<GameStore>((set, get) => ({
         }
     },
 
-    setPhase: (phase) => set({ phase }),
+    setPhase: (phase) => {
+        set((state) => {
+            const updates: Partial<GameState> = { phase };
+
+            // Auto-init timer if moving to playing and we have a limit
+            if (phase === 'playing' && state.settings.debateTime > 0) {
+                updates.timeRemaining = state.settings.debateTime;
+            }
+
+            return updates;
+        });
+    },
+
+    tickTimer: () => {
+        set((state) => {
+            if (state.phase !== 'playing' || !state.timeRemaining || state.timeRemaining <= 0) {
+                return {};
+            }
+            return { timeRemaining: state.timeRemaining - 1 };
+        });
+    },
 }));

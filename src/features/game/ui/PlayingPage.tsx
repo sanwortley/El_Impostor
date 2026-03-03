@@ -1,12 +1,31 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { Button } from '../../../shared/ui/Button';
 import { Card } from '../../../shared/ui/Card';
 import { Target, Flag, ShieldAlert, Laugh } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { haptics } from '../../../shared/utils/haptics';
 
 export const PlayingPage: React.FC = () => {
-    const { finishGame, gameMode, localPlayer, lastVoteResults, players, starterPlayerId, turnOrder } = useGameStore();
+    const { finishGame, gameMode, localPlayer, lastVoteResults, players, starterPlayerId, turnOrder, settings, timeRemaining, tickTimer } = useGameStore();
+
+    useEffect(() => {
+        if (settings.debateTime > 0) {
+            const interval = setInterval(() => {
+                tickTimer();
+            }, 1000);
+            return () => clearInterval(interval);
+        }
+    }, [settings.debateTime, tickTimer]);
+
+    useEffect(() => {
+        if (timeRemaining && timeRemaining <= 10 && timeRemaining > 0) {
+            haptics.tick();
+        }
+        if (timeRemaining === 0 && settings.debateTime > 0) {
+            haptics.reveal(); // Final alarm sound
+        }
+    }, [timeRemaining, settings.debateTime]);
 
     // Prank round: triggered automatically when any player has role 'victim'
     const isPrankRound = players.some(p => p.role === 'victim');
@@ -151,12 +170,16 @@ export const PlayingPage: React.FC = () => {
                                         <span className="text-white/40 text-[10px] font-bold">{voters.length} {voters.length === 1 ? 'voto' : 'votos'}</span>
                                     </div>
                                     <div className="flex flex-wrap gap-x-2 gap-y-1">
-                                        {voters.map((v, i) => (
-                                            <div key={i} className="flex items-center gap-1">
-                                                <div className="w-1 h-1 rounded-full bg-white/20" />
-                                                <span className="text-white/30 text-[9px] font-medium">{v.voterName}</span>
-                                            </div>
-                                        ))}
+                                        {!settings.anonymousVoting ? (
+                                            voters.map((v, i) => (
+                                                <div key={i} className="flex items-center gap-1">
+                                                    <div className="w-1 h-1 rounded-full bg-white/20" />
+                                                    <span className="text-white/30 text-[9px] font-medium">{v.voterName}</span>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <span className="text-white/10 text-[9px] italic">Votos ocultos</span>
+                                        )}
                                     </div>
                                 </div>
                             );
@@ -174,11 +197,20 @@ export const PlayingPage: React.FC = () => {
                 </div>
 
                 <div className="flex flex-col gap-2">
-                    <h1 className="text-4xl font-black text-white italic uppercase tracking-tighter">Partida en Juego</h1>
-                    <p className="text-white/40 text-sm font-medium max-w-[280px] mx-auto">
-                        {gameMode === 'online'
-                            ? 'Debatí con los demás jugadores y tratá de encontrar al impostor.'
-                            : '¡Que no se note quién es el impostor! Pasen el celular y debatan.'}
+                    <h1 className="text-4xl font-black text-primary italic uppercase tracking-tighter">
+                        DEBATE
+                    </h1>
+                    {settings.debateTime > 0 && timeRemaining !== undefined && (
+                        <motion.div
+                            animate={timeRemaining <= 10 ? { scale: [1, 1.1, 1], color: ['#FFFFFF', '#facc15', '#FFFFFF'] } : {}}
+                            transition={{ repeat: timeRemaining <= 10 ? Infinity : 0, duration: 1 }}
+                            className={`text-2xl font-black mt-2 font-mono ${timeRemaining <= 10 ? 'text-primary' : 'text-white/40'}`}
+                        >
+                            {Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, '0')}
+                        </motion.div>
+                    )}
+                    <p className="text-white/40 text-sm uppercase font-bold tracking-widest mt-1">
+                        Traten de encontrar al impostor
                     </p>
                 </div>
 

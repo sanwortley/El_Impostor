@@ -186,6 +186,23 @@ export const RevealPage: React.FC = () => {
                                                 </div>
                                             ) : null;
                                         })()}
+
+                                        {settings.impostorsKnowEachOther && settings.impostorCount > 1 && (
+                                            <div className="p-4 rounded-xl bg-white/5 border border-white/10 mt-2">
+                                                <p className="text-white/40 uppercase font-bold text-[10px] text-center mb-2 tracking-widest">Tus Aliados:</p>
+                                                <div className="flex flex-wrap justify-center gap-2">
+                                                    {players
+                                                        .filter(p => p.role === 'impostor' && p.id !== currentPlayer.id)
+                                                        .map(p => (
+                                                            <span key={p.id} className="bg-red-500/10 text-red-500 border border-red-500/20 px-3 py-1 rounded-full text-xs font-black uppercase italic">
+                                                                {p.name}
+                                                            </span>
+                                                        ))
+                                                    }
+                                                </div>
+                                            </div>
+                                        )}
+
                                     </div>
 
                                     {isChaosMode && (

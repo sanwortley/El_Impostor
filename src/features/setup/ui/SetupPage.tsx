@@ -63,6 +63,38 @@ export const SetupPage: React.FC = () => {
                             enabled={settings.showCategory}
                             onChange={(val) => setSettings({ showCategory: val })}
                         />
+
+                        <Stepper
+                            label="Tiempo de debate"
+                            value={settings.debateTime / 60}
+                            min={0}
+                            max={5}
+                            onChange={(val) => setSettings({ debateTime: val * 60 })}
+                            info={`${settings.debateTime === 0 ? 'Sin límite' : settings.debateTime / 60 + ' min'}`}
+                        />
+
+                        <Toggle
+                            label="Votación anónima"
+                            description="Nadie sabe quién votó a quién"
+                            enabled={settings.anonymousVoting}
+                            onChange={(val) => setSettings({ anonymousVoting: val })}
+                        />
+
+                        {settings.impostorCount > 1 && (
+                            <Toggle
+                                label="Compañeros"
+                                description="Los impostores ven quiénes son sus aliados"
+                                enabled={settings.impostorsKnowEachOther}
+                                onChange={(val) => setSettings({ impostorsKnowEachOther: val })}
+                            />
+                        )}
+
+                        <Toggle
+                            label="Modo OLED"
+                            description="Negro puro para ahorrar batería y más estilo"
+                            enabled={settings.oledMode}
+                            onChange={(val) => setSettings({ oledMode: val })}
+                        />
                     </section>
 
                     <Button
