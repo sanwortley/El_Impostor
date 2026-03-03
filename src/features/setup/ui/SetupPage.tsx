@@ -80,14 +80,12 @@ export const SetupPage: React.FC = () => {
                             onChange={(val) => setSettings({ anonymousVoting: val })}
                         />
 
-                        {settings.impostorCount > 1 && (
-                            <Toggle
-                                label="Compañeros"
-                                description="Los impostores ven quiénes son sus aliados"
-                                enabled={settings.impostorsKnowEachOther}
-                                onChange={(val) => setSettings({ impostorsKnowEachOther: val })}
-                            />
-                        )}
+                        <Toggle
+                            label="Ver compañeros"
+                            description="Los impostores ven quiénes son sus aliados (si hay más de uno)"
+                            enabled={settings.impostorsKnowEachOther}
+                            onChange={(val) => setSettings({ impostorsKnowEachOther: val })}
+                        />
 
                         <Toggle
                             label="Modo OLED"

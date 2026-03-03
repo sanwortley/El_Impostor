@@ -249,6 +249,23 @@ export const PlayingPage: React.FC = () => {
                     </motion.div>
                 )}
 
+                {/* Impostor Teammates visibility during debate */}
+                {localPlayer?.role === 'impostor' && settings.impostorsKnowEachOther && settings.impostorCount > 1 && (
+                    <div className="w-full flex flex-col items-center gap-2 px-4">
+                        <span className="text-[9px] text-white/20 font-black uppercase tracking-widest">Tus Aliados</span>
+                        <div className="flex flex-wrap justify-center gap-2">
+                            {players
+                                .filter(p => p.role === 'impostor' && p.id !== localPlayer.id)
+                                .map(p => (
+                                    <span key={p.id} className="bg-red-500/5 text-red-500/40 border border-red-500/10 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase italic">
+                                        {p.name}
+                                    </span>
+                                ))
+                            }
+                        </div>
+                    </div>
+                )}
+
                 <div className="flex flex-col w-full gap-3 mt-4">
                     {gameMode === 'online' && localPlayer?.isHost && (
                         <Button
