@@ -225,9 +225,23 @@ Si un jugador pierde señal o manda la app al background (común en iPhone), tie
 
 ---
 
-## 🗃️ Estado del servidor
+## 🏗️ Arquitectura del Servidor
 
-El servidor **no usa base de datos**. Todas las salas viven en memoria RAM. Si el servidor se reinicia, las partidas en curso se pierden — aceptable para un juego de fiesta.
+El servidor de **"El Impostor"** está diseñado para ser ligero, rápido y centrado en la privacidad:
+
+- **Lenguaje & Runtime**: Desarrollado íntegramente en **TypeScript** corriendo sobre **Node.js**. Esto permite compartir tipos de datos entre el frontend y el backend, garantizando una comunicación robusta.
+- **Comunicación en Tiempo Real**: Utiliza **Socket.io** para una latencia mínima. El servidor actúa como un director de orquesta, gestionando salas, sincronizando el estado del juego y validando movimientos críticos (quién es el impostor, conteo de votos, etc.).
+- **Voz sobre IP (VoIP)**: El sistema de chat de voz utiliza **WebRTC (Peer-to-Peer)**. El servidor solo actúa como "señalizador" para conectar a los jugadores; el audio en sí viaja cifrado directamente entre los dispositivos, garantizando máxima privacidad.
+- **Detección de Voz**: Implementa análisis de audio en tiempo real mediante **Web Audio API** para identificar quién está hablando y mostrar indicadores visuales (estilo Discord) con anillos neón dinámicos.
+- **Gestión de Memoria**: Las salas son efímeras y viven exclusivamente en la **memoria RAM** del servidor. No se almacenan datos permanentes, lo que simplifica la infraestructura y aumenta la seguridad.
+- **Alta Disponibilidad**: Incluye un sistema de **reconexión inteligente** con un temporizador de gracia de 2 minutos para proteger las partidas ante cortes de internet o cambios de aplicación.
+
+## 🛡️ Seguridad y Privacidad
+
+- **Privacidad de Audio**: El audio es P2P y cifrado. El servidor nunca escucha ni graba las conversaciones.
+- **Protección XSS**: React limpia automáticamente todas las entradas (nombres de jugadores, mensajes) para prevenir inyecciones de código.
+- **Salas Privadas**: Los códigos de 5 caracteres generan millones de combinaciones posibles, haciendo que sea prácticamente imposible acceder a una sala sin invitación.
+- **Cero Datos Sensibles**: No requerimos registro, correos electrónicos ni contraseñas. El anonimato es la base del juego.
 
 ---
 
