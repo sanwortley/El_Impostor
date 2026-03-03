@@ -51,16 +51,20 @@ const App: React.FC = () => {
     };
 
     return (
-        <div className="max-w-md mx-auto min-h-screen min-h-[100dvh] px-4 md:px-6 flex flex-col relative">
+        <div className="max-w-md mx-auto min-h-screen min-h-[100dvh] px-4 md:px-6 flex flex-col relative overflow-hidden pt-14">
+            <div className="scanline" />
+
             {/* Global back button */}
             {showBack && (
-                <button
-                    onClick={handleBack}
-                    className="fixed top-4 left-4 z-40 w-10 h-10 flex items-center justify-center rounded-full bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10 transition-all"
-                    aria-label="Volver"
-                >
-                    <ChevronLeft size={20} />
-                </button>
+                <div className="absolute top-4 left-4 z-40">
+                    <button
+                        onClick={handleBack}
+                        className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10 transition-all backdrop-blur-sm"
+                        aria-label="Volver"
+                    >
+                        <ChevronLeft size={18} />
+                    </button>
+                </div>
             )}
 
             {/* Confirmation modal for host closing room */}

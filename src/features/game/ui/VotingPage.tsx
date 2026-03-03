@@ -8,7 +8,14 @@ import { motion } from 'framer-motion';
 import type { Player } from '../../../shared/types/game';
 
 export const VotingPage: React.FC = () => {
-    const { players, localPlayer, castVote, skipVoting, currentVotes } = useGameStore();
+    const { players, localPlayer, castVote, skipVoting, currentVotes, timeRemaining, tickTimer, gameMode } = useGameStore();
+
+    React.useEffect(() => {
+        const interval = setInterval(() => {
+            tickTimer();
+        }, 1000);
+        return () => clearInterval(interval);
+    }, [tickTimer]);
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [hasVoted, setHasVoted] = useState(false);
 
@@ -58,7 +65,17 @@ export const VotingPage: React.FC = () => {
                 <p className="text-white/40 text-sm uppercase font-bold tracking-widest mt-1">
                     ¿Quién es el impostor?
                 </p>
+                {gameMode === 'online' && timeRemaining !== undefined && timeRemaining > 0 && (
+                    <motion.div
+                        animate={timeRemaining <= 5 ? { scale: [1, 1.1, 1], color: ['#FFFFFF', '#ef4444', '#FFFFFF'] } : {}}
+                        transition={{ repeat: timeRemaining <= 5 ? Infinity : 0, duration: 1 }}
+                        className={`text-xl font-black mt-2 font-mono ${timeRemaining <= 5 ? 'text-red-500' : 'text-primary'}`}
+                    >
+                        {timeRemaining}s
+                    </motion.div>
+                )}
             </header>
+
 
             {!hasVoted ? (
                 <>

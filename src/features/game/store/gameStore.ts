@@ -40,6 +40,7 @@ const DEFAULT_SETTINGS: GameSettings = {
     showHint: false,
     showCategory: true,
     debateTime: 60,
+    votingTime: 30,
     anonymousVoting: false,
     impostorsKnowEachOther: true,
     oledMode: false,
@@ -143,13 +144,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 roomCode: room.code,
                 players: room.players,
                 settings: room.settings,
-                phase: (room.phase === 'lobby' ? 'setup' : room.phase) as GamePhase,
-                winner: room.winner,
-                starterPlayerId: room.starterPlayerId,
                 turnOrder: room.turnOrder,
                 lastVoteResults: room.lastVoteResults,
-                currentVotes: room.currentVotes || {}
+                currentVotes: room.currentVotes || {},
+                gameMode: 'online'
             });
+            get().setPhase((room.phase === 'lobby' ? 'setup' : room.phase) as GamePhase);
 
             // Update local player state (role, elimination, etc)
             const playerList = room.players || [];
@@ -166,18 +166,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 roomCode: room.code,
                 players: room.players,
                 settings: room.settings,
-                phase: 'reveal',
-                currentRevealIndex: 0,
-                winner: null,
                 starterPlayerId: room.starterPlayerId,
                 turnOrder: room.turnOrder,
                 lastVoteResults: null,
-                currentVotes: {}
+                currentVotes: {},
+                gameMode: 'online'
             });
+            get().setPhase('reveal');
         });
 
         socket.on('phase_updated', (phase) => {
-            set({ phase: phase as GamePhase });
+            get().setPhase(phase as GamePhase);
         });
 
         // Host closed the room — reset everyone back to the start
@@ -309,11 +308,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
             set({
                 players: playersWithRoles,
                 currentRevealIndex: 0,
-                phase: 'reveal',
                 settings: updatedSettings,
                 starterPlayerId: playersWithRoles[Math.floor(Math.random() * playersWithRoles.length)].id,
                 turnOrder: Math.random() > 0.5 ? 'clockwise' : 'counter-clockwise'
             });
+            get().setPhase('reveal');
         }
     },
 
@@ -329,7 +328,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         } else {
             const nextIndex = currentRevealIndex + 1;
             if (nextIndex >= players.length) {
-                set({ phase: 'playing' });
+                get().setPhase('playing');
             } else {
                 set({ currentRevealIndex: nextIndex });
             }
@@ -343,7 +342,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 socket.emit('next_phase', { code: roomCode, phase: 'summary' });
             }
         } else {
-            set({ phase: 'summary' });
+            get().setPhase('summary');
         }
     },
 
@@ -375,10 +374,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
             }
         } else {
             set({
-                phase: 'setup',
                 currentRevealIndex: 0,
                 players: get().players.map(p => ({ ...p, role: 'normal' }))
             });
+            get().setPhase('setup');
         }
     },
 
@@ -386,9 +385,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
         set((state) => {
             const updates: Partial<GameState> = { phase };
 
-            // Auto-init timer if moving to playing and we have a limit
-            if (phase === 'playing' && state.settings.debateTime > 0) {
-                updates.timeRemaining = state.settings.debateTime;
+            // Auto-init timer only in online mode
+            if (state.gameMode === 'online') {
+                if (phase === 'playing' && state.settings.debateTime > 0) {
+                    updates.timeRemaining = state.settings.debateTime;
+                } else if (phase === 'voting' && state.settings.votingTime > 0) {
+                    updates.timeRemaining = state.settings.votingTime;
+                } else {
+                    updates.timeRemaining = undefined;
+                }
+            } else {
+                updates.timeRemaining = undefined;
             }
 
             return updates;
@@ -396,11 +403,33 @@ export const useGameStore = create<GameStore>((set, get) => ({
     },
 
     tickTimer: () => {
-        set((state) => {
-            if (state.phase !== 'playing' || !state.timeRemaining || state.timeRemaining <= 0) {
-                return {};
+        const { phase, timeRemaining } = get();
+        if (!timeRemaining || timeRemaining <= 0) return;
+
+        const newTime = timeRemaining - 1;
+        set({ timeRemaining: newTime });
+
+        // Auto-action when timer hits zero
+        if (newTime === 0) {
+            const { gameMode, socket, roomCode, localPlayer } = get();
+            if (phase === 'playing') {
+                if (gameMode === 'online') {
+                    if (localPlayer?.isHost && socket && roomCode) {
+                        socket.emit('next_phase', { code: roomCode, phase: 'voting' });
+                    }
+                } else if (gameMode === 'local') {
+                    get().setPhase('summary');
+                }
+            } else if (phase === 'voting') {
+                if (gameMode === 'online') {
+                    if (localPlayer?.isHost && socket && roomCode) {
+                        // Force calculation of results on server
+                        socket.emit('skip_voting', { code: roomCode });
+                    }
+                } else if (gameMode === 'local') {
+                    get().setPhase('summary');
+                }
             }
-            return { timeRemaining: state.timeRemaining - 1 };
-        });
+        }
     },
 }));

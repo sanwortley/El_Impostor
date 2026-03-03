@@ -28,6 +28,7 @@ export interface GameSettings {
     showHint: boolean;
     showCategory: boolean;
     debateTime: number; // in seconds, 0 for infinite
+    votingTime: number; // in seconds
     anonymousVoting: boolean;
     impostorsKnowEachOther: boolean;
     oledMode: boolean;

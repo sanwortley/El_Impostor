@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useGameStore } from '../../game/store/gameStore';
 import { Button } from '../../../shared/ui/Button';
 import { HoldToReveal } from './HoldToReveal';
-import { ChevronRight, ShieldAlert, Eye, Laugh } from 'lucide-react';
+import { ChevronRight, ShieldAlert, Eye } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { haptics } from '../../../shared/utils/haptics';
 
@@ -138,26 +138,21 @@ export const RevealPage: React.FC = () => {
                         <div className="flex flex-col items-center gap-6 max-w-sm">
                             {isPrankster ? (
                                 <>
-                                    <Laugh size={80} className="text-amber-400 animate-bounce" />
-                                    <h2 className="text-5xl font-black text-amber-400 italic tracking-tighter uppercase mb-2">
-                                        ¡SOS {currentPlayer.relation || 'CÓMPLICE'}!
-                                    </h2>
-                                    <h3 className="text-xl font-bold text-white/80 mb-6 uppercase tracking-widest">MODO JODA</h3>
+                                    <Eye size={80} className="text-primary self-center" />
+                                    <div className="flex flex-col items-center">
+                                        <p className="text-white/60 mb-1 uppercase font-bold text-sm tracking-widest text-center">
+                                            TU PALABRA ES:
+                                        </p>
+                                        <h2 className="text-4xl md:text-6xl font-black text-white uppercase italic text-center leading-tight">
+                                            {currentPlayer.relation || 'CÓMPLICE'}
+                                        </h2>
+                                    </div>
 
-                                    <div className="flex flex-col gap-4 w-full">
-                                        <div className="flex flex-col items-center p-5 rounded-2xl bg-amber-500/10 border-2 border-amber-500/30">
-                                            <p className="text-white/40 uppercase font-bold text-[10px] tracking-widest mb-1">LA PALABRA ES:</p>
-                                            <p className="text-3xl font-black text-white uppercase italic tracking-tighter mb-4">{settings.secretWord}</p>
-
-                                            <p className="text-amber-400/60 uppercase font-black text-[10px] tracking-[0.2em] mb-1 border-t border-amber-500/20 pt-4 w-full text-center">EL OBJETIVO ES:</p>
-                                            <p className="text-xl font-black text-amber-400 uppercase italic tracking-tighter">{victimPlayer?.name}</p>
-                                        </div>
-
-                                        <div className="flex flex-col items-center p-5 rounded-2xl bg-white/5 border border-white/10 gap-3">
-                                            <p className="text-white font-bold text-sm leading-relaxed text-center">
-                                                ¡Actuá como su <span className="text-amber-400">{currentPlayer.relation?.split(' DE ')[0] || 'Cómplice'}</span> y confundilo!
-                                            </p>
-                                        </div>
+                                    <div className="mt-6 p-4 rounded-xl bg-white/5 border border-white/10 w-full text-center">
+                                        <p className="text-white/40 text-[10px] uppercase font-black tracking-widest mb-1">EL OBJETIVO ES:</p>
+                                        <p className="text-xl font-black text-primary uppercase italic tracking-tighter">
+                                            {victimPlayer?.name}
+                                        </p>
                                     </div>
                                 </>
                             ) : isImpostor ? (

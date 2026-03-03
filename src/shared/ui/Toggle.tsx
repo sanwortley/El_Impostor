@@ -17,11 +17,11 @@ export const Toggle: React.FC<ToggleProps> = ({ label, enabled, onChange, descri
             <button
                 type="button"
                 onClick={() => onChange(!enabled)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${enabled ? 'bg-primary' : 'bg-white/10'
+                className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors focus:outline-none px-1 ${enabled ? 'bg-primary' : 'bg-white/10'
                     }`}
             >
-                <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${enabled ? 'translate-x-6' : 'translate-x-1'
+                <div
+                    className={`h-4 w-4 rounded-full bg-white transition-all duration-300 shadow-sm ${enabled ? 'translate-x-5' : 'translate-x-0'
                         }`}
                 />
             </button>

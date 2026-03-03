@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { Button } from '../../../shared/ui/Button';
 import { Card } from '../../../shared/ui/Card';
-import { Target, Flag, ShieldAlert, Laugh } from 'lucide-react';
+import { Target, Flag, ShieldAlert } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { haptics } from '../../../shared/utils/haptics';
 
@@ -10,106 +10,24 @@ export const PlayingPage: React.FC = () => {
     const { finishGame, gameMode, localPlayer, lastVoteResults, players, starterPlayerId, turnOrder, settings, timeRemaining, tickTimer } = useGameStore();
 
     useEffect(() => {
-        if (settings.debateTime > 0) {
-            const interval = setInterval(() => {
-                tickTimer();
-            }, 1000);
-            return () => clearInterval(interval);
-        }
-    }, [settings.debateTime, tickTimer]);
+        const interval = setInterval(() => {
+            tickTimer();
+        }, 1000);
+        return () => clearInterval(interval);
+    }, [tickTimer]);
+
 
     useEffect(() => {
         if (timeRemaining && timeRemaining <= 10 && timeRemaining > 0) {
             haptics.tick();
         }
-        if (timeRemaining === 0 && settings.debateTime > 0) {
+        if (timeRemaining === 0) {
             haptics.reveal(); // Final alarm sound
         }
-    }, [timeRemaining, settings.debateTime]);
+    }, [timeRemaining]);
 
-    // Prank round: triggered automatically when any player has role 'victim'
-    const isPrankRound = players.some(p => p.role === 'victim');
-    // The victim must never see the prank screen — they'd instantly know they're the target
-    const isVictim = localPlayer?.role === 'victim';
 
-    // Show prank screen only to pranksters (or in local mode where localPlayer is null)
-    if (isPrankRound && !isVictim) {
-        const victim = players.find(p => p.role === 'victim');
-        const chosenCategory = useGameStore.getState().settings.chosenCategory;
 
-        return (
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex-1 flex flex-col justify-center gap-6 py-8"
-            >
-                <Card className="flex flex-col items-center justify-center p-8 gap-6 text-center min-h-[450px] relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-amber-500/50 to-transparent" />
-                    <div className="w-20 h-20 bg-amber-500/10 text-amber-400 rounded-full flex items-center justify-center relative">
-                        <div className="absolute inset-0 bg-amber-500/20 rounded-full animate-ping opacity-20" />
-                        <Laugh size={40} className="relative z-10" />
-                    </div>
-
-                    <div className="flex flex-col gap-1">
-                        <h1 className="text-3xl font-black text-white italic uppercase tracking-tighter">¡EL PLAN SIGUE!</h1>
-                        <p className="text-amber-400 text-xs font-black uppercase tracking-[0.2em] mb-4">MODO JODA ACTIVO</p>
-
-                        <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 mb-2 flex flex-col gap-3">
-                            <div>
-                                <p className="text-white/40 uppercase font-bold text-[10px] tracking-widest mb-1">SOS {localPlayer?.relation || 'CÓMPLICE'}:</p>
-                                <p className="text-2xl font-black text-amber-400 uppercase italic tracking-tighter">{victim?.name}</p>
-                            </div>
-                            <div className="border-t border-amber-500/20 pt-3">
-                                <p className="text-white/40 uppercase font-bold text-[10px] tracking-widest mb-1">LA PALABRA ES:</p>
-                                <p className="text-xl font-black text-white uppercase italic tracking-tighter">
-                                    {useGameStore.getState().settings.secretWord}
-                                </p>
-                            </div>
-                        </div>
-
-                        {/* Who Starts Info in Prank Mode */}
-                        {starterPlayerId && (
-                            <div className="w-full bg-amber-500/5 border border-amber-500/10 rounded-2xl p-4 flex flex-col items-center gap-2 mb-2">
-                                <div className="flex flex-col items-center gap-0.5">
-                                    <span className="text-[9px] text-amber-500/60 font-black uppercase tracking-[0.3em]">ARRANCA</span>
-                                    <span className="text-xl font-black text-white uppercase italic tracking-tighter">
-                                        {players.find(p => p.id === starterPlayerId)?.name}
-                                    </span>
-                                </div>
-                                {turnOrder && (
-                                    <span className="text-[8px] font-extrabold text-amber-500/40 uppercase tracking-widest">
-                                        SENTIDO {turnOrder === 'clockwise' ? 'HORARIO' : 'ANTI-HORARIO'}
-                                    </span>
-                                )}
-                            </div>
-                        )}
-
-                        <div className="space-y-4">
-                            <p className="text-white/60 text-sm leading-relaxed px-4">
-                                Usá palabras serias pero sin sentido que tengan que ver con <strong>{chosenCategory?.name}</strong>.
-                            </p>
-                            <div className="bg-white/5 border border-white/10 rounded-xl p-3 text-[11px] text-white/30 italic">
-                                "¡Esa palabra tiene un tono muy 'refrunlo'!" <br />
-                                "Yo prefiero cuando es más 'zapinto'..."
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="w-full flex flex-col gap-3 mt-4">
-                        <Button
-                            fullWidth
-                            onClick={finishGame}
-                            className="h-16 text-lg bg-amber-500 hover:bg-amber-400 text-black font-black"
-                        >
-                            <Laugh size={24} />
-                            REVELAR LA BROMA
-                        </Button>
-                        <p className="text-[10px] text-white/20 uppercase font-bold tracking-widest">Solo cuando terminen la joda</p>
-                    </div>
-                </Card>
-            </motion.div>
-        );
-    }
 
     if (localPlayer?.isEliminated) {
         return (
@@ -200,7 +118,7 @@ export const PlayingPage: React.FC = () => {
                     <h1 className="text-4xl font-black text-primary italic uppercase tracking-tighter">
                         DEBATE
                     </h1>
-                    {settings.debateTime > 0 && timeRemaining !== undefined && (
+                    {gameMode === 'online' && settings.debateTime > 0 && timeRemaining !== undefined && (
                         <motion.div
                             animate={timeRemaining <= 10 ? { scale: [1, 1.1, 1], color: ['#FFFFFF', '#facc15', '#FFFFFF'] } : {}}
                             transition={{ repeat: timeRemaining <= 10 ? Infinity : 0, duration: 1 }}

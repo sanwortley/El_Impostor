@@ -2,7 +2,7 @@ import React from 'react';
 import { useGameStore } from '../../game/store/gameStore';
 import { CATEGORIES } from '../../../shared/data/categories';
 import { Card } from '../../../shared/ui/Card';
-import { Target, Check, Trash2, Layers } from 'lucide-react';
+import { Target, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const CategoryPicker: React.FC = () => {
@@ -18,43 +18,33 @@ export const CategoryPicker: React.FC = () => {
             <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors duration-700" />
 
             <div className="flex flex-col gap-4 relative z-10">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                        <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                            <Layers size={18} />
-                        </div>
-                        <div>
-                            <h2 className="text-lg font-extrabold tracking-tight text-white/90">
-                                Categorías
-                            </h2>
-                            <p className="text-[10px] text-white/40 uppercase tracking-widest font-bold">
-                                {settings.selectedCategories.length} seleccionadas
-                                {settings.selectedCategories.length > 0 && (
-                                    <> — {settings.selectedCategories.reduce((acc, cat) => acc + cat.items.length, 0)} palabras</>
-                                )}
-                            </p>
-                        </div>
+                <div className="flex items-center justify-between pb-3 border-b border-white/5">
+                    <div className="flex flex-col">
+                        <h2 className="text-xl font-black italic uppercase tracking-tighter text-white leading-none">
+                            Categorías
+                        </h2>
+                        <p className="text-[10px] text-white/20 uppercase tracking-[0.2em] font-black mt-1.5">
+                            {settings.selectedCategories.length} <span className="opacity-30 mx-0.5">/</span> {CATEGORIES.length} ACTIVAS
+                        </p>
                     </div>
 
-                    <div className="flex bg-white/5 p-1 rounded-xl border border-white/10">
+                    <div className="flex items-center gap-1 bg-white/5 rounded-full p-1 border border-white/10">
                         <button
                             onClick={() => setSettings({ selectedCategories: CATEGORIES })}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all ${allSelected
-                                ? 'bg-primary text-black shadow-lg shadow-primary/20'
-                                : 'text-white/60 hover:text-white hover:bg-white/5'
+                            className={`px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest transition-all ${allSelected
+                                ? 'bg-primary text-black'
+                                : 'text-white/40 hover:text-white hover:bg-white/5'
                                 }`}
                         >
-                            <Check size={12} strokeWidth={3} />
                             Todas
                         </button>
                         <button
                             onClick={() => setSettings({ selectedCategories: [] })}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all ${noneSelected
-                                ? 'bg-red-500/20 text-red-400 border border-red-500/30'
-                                : 'text-white/60 hover:text-white hover:bg-white/5'
+                            className={`px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest transition-all ${noneSelected
+                                ? 'bg-red-500/20 text-red-400'
+                                : 'text-white/40 hover:text-red-400 hover:bg-white/5'
                                 }`}
                         >
-                            <Trash2 size={12} strokeWidth={3} />
                             Ninguna
                         </button>
                     </div>

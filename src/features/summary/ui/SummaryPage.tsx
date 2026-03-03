@@ -1,8 +1,7 @@
 import React from 'react';
 import { useGameStore } from '../../game/store/gameStore';
 import { Button } from '../../../shared/ui/Button';
-import { Card } from '../../../shared/ui/Card';
-import { RefreshCcw, ShieldAlert, User, Laugh, Home } from 'lucide-react';
+import { RefreshCcw, ShieldAlert, User, Laugh, Home, Target } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const SummaryPage: React.FC = () => {
@@ -14,6 +13,12 @@ export const SummaryPage: React.FC = () => {
     // Prank round: triggered automatically when any player has role 'victim'
     const isPrankRound = players.some(p => p.role === 'victim');
 
+    // Winner Color Logic
+    const isNormalWin = winner === 'normals';
+    const accentColor = isNormalWin ? 'text-green-400' : 'text-red-500';
+    const bgColor = isNormalWin ? 'bg-green-500/10' : 'bg-red-500/10';
+    const borderColor = isNormalWin ? 'border-green-500/20' : 'border-red-500/20';
+
     // Prank mode summary
     if (isPrankRound) {
         const victim = players.find(p => p.role === 'victim');
@@ -23,34 +28,35 @@ export const SummaryPage: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="flex flex-col gap-6 py-8"
             >
-                <header className="text-center">
-                    <p className="text-4xl mb-2">🎉</p>
-                    <h1 className="text-5xl font-black text-amber-400 italic uppercase tracking-tighter">
-                        ¡Se reveló!
+                <header className="text-center space-y-2">
+                    <p className="text-5xl animate-bounce">🎉</p>
+                    <h1 className="text-4xl sm:text-6xl font-black text-amber-400 italic uppercase tracking-tighter text-glow">
+                        ¡BROMA REVELADA!
                     </h1>
                 </header>
 
-                <Card className="flex flex-col items-center gap-4 p-8 text-center bg-amber-500/5 border-amber-500/30 ring-2 ring-amber-500/20">
-                    <Laugh size={48} className="text-amber-400" />
-                    <p className="text-white/40 uppercase font-bold text-xs tracking-widest">La víctima era</p>
-                    <h2 className="text-5xl font-black text-amber-400 uppercase italic tracking-tighter">{victim?.name}</h2>
-                    <p className="text-white/40 text-sm">Estaba hablando en serio mientras todos lo/la confundían 😂</p>
-                </Card>
-
-                <div className="p-6 rounded-3xl bg-white/5 border border-white/10 text-center">
-                    <p className="text-white/60 mb-1">La palabra era:</p>
-                    <h3 className="text-4xl font-black text-primary uppercase mb-2">{settings.secretWord}</h3>
-                    <p className="text-white/40 text-xs uppercase font-bold tracking-widest">Categoría: {settings.chosenCategory?.name}</p>
+                <div className="glass rounded-[2.5rem] p-1 border-amber-500/30">
+                    <div className="flex flex-col items-center gap-4 p-8 text-center bg-amber-500/5 rounded-[2.4rem]">
+                        <Laugh size={60} className="text-amber-400" />
+                        <div className="space-y-1">
+                            <p className="text-white/40 uppercase font-black text-[10px] tracking-widest">EL OBJETIVO ERA</p>
+                            <h2 className="text-5xl font-black text-white uppercase italic tracking-tighter">{victim?.name}</h2>
+                        </div>
+                        <p className="text-white/60 text-sm leading-relaxed max-w-[200px]">
+                            ¡Todos sabían la palabra menos <span className="text-amber-400 font-bold">{victim?.name}</span>! 😂
+                        </p>
+                    </div>
                 </div>
 
-                <div className="flex flex-col gap-3 mt-2">
+
+                <div className="flex flex-col gap-3 mt-4">
                     {canRestart && (
-                        <Button fullWidth onClick={resetGame} className="h-16 text-lg bg-amber-500 hover:bg-amber-400 text-black font-black">
-                            <Laugh size={20} />
+                        <Button fullWidth onClick={resetGame} className="h-20 text-xl bg-amber-500 hover:bg-amber-400 text-black font-black italic tracking-tighter shadow-lg shadow-amber-500/20">
+                            <Laugh size={24} />
                             NUEVA PARTIDA
                         </Button>
                     )}
-                    <Button fullWidth variant="secondary" onClick={() => setPhase('mode_select')} className="h-14 text-sm">
+                    <Button fullWidth variant="secondary" onClick={() => setPhase('mode_select')} className="h-14 text-xs font-black uppercase tracking-widest opacity-40 hover:opacity-100">
                         <Home size={18} />
                         VOLVER AL INICIO
                     </Button>
@@ -67,52 +73,72 @@ export const SummaryPage: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             className="flex flex-col gap-8 py-8"
         >
-            <header className="text-center">
-                {gameMode === 'online' && winner && (
-                    <div className={`mb-4 py-2 px-6 rounded-full inline-block font-black italic uppercase tracking-widest text-sm ${winner === 'normals' ? 'bg-green-500 text-black' : 'bg-red-500 text-white'
-                        }`}>
-                        {winner === 'normals' ? '¡LOS CIVILES GANAN!' : '¡EL IMPOSTOR GANA!'}
-                    </div>
+            <header className="text-center space-y-4">
+                {winner && (
+                    <motion.div
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        className={`py-2 px-8 rounded-full inline-block font-black italic uppercase tracking-[0.2em] text-[10px] ${bgColor} ${accentColor} border ${borderColor} text-glow`}
+                    >
+                        {isNormalWin ? '¡MISIÓN CUMPLIDA - CIVILES GANAN!' : '¡INFILTRACIÓN EXITOSA - IMPOSTOR GANA!'}
+                    </motion.div>
                 )}
-                <h1 className="text-5xl font-black text-primary italic uppercase tracking-tighter">
+                <h1 className="text-4xl sm:text-6xl font-black text-white italic uppercase tracking-tighter italic">
                     RESULTADOS
                 </h1>
             </header>
 
             <div className="grid grid-cols-1 gap-3">
                 {players.map((player) => (
-                    <Card
+                    <motion.div
                         key={player.id}
-                        className={`flex items-center justify-between transition-all ${player.role === 'impostor' ? 'ring-2 ring-red-500 bg-red-500/10' : ''
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className={`relative group flex items-center justify-between p-5 rounded-3xl glass transition-all ${player.role === 'impostor' ? 'border-red-500/30 bg-red-500/5' : ''
                             }`}
                     >
                         <div className="flex items-center gap-4">
-                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${player.role === 'impostor' ? 'bg-red-500 text-white' : 'bg-primary text-black'
+                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${player.role === 'impostor'
+                                ? 'bg-red-500 text-white shadow-lg shadow-red-500/20'
+                                : 'bg-primary/20 text-primary'
                                 }`}>
                                 {player.role === 'impostor' ? <ShieldAlert size={24} /> : <User size={24} />}
                             </div>
-                            <span className="text-xl font-bold">{player.name}</span>
+                            <div className="flex flex-col">
+                                <span className={`text-xl font-black italic uppercase tracking-tight ${player.role === 'impostor' ? 'text-red-400' : 'text-white/90'}`}>{player.name}</span>
+                                <span className="text-[9px] font-black uppercase tracking-widest text-white/20">
+                                    {player.role === 'impostor' ? 'AGENTE INFILTRADO' : 'PERSONAL CIVIL'}
+                                </span>
+                            </div>
                         </div>
 
                         {player.role === 'impostor' && (
-                            <span className="bg-red-500 text-white text-[10px] font-black px-2 py-1 rounded-md uppercase tracking-tighter">
-                                Impostor
-                            </span>
+                            <div className="bg-red-500 text-white text-[9px] font-black px-3 py-1.5 rounded-xl uppercase tracking-widest italic animate-pulse">
+                                IMPOSTOR
+                            </div>
                         )}
-                    </Card>
+                        {player.isEliminated && player.role !== 'impostor' && (
+                            <span className="text-white/20 text-[9px] font-black uppercase tracking-widest italic">ELIMINADO</span>
+                        )}
+                    </motion.div>
                 ))}
             </div>
 
-            <div className="mt-4 p-6 rounded-3xl bg-white/5 border border-white/10 text-center">
-                <p className="text-white/60 mb-1">La palabra era:</p>
-                <h3 className="text-4xl font-black text-primary uppercase mb-2">{settings.secretWord}</h3>
-                <p className="text-white/40 text-xs uppercase font-bold tracking-widest">Categoría: {settings.chosenCategory?.name}</p>
+            <div className="p-8 rounded-[2rem] glass text-center relative overflow-hidden border-primary/20">
+                <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                    <Target size={120} className="text-primary" />
+                </div>
+                <p className="text-white/40 uppercase font-black text-[10px] tracking-widest mb-1">La palabra era:</p>
+                <h3 className="text-3xl sm:text-5xl font-black text-primary uppercase mb-3 text-glow italic tracking-tighter">{settings.secretWord}</h3>
+                <div className="inline-block px-3 py-1 rounded-full bg-primary/5 border border-primary/20">
+                    <span className="text-primary/60 text-[10px] uppercase font-black tracking-widest">Sector: {settings.chosenCategory?.name}</span>
+                </div>
             </div>
 
             {canRestart && (
-                <Button fullWidth onClick={resetGame} className="h-20 text-xl mt-4">
+                <Button fullWidth onClick={resetGame} className="h-20 text-xl mt-4 font-black italic shadow-lg shadow-primary/10">
                     <RefreshCcw size={24} />
-                    NUEVA PARTIDA
+                    NUEVA MISIÓN
                 </Button>
             )}
 

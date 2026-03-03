@@ -8,9 +8,10 @@ interface StepperProps {
     max: number;
     onChange: (value: number) => void;
     info?: string;
+    step?: number;
 }
 
-export const Stepper: React.FC<StepperProps> = ({ label, value, min, max, onChange, info }) => {
+export const Stepper: React.FC<StepperProps> = ({ label, value, min, max, onChange, info, step = 1 }) => {
     return (
         <div className="flex flex-col gap-2 p-4 rounded-2xl bg-white/5 border border-white/10">
             <div className="flex items-center justify-between">
@@ -20,7 +21,7 @@ export const Stepper: React.FC<StepperProps> = ({ label, value, min, max, onChan
                 </div>
                 <div className="flex items-center gap-4">
                     <button
-                        onClick={() => onChange(Math.max(min, value - 1))}
+                        onClick={() => onChange(Math.max(min, value - step))}
                         className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 active:scale-90 transition-all"
                         disabled={value <= min}
                     >
@@ -28,7 +29,7 @@ export const Stepper: React.FC<StepperProps> = ({ label, value, min, max, onChan
                     </button>
                     <span className="text-xl font-bold w-6 text-center">{value}</span>
                     <button
-                        onClick={() => onChange(Math.min(max, value + 1))}
+                        onClick={() => onChange(Math.min(max, value + step))}
                         className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 active:scale-90 transition-all font-bold"
                         disabled={value >= max}
                     >
