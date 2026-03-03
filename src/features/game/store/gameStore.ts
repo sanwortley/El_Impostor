@@ -37,6 +37,7 @@ const DEFAULT_SETTINGS: GameSettings = {
     playerCount: 0,
     impostorCount: 1,
     showHint: false,
+    hintDifficulty: 'hard',
     showCategory: true,
 };
 

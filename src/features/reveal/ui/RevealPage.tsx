@@ -74,11 +74,17 @@ export const RevealPage: React.FC = () => {
                 <HoldToReveal
                     playerName={currentPlayer.name}
                     isRevealing={isRevealing}
-                    onHold={() => setIsRevealing(true)}
+                    onHold={() => {
+                        setIsRevealing(true);
+                        // Haptic feedback when the reveal starts
+                        if ('vibrate' in navigator) navigator.vibrate(10);
+                    }}
                     onRelease={() => {
                         if (isRevealing) {
                             setIsRevealing(false);
                             setHasRevealed(true);
+                            // Haptic feedback when the role is revealed
+                            if ('vibrate' in navigator) navigator.vibrate([30, 50, 30]);
                         }
                     }}
                 />
@@ -171,12 +177,17 @@ export const RevealPage: React.FC = () => {
                                         )}
 
                                         {settings.showHint && (() => {
-                                            const specificHint = settings.chosenCategory?.itemHints?.[settings.secretWord];
+                                            const easyHints = settings.chosenCategory?.itemHintsEasy;
+                                            const hardHints = settings.chosenCategory?.itemHints;
+                                            const hints = settings.hintDifficulty === 'easy' && easyHints ? easyHints : hardHints;
+
+                                            const specificHint = hints?.[settings.secretWord];
                                             const fallbackHint = settings.chosenCategory?.hint;
                                             const hintText = specificHint || fallbackHint;
+
                                             return hintText ? (
                                                 <div className="flex flex-col items-center p-4 rounded-xl bg-white/5 border border-primary/20">
-                                                    <p className="text-primary uppercase font-bold text-xs tracking-widest mb-2">Tu Pista:</p>
+                                                    <p className="text-primary uppercase font-bold text-xs tracking-widest mb-2">Tu Pista ({settings.hintDifficulty === 'easy' ? 'Cercana' : 'Críptica'}):</p>
                                                     <p className="text-lg font-medium text-white italic">"{hintText}"</p>
                                                 </div>
                                             ) : null;
