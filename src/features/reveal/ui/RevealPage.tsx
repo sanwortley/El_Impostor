@@ -4,6 +4,7 @@ import { Button } from '../../../shared/ui/Button';
 import { HoldToReveal } from './HoldToReveal';
 import { ChevronRight, ShieldAlert, Eye, Laugh } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { haptics } from '../../../shared/utils/haptics';
 
 export const RevealPage: React.FC = () => {
     const { players, localPlayer, settings, nextReveal, gameMode, currentRevealIndex } = useGameStore();
@@ -76,15 +77,13 @@ export const RevealPage: React.FC = () => {
                     isRevealing={isRevealing}
                     onHold={() => {
                         setIsRevealing(true);
-                        // Haptic feedback when the reveal starts
-                        if ('vibrate' in navigator) navigator.vibrate(10);
+                        haptics.tick();
                     }}
                     onRelease={() => {
                         if (isRevealing) {
                             setIsRevealing(false);
                             setHasRevealed(true);
-                            // Haptic feedback when the role is revealed
-                            if ('vibrate' in navigator) navigator.vibrate([30, 50, 30]);
+                            haptics.reveal();
                         }
                     }}
                 />
