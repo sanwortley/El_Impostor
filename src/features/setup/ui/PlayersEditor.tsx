@@ -87,8 +87,8 @@ export const PlayersEditor: React.FC = () => {
                 </AnimatePresence>
             </div>
 
-            {players.length < 3 && (
-                <p className="text-xs text-red-400 mt-2">Mínimo 3 jugadores para empezar</p>
+            {players.length < 2 && (
+                <p className="text-xs text-red-400 mt-2">Mínimo 2 jugadores para empezar</p>
             )}
         </Card>
     );

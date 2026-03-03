@@ -2,12 +2,27 @@ import React, { useEffect } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { Button } from '../../../shared/ui/Button';
 import { Card } from '../../../shared/ui/Card';
-import { Target, Flag, ShieldAlert } from 'lucide-react';
+import { Target, Flag, Mic, MicOff, ShieldAlert } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { haptics } from '../../../shared/utils/haptics';
 
+const PLAYER_COLORS = [
+    '#FFD700', // Gold
+    '#00F2FF', // Cyan
+    '#FF00FF', // Pink
+    '#39FF14', // Lime
+    '#FF4D00', // Orange
+    '#BC13FE', // Purple
+    '#4DFFFF', // Sky
+    '#FF3131', // Red
+    '#1F51FF', // Blue
+    '#0FFF50', // Green
+];
+
+const getPlayerColor = (index: number) => PLAYER_COLORS[index % PLAYER_COLORS.length];
+
 export const PlayingPage: React.FC = () => {
-    const { finishGame, gameMode, localPlayer, lastVoteResults, players, starterPlayerId, turnOrder, settings, timeRemaining, tickTimer } = useGameStore();
+    const { finishGame, gameMode, localPlayer, lastVoteResults, players, starterPlayerId, turnOrder, settings, timeRemaining, tickTimer, speakingPlayers } = useGameStore();
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -169,7 +184,7 @@ export const PlayingPage: React.FC = () => {
 
                 {/* Impostor Teammates visibility during debate */}
                 {localPlayer?.role === 'impostor' && settings.impostorsKnowEachOther && settings.impostorCount > 1 && (
-                    <div className="w-full flex flex-col items-center gap-2 px-4">
+                    <div className="w-full flex flex-col items-center gap-2 px-4 mb-2">
                         <span className="text-[9px] text-white/20 font-black uppercase tracking-widest">Tus Aliados</span>
                         <div className="flex flex-wrap justify-center gap-2">
                             {players
@@ -180,6 +195,75 @@ export const PlayingPage: React.FC = () => {
                                     </span>
                                 ))
                             }
+                        </div>
+                    </div>
+                )}
+
+                {/* Voice Chat Status - Discord Style Scalable */}
+                {settings.voiceChat && (
+                    <div className="w-full mt-2">
+                        <div className="flex items-center gap-2 mb-3 px-1">
+                            <Mic size={12} className="text-primary animate-pulse" />
+                            <h4 className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Canal de Voz ({players.length})</h4>
+                        </div>
+
+                        {/* Dynamic Grid: adjust columns and scale based on player count */}
+                        <div className={`grid gap-2 ${players.length <= 6 ? 'grid-cols-3' :
+                            players.length <= 12 ? 'grid-cols-4' :
+                                players.length <= 20 ? 'grid-cols-5' : 'grid-cols-6'
+                            }`}>
+                            {players.map((p, idx) => {
+                                const isSpeaking = speakingPlayers[p.id];
+                                const playerColor = getPlayerColor(idx);
+                                const isMany = players.length > 12;
+
+                                return (
+                                    <div key={p.id} className="flex flex-col items-center gap-1 min-w-0">
+                                        <div className="relative">
+                                            {/* Speaking Glow Ring - Custom Color */}
+                                            <motion.div
+                                                animate={isSpeaking ? {
+                                                    scale: [1, 1.4, 1],
+                                                    opacity: [0.4, 0.8, 0.4],
+                                                    backgroundColor: playerColor
+                                                } : { scale: 1, opacity: 0 }}
+                                                transition={{ repeat: Infinity, duration: 1.5 }}
+                                                className="absolute -inset-2 rounded-full blur-md"
+                                            />
+
+                                            <div
+                                                className={`relative rounded-full flex items-center justify-center transition-all duration-300 border-2 ${isMany ? 'w-10 h-10' : 'w-12 h-12'
+                                                    }`}
+                                                style={{
+                                                    backgroundColor: p.isMuted ? 'rgba(239, 68, 68, 0.1)' : `${playerColor}15`,
+                                                    borderColor: p.isMuted
+                                                        ? 'rgba(239, 68, 68, 0.2)'
+                                                        : isSpeaking
+                                                            ? playerColor
+                                                            : `${playerColor}40`,
+                                                    boxShadow: isSpeaking ? `0 0 20px ${playerColor}60` : 'none'
+                                                }}
+                                            >
+                                                {p.isMuted ? (
+                                                    <MicOff size={isMany ? 14 : 18} className="text-red-500/40" />
+                                                ) : (
+                                                    <Mic size={isMany ? 14 : 18} style={{ color: isSpeaking ? playerColor : `${playerColor}80` }} />
+                                                )}
+
+                                                {p.id === localPlayer?.id && (
+                                                    <div className="absolute -top-1 -right-1 bg-primary text-black text-[7px] font-black px-1 py-0.5 rounded-full uppercase border border-[#1a1a1a]">
+                                                        Tú
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <span className={`text-[8px] font-bold uppercase tracking-tight truncate w-full text-center italic transition-colors ${p.isMuted ? 'text-white/20' : isSpeaking ? 'text-white' : 'text-white/40'
+                                            }`} style={{ color: isSpeaking ? playerColor : undefined }}>
+                                            {p.name}
+                                        </span>
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
                 )}

@@ -29,6 +29,8 @@ interface GameStore extends GameState {
     leaveRoom: () => void;
     setPhase: (phase: GamePhase) => void;
     tickTimer: () => void;
+    speakingPlayers: Record<string, boolean>;
+    setSpeakingPlayers: (speaking: Record<string, boolean>) => void;
 }
 
 const DEFAULT_SETTINGS: GameSettings = {
@@ -58,6 +60,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
     winner: null,
     lastVoteResults: null,
     currentVotes: {},
+    speakingPlayers: {},
+
+    setSpeakingPlayers: (speaking) => set({ speakingPlayers: speaking }),
 
     setMode: (mode) => {
         if (mode === 'local') {
@@ -140,10 +145,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
         });
 
         socket.on('room_updated', (room) => {
+            const playerList = room.players || [];
+            const updatedSettings = {
+                ...room.settings,
+                impostorCount: Math.min(room.settings.impostorCount || 1, playerList.length || 1)
+            };
+
             set({
                 roomCode: room.code,
-                players: room.players,
-                settings: room.settings,
+                players: playerList,
+                settings: updatedSettings,
                 turnOrder: room.turnOrder,
                 lastVoteResults: room.lastVoteResults,
                 currentVotes: room.currentVotes || {},
@@ -153,7 +164,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
             get().setPhase((room.phase === 'lobby' ? 'setup' : room.phase) as GamePhase);
 
             // Update local player state (role, elimination, etc)
-            const playerList = room.players || [];
             const updatedLocal = playerList.find((p: any) => p.id === get().localPlayer?.id) ||
                 playerList.find((p: any) => p.name === get().localPlayer?.name);
 

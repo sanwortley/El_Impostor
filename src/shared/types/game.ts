@@ -18,6 +18,7 @@ export interface Player {
     votes?: number;
     relation?: string;
     word?: string;
+    isMuted?: boolean;
 }
 
 export interface GameSettings {
@@ -34,6 +35,7 @@ export interface GameSettings {
     impostorsKnowEachOther: boolean;
     oledMode: boolean;
     isTotalChaos?: boolean;
+    voiceChat?: boolean;
 }
 
 export type GameMode = 'local' | 'online';

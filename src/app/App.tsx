@@ -9,10 +9,18 @@ import { JoiningPage } from '../features/game/ui/JoiningPage';
 import { ModeSelectPage } from '../features/game/ui/ModeSelectPage';
 import { VotingPage } from '../features/game/ui/VotingPage';
 import { ChevronLeft } from 'lucide-react';
+import { useVoiceChat } from '../shared/hooks/useVoiceChat';
 
 const App: React.FC = () => {
-    const { phase, gameMode, localPlayer, leaveRoom, setPhase, settings } = useGameStore();
+    const { phase, gameMode, localPlayer, leaveRoom, setPhase, settings, setSpeakingPlayers } = useGameStore();
     const [showConfirm, setShowConfirm] = useState(false);
+
+    // Initialize voice chat if enabled
+    const { speakingPlayers } = useVoiceChat();
+
+    React.useEffect(() => {
+        setSpeakingPlayers(speakingPlayers);
+    }, [speakingPlayers, setSpeakingPlayers]);
 
     // Apply OLED mode to body
     React.useEffect(() => {
@@ -27,16 +35,28 @@ const App: React.FC = () => {
 
     const handleBack = () => {
         if (gameMode === 'online') {
+            // If in a game phase (reveal, playing, voting, summary), go back to setup (lobby)
+            if (phase !== 'setup' && phase !== 'joining') {
+                if (localPlayer?.isHost) {
+                    // Host can force everyone back to lobby
+                    useGameStore.getState().socket?.emit('next_phase', { code: useGameStore.getState().roomCode, phase: 'lobby' });
+                } else {
+                    // Non-host: just show current game state or return to join
+                    // For now, let's keep it simple: non-host stays in game until host moves it
+                    // or leaves if they really want to exit
+                    leaveRoom();
+                }
+                return;
+            }
+
+            // If already in setup, then confirm leave/close
             if (localPlayer?.isHost) {
-                // Host closing → confirm, because it kicks everyone
                 setShowConfirm(true);
             } else {
                 leaveRoom();
             }
         } else {
-            // Local mode: 
-            // If in reveal/playing/voting/summary, go back to setup to allow re-checking or repeating
-            // If already in setup, then go back to mode_select
+            // Local mode behavior
             if (phase === 'setup') {
                 setPhase('mode_select');
             } else {

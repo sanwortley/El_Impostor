@@ -12,7 +12,12 @@ export const SetupPage: React.FC = () => {
 
     const isHost = localPlayer?.isHost;
     const isChaosMode = settings.impostorCount === players.length && players.length > 0;
-    const canStart = (isHost || gameMode === 'local') && players.length >= 3 && settings.selectedCategories.length > 0;
+
+    // Requirements to start: 
+    // Minimum 2 players to allow any kind of play, though 3+ is recommended.
+    const hasEnoughPlayers = players.length >= 2;
+    const canStart = (isHost || gameMode === 'local') && hasEnoughPlayers;
+    const noCategoriesSelected = settings.selectedCategories.length === 0;
 
     return (
         <motion.div
@@ -96,6 +101,15 @@ export const SetupPage: React.FC = () => {
                             />
                         )}
 
+                        {gameMode === 'online' && (
+                            <Toggle
+                                label="Modo Distancia (Voz)"
+                                description="Habilita chat de voz y silencia a los eliminados"
+                                enabled={settings.voiceChat || false}
+                                onChange={(val) => setSettings({ voiceChat: val })}
+                            />
+                        )}
+
                         {settings.impostorCount >= 2 && (
                             <Toggle
                                 label="Ver compañeros"
@@ -113,9 +127,15 @@ export const SetupPage: React.FC = () => {
                         />
                     </section>
 
+                    {noCategoriesSelected && hasEnoughPlayers && (
+                        <p className="text-[10px] text-white/30 text-center uppercase font-bold tracking-widest mt-2 animate-pulse">
+                            Tip: Sin categorías seleccionadas se elegirá una al azar
+                        </p>
+                    )}
+
                     <Button
                         fullWidth
-                        className="mt-4 h-20 text-2xl animate-pulse-gold shadow-primary/20"
+                        className="mt-2 h-20 text-2xl animate-pulse-gold shadow-primary/20"
                         disabled={!canStart}
                         onClick={startGame}
                     >

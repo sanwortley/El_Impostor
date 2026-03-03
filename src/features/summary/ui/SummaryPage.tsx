@@ -1,7 +1,7 @@
 import React from 'react';
 import { useGameStore } from '../../game/store/gameStore';
 import { Button } from '../../../shared/ui/Button';
-import { RefreshCcw, ShieldAlert, User, Laugh, Home, Target } from 'lucide-react';
+import { RefreshCcw, ShieldAlert, User, Laugh, Home, Target, Users } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const SummaryPage: React.FC = () => {
@@ -56,14 +56,25 @@ export const SummaryPage: React.FC = () => {
 
                 <div className="flex flex-col gap-3 mt-4">
                     {canRestart && (
-                        <Button fullWidth onClick={startGame} className="h-20 text-xl bg-amber-500 hover:bg-amber-400 text-black font-black italic tracking-tighter shadow-lg shadow-amber-500/20">
-                            <Laugh size={24} />
-                            NUEVA PARTIDA
-                        </Button>
+                        <>
+                            <Button fullWidth onClick={startGame} className="h-20 text-xl bg-amber-500 hover:bg-amber-400 text-black font-black italic tracking-tighter shadow-lg shadow-amber-500/20">
+                                <RefreshCcw size={24} />
+                                NUEVA MISIÓN
+                            </Button>
+                            <Button
+                                fullWidth
+                                variant="secondary"
+                                onClick={() => useGameStore.getState().socket?.emit('next_phase', { code: useGameStore.getState().roomCode, phase: 'lobby' })}
+                                className="h-14 text-xs font-black uppercase tracking-widest border-amber-500/20 text-amber-500/60"
+                            >
+                                <Users size={18} />
+                                VOLVER AL LOBBY
+                            </Button>
+                        </>
                     )}
-                    <Button fullWidth variant="secondary" onClick={() => setPhase('mode_select')} className="h-14 text-xs font-black uppercase tracking-widest opacity-40 hover:opacity-100">
+                    <Button fullWidth variant="secondary" onClick={() => setPhase('mode_select')} className="h-14 text-xs font-black uppercase tracking-widest opacity-20 hover:opacity-100 mt-4">
                         <Home size={18} />
-                        VOLVER AL INICIO
+                        SALIR AL INICIO
                     </Button>
                 </div>
 
@@ -149,9 +160,27 @@ export const SummaryPage: React.FC = () => {
             )}
 
             {canRestart && (
-                <Button fullWidth onClick={startGame} className="h-20 text-xl mt-4 font-black italic shadow-lg shadow-primary/10">
-                    <RefreshCcw size={24} />
-                    NUEVA MISIÓN
+                <div className="flex flex-col gap-3 mt-4">
+                    <Button fullWidth onClick={startGame} className="h-20 text-xl font-black italic shadow-lg shadow-primary/10">
+                        <RefreshCcw size={24} />
+                        NUEVA MISIÓN
+                    </Button>
+                    <Button
+                        fullWidth
+                        variant="secondary"
+                        onClick={() => useGameStore.getState().socket?.emit('next_phase', { code: useGameStore.getState().roomCode, phase: 'lobby' })}
+                        className="h-14 text-xs font-black uppercase tracking-widest"
+                    >
+                        <Users size={18} />
+                        VOLVER AL LOBBY
+                    </Button>
+                </div>
+            )}
+
+            {!canRestart && (
+                <Button fullWidth variant="secondary" onClick={() => setPhase('mode_select')} className="h-14 text-xs font-black uppercase tracking-widest mt-4 opacity-40">
+                    <Home size={18} />
+                    SALIR AL INICIO
                 </Button>
             )}
 

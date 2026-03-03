@@ -46,6 +46,7 @@ interface Player {
     isEliminated?: boolean;
     relation?: string;
     word?: string;
+    isMuted?: boolean;
 }
 
 interface Room {
@@ -150,7 +151,8 @@ io.on('connection', (socket) => {
                     role: finalRole as any,
                     relation: roleData?.relation,
                     word: roleData?.word,
-                    isEliminated: false
+                    isEliminated: false,
+                    isMuted: false
                 };
             });
             room.word = word;
@@ -201,6 +203,9 @@ io.on('connection', (socket) => {
             room.phase = phase;
             if (phase === 'voting') {
                 room.votes = {};
+            }
+            if (phase === 'summary' || phase === 'setup') {
+                room.players.forEach(p => p.isMuted = false);
             }
             if (phase === 'playing') {
                 // Pick a new random starter player when entering playing phase from reveal
@@ -277,6 +282,9 @@ io.on('connection', (socket) => {
             const eliminatedPlayer = room.players.find(p => p.id === eliminatedId);
             if (eliminatedPlayer) {
                 eliminatedPlayer.isEliminated = true;
+                if (room.settings.voiceChat) {
+                    eliminatedPlayer.isMuted = true;
+                }
                 room.lastVoteResults.eliminatedPlayerName = eliminatedPlayer.name;
                 room.lastVoteResults.isImpostor = eliminatedPlayer.role === 'impostor';
 
@@ -286,9 +294,11 @@ io.on('connection', (socket) => {
                 if (impostorsAlive.length === 0) {
                     room.winner = 'normals';
                     room.phase = 'summary';
+                    room.players.forEach(p => p.isMuted = false);
                 } else if (impostorsAlive.length >= normalsAlive.length) {
                     room.winner = 'impostors';
                     room.phase = 'summary';
+                    room.players.forEach(p => p.isMuted = false);
                 } else {
                     room.phase = 'playing';
                     // Pick a new random starter player for the next round
@@ -312,6 +322,20 @@ io.on('connection', (socket) => {
         }
         io.to(room.code).emit('room_updated', formatRoom(room));
     }
+
+    socket.on('signal', (data) => {
+        const { to, from, signal } = data;
+        const result = findRoomBySocketId(socket.id);
+        if (result) {
+            const targetPlayer = result.room.players.find(p => p.id === to);
+            if (targetPlayer) {
+                io.to(targetPlayer.socketId).emit('signal', {
+                    from,
+                    signal
+                });
+            }
+        }
+    });
 
     socket.on('disconnect', () => {
         const result = findRoomBySocketId(socket.id);
