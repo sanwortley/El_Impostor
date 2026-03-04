@@ -12,12 +12,9 @@ export const WalkieTalkie: React.FC = () => {
     const [isPressing, setIsPressing] = useState(false);
     const isPressingRef = useRef(false);
 
-    if (!settings.voiceChat) return null;
-
     const startTalking = () => {
         if (isPressingRef.current) return;
 
-        // Resume AudioContext on first touch for mobile security
         const AudioCtx = (window as any).AudioContext || (window as any).webkitAudioContext;
         if (AudioCtx) {
             const tempCtx = new AudioCtx();
@@ -28,7 +25,6 @@ export const WalkieTalkie: React.FC = () => {
         setIsPressing(true);
         setMuted(false);
         if (navigator.vibrate) navigator.vibrate(40);
-        console.log("[Walkie] Transmitting...");
     };
 
     const stopTalking = () => {
@@ -38,11 +34,10 @@ export const WalkieTalkie: React.FC = () => {
         setIsPressing(false);
         setMuted(true);
         if (navigator.vibrate) navigator.vibrate(10);
-        console.log("[Walkie] Transmission Ended.");
     };
 
-    // GLOBAL SAFETY: If the finger leaves the screen ANYWHERE, we must mute.
-    // This fixes the "sticky mic" issue on mobile.
+    // GLOBAL SAFETY: Register hooks ALWAYS (even if settings.voiceChat is false) 
+    // to avoid React Hook Mismatch errors.
     useEffect(() => {
         const handleGlobalUp = () => {
             if (isPressingRef.current) {
@@ -52,7 +47,7 @@ export const WalkieTalkie: React.FC = () => {
 
         window.addEventListener('pointerup', handleGlobalUp);
         window.addEventListener('pointercancel', handleGlobalUp);
-        window.addEventListener('blur', handleGlobalUp); // Mute if user switches apps
+        window.addEventListener('blur', handleGlobalUp);
 
         return () => {
             window.removeEventListener('pointerup', handleGlobalUp);
@@ -60,6 +55,9 @@ export const WalkieTalkie: React.FC = () => {
             window.removeEventListener('blur', handleGlobalUp);
         };
     }, []);
+
+    // Return null at the END of hook declarations
+    if (!settings.voiceChat) return null;
 
     return (
         <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[60] flex flex-col items-center gap-4">
@@ -83,7 +81,6 @@ export const WalkieTalkie: React.FC = () => {
                     e.preventDefault();
                     startTalking();
                 }}
-                // We use global listeners for "Up", but local is for immediate feedback
                 onPointerUp={stopTalking}
                 onContextMenu={(e) => e.preventDefault()}
                 whileTap={{ scale: 0.9, y: 5 }}
