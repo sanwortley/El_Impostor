@@ -45,10 +45,17 @@ export const WalkieTalkie: React.FC = () => {
                 onPointerDown={handleStartTalking}
                 onPointerUp={handleStopTalking}
                 onPointerLeave={handleStopTalking}
+                onContextMenu={(e) => e.preventDefault()}
                 whileTap={{ scale: 0.9, y: 5 }}
+                style={{
+                    WebkitTouchCallout: 'none',
+                    WebkitUserSelect: 'none',
+                    userSelect: 'none',
+                    touchAction: 'none'
+                }}
                 className={`
                     relative w-24 h-24 rounded-full flex items-center justify-center
-                    transition-all duration-300
+                    transition-all duration-300 select-none
                     ${isPressing
                         ? 'bg-primary text-black shadow-[0_0_50px_rgba(255,215,0,0.5)]'
                         : 'bg-white/5 text-white/40 border-2 border-white/10 shadow-xl'
