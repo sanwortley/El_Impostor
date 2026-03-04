@@ -263,19 +263,38 @@ export const useVoiceChat = () => {
         return () => { socket.off('signal', handleSignal); };
     }, [socket, settings.voiceChat, localPlayer?.id]);
 
-    // 5. Lifecycle Manager (Immediate Connection)
+    // 5. Track Injector (Crucial for Host or late mic permission)
     useEffect(() => {
-        // We don't wait for localStream anymore. 
-        // We want to hear others even if we don't have a mic yet.
+        if (!localStream) return;
+
+        console.log(`[Voice Scale] Mic active, checking ${Object.keys(peers.current).length} existing peers for tracks...`);
+
+        Object.keys(peers.current).forEach(targetId => {
+            const peer = peers.current[targetId];
+            if (peer) {
+                const senders = peer.getSenders();
+                // If this peer has no audio tracks being sent, add them now
+                if (senders.length === 0 || !senders.some(s => s.track?.kind === 'audio')) {
+                    console.log(`[Voice Scale] Injecting late tracks to player ${targetId}`);
+                    localStream.getTracks().forEach(track => {
+                        peer.addTrack(track, localStream);
+                    });
+                }
+            }
+        });
+    }, [localStream]);
+
+    // 6. Lifecycle Manager (Immediate Connection)
+    useEffect(() => {
         if (!settings.voiceChat || !localPlayer) return;
 
-        console.log(`[Voice Scale] Checking mesh for ${players.length} players...`);
-
-        // Populate queue for new players
+        // Populate queue for new players (ensure IDs are strings for consistent comparison)
+        const myId = String(localPlayer.id);
         players.forEach(p => {
-            if (p.id !== localPlayer.id && !peers.current[p.id]) {
-                if (!connectionQueue.current.includes(p.id)) {
-                    connectionQueue.current.push(p.id);
+            const pid = String(p.id);
+            if (pid !== myId && !peers.current[pid]) {
+                if (!connectionQueue.current.includes(pid)) {
+                    connectionQueue.current.push(pid);
                 }
             }
         });
@@ -284,7 +303,7 @@ export const useVoiceChat = () => {
 
         // Cleanup disconnected players
         Object.keys(peers.current).forEach(id => {
-            if (!players.some(p => p.id === id)) {
+            if (!players.some(p => String(p.id) === id)) {
                 console.log(`[Voice Scale] Player ${id} left, closing connection.`);
                 if (peers.current[id]) {
                     peers.current[id].close();
