@@ -141,20 +141,26 @@ export const useVoiceChat = () => {
     };
 
     const createPeer = (targetId: string) => {
-        if (peers.current[targetId]) return peers.current[targetId];
+        const id = String(targetId);
+        if (peers.current[id]) return peers.current[id];
 
-        console.log(`[Voice Scale] Creating connection for player ${targetId}`);
+        console.log(`[Voice Scale] Mesh: Creating peer for ${id}`);
         const peer = new RTCPeerConnection({
             iceServers: [
-                { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:stun1.l.google.com:19302' }
+                { urls: 'stun:stun1.l.google.com:19302' },
+                { urls: 'stun:stun2.l.google.com:19302' },
+                { urls: 'stun:stun3.l.google.com:19302' },
+                { urls: 'stun:stun4.l.google.com:19302' },
+                { urls: 'stun:stun.l.google.com:19302' }
             ]
         });
 
-        peers.current[targetId] = peer;
-        candidateQueue.current[targetId] = [];
+        peers.current[id] = peer;
+        candidateQueue.current[id] = [];
 
+        // Add tracks if ready
         if (localStreamRef.current) {
+            console.log(`[Voice Scale] Adding tracks to peer ${id}`);
             localStreamRef.current.getTracks().forEach(track => {
                 peer.addTrack(track, localStreamRef.current!);
             });
@@ -162,41 +168,41 @@ export const useVoiceChat = () => {
 
         peer.onnegotiationneeded = async () => {
             try {
-                makingOffer.current[targetId] = true;
+                makingOffer.current[id] = true;
                 await peer.setLocalDescription();
 
-                // Quality optimization for the offer
                 if (peer.localDescription) {
                     const optimizedOffer = {
                         type: peer.localDescription.type,
                         sdp: setAudioQuality(peer.localDescription.sdp)
                     };
-                    socket?.emit('signal', { to: targetId, from: localPlayer?.id, signal: optimizedOffer });
+                    socket?.emit('signal', { to: id, from: String(localPlayer?.id), signal: optimizedOffer });
                 }
             } catch (err) {
-                console.error(`[Voice Scale] Negotiation Error:`, err);
+                console.error(`[Voice Scale] Negotiation Error with ${id}:`, err);
             } finally {
-                makingOffer.current[targetId] = false;
+                makingOffer.current[id] = false;
             }
         };
 
         peer.onicecandidate = ({ candidate }) => {
             if (candidate && socket && localPlayer) {
-                socket.emit('signal', { to: targetId, from: localPlayer.id, signal: { type: 'candidate', candidate } });
+                socket.emit('signal', { to: id, from: String(localPlayer.id), signal: { type: 'candidate', candidate } });
             }
         };
 
         peer.ontrack = ({ streams: [remoteStream] }) => {
-            if (audioElements.current[targetId]) {
-                audioElements.current[targetId].pause();
-                audioElements.current[targetId].remove();
+            console.log(`[Voice Scale] Received audio track from ${id}`);
+            if (audioElements.current[id]) {
+                audioElements.current[id].pause();
+                audioElements.current[id].remove();
             }
             const audio = document.createElement('audio');
             audio.srcObject = remoteStream;
             audio.autoplay = true;
-            audioElements.current[targetId] = audio;
+            audioElements.current[id] = audio;
             document.getElementById('voice-chat-audio-container')?.appendChild(audio);
-            setupAnalyzer(remoteStream, String(targetId));
+            setupAnalyzer(remoteStream, id);
         };
 
         return peer;
