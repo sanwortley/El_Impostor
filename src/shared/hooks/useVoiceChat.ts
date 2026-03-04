@@ -3,7 +3,7 @@ import { useGameStore } from '../../features/game/store/gameStore';
 
 /**
  * Hook to manage High-Scale multi-party voice chat (up to 30 players).
- * Features an Aggressive Self-Healing Mesh that recreates dead connections automatically.
+ * Reinforced with Audio Graph processing for 2x Volume Boost and Auto-Recovery.
  */
 export const useVoiceChat = () => {
     const { socket, players, localPlayer, settings } = useGameStore();
@@ -13,18 +13,23 @@ export const useVoiceChat = () => {
     const localStreamRef = useRef<MediaStream | null>(null);
     const [speakingPlayers, setSpeakingPlayers] = useState<Record<string, boolean>>({});
     const audioContextRef = useRef<AudioContext | null>(null);
-    const analyzerNodes = useRef<Record<string, { analyzer: AnalyserNode, dataArray: any }>>({});
+
+    // Advanced Audio Graph tracking
+    const audioNodes = useRef<Record<string, {
+        analyzer: AnalyserNode,
+        dataArray: Uint8Array,
+        source: MediaStreamAudioSourceNode,
+        gain: GainNode
+    }>>({});
+
     const animationFrameId = useRef<number | null>(null);
-
-    console.log("[Voice Debug] Hook Initialized");
-
     const makingOffer = useRef<Record<string, boolean>>({});
     const ignoreOffer = useRef<Record<string, boolean>>({});
     const candidateQueue = useRef<Record<string, RTCIceCandidateInit[]>>({});
     const connectionQueue = useRef<string[]>([]);
     const isProcessingQueue = useRef(false);
 
-    // 1. Efficient Audio Level Detection
+    // 1. Efficient Audio Level Detection & Volume Management
     const checkVoiceActivity = () => {
         if (!audioContextRef.current) {
             animationFrameId.current = requestAnimationFrame(checkVoiceActivity);
@@ -35,18 +40,15 @@ export const useVoiceChat = () => {
         }
 
         const newSpeakingPlayers: Record<string, boolean> = {};
-        const threshold = 5;
+        const threshold = 10; // Slightly higher threshold for better accuracy
 
-        Object.entries(analyzerNodes.current).forEach(([playerId, { analyzer, dataArray }]) => {
+        Object.entries(audioNodes.current).forEach(([playerId, { analyzer, dataArray }]) => {
             analyzer.getByteFrequencyData(dataArray);
-            let hasVoice = false;
+            let volume = 0;
             for (let i = 0; i < dataArray.length; i++) {
-                if (dataArray[i] > threshold) {
-                    hasVoice = true;
-                    break;
-                }
+                if (dataArray[i] > volume) volume = dataArray[i];
             }
-            newSpeakingPlayers[playerId] = hasVoice;
+            newSpeakingPlayers[playerId] = volume > threshold;
         });
 
         setSpeakingPlayers(prev => {
@@ -69,19 +71,37 @@ export const useVoiceChat = () => {
         };
     }, []);
 
-    const setupAnalyzer = (stream: MediaStream, playerId: string) => {
+    const setupAudioGraph = (stream: MediaStream, playerId: string) => {
         try {
             if (!audioContextRef.current) {
                 audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
             }
-            const source = audioContextRef.current.createMediaStreamSource(stream);
-            const analyzer = audioContextRef.current.createAnalyser();
+            const context = audioContextRef.current;
+
+            // Cleanup old nodes for this player if they exist
+            if (audioNodes.current[playerId]) {
+                audioNodes.current[playerId].source.disconnect();
+                audioNodes.current[playerId].gain.disconnect();
+            }
+
+            const source = context.createMediaStreamSource(stream);
+            const analyzer = context.createAnalyser();
+            const gainNode = context.createGain();
+
             analyzer.fftSize = 64;
-            source.connect(analyzer);
+            // VOLUME BOOST: 250% by default to ensure loud voices
+            gainNode.gain.value = 2.5;
+
+            // Connect: Source -> Gain -> Analyzer -> Destination (Speakers)
+            source.connect(gainNode);
+            gainNode.connect(analyzer);
+            gainNode.connect(context.destination);
+
             const dataArray = new Uint8Array(analyzer.frequencyBinCount);
-            analyzerNodes.current[String(playerId)] = { analyzer, dataArray };
+            audioNodes.current[String(playerId)] = { analyzer, dataArray, source, gain: gainNode };
+            console.log(`[Voice Debug] Audio Graph linked for ${playerId} at 2.5x volume`);
         } catch (e) {
-            console.error("[Voice] Analyzer error:", e);
+            console.error("[Voice] Audio Graph error:", e);
         }
     };
 
@@ -91,17 +111,34 @@ export const useVoiceChat = () => {
             const initMic = async () => {
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({
-                        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+                        audio: {
+                            echoCancellation: true,
+                            noiseSuppression: true,
+                            autoGainControl: true,
+                            channelCount: 1 // Mono for better stability
+                        },
                         video: false
                     });
-                    console.log("[Voice Debug] Microphone stream acquired successfully");
+                    console.log("[Voice Debug] Mic ready");
                     localStreamRef.current = stream;
                     setLocalStream(stream);
                     if (localPlayer.isMuted) stream.getAudioTracks().forEach(t => t.enabled = false);
-                    setupAnalyzer(stream, String(localPlayer.id));
+
+                    // Also setup local analyzer (but don't connect to destination to avoid echo)
+                    if (!audioContextRef.current) audioContextRef.current = new AudioContext();
+                    const source = audioContextRef.current.createMediaStreamSource(stream);
+                    const analyzer = audioContextRef.current.createAnalyser();
+                    analyzer.fftSize = 64;
+                    source.connect(analyzer);
+                    audioNodes.current[String(localPlayer.id)] = {
+                        analyzer,
+                        dataArray: new Uint8Array(analyzer.frequencyBinCount),
+                        source,
+                        gain: audioContextRef.current.createGain() // Dummy gain
+                    };
                 } catch (err) {
-                    console.error("[Voice Debug] CRITICAL: Microphone failure:", err);
-                    alert("ERROR DE MICROFONO: No se pudo acceder al audio. Asegurate de dar permisos en el navegador.");
+                    console.error("[Voice Debug] Mic failure:", err);
+                    alert("ERROR DE MICROFONO: Verificá los permisos en el navegador.");
                 }
             };
             initMic();
@@ -112,7 +149,8 @@ export const useVoiceChat = () => {
                 localStreamRef.current = null;
             }
             setLocalStream(null);
-            delete analyzerNodes.current[localPlayer?.id ? String(localPlayer.id) : ''];
+            Object.values(audioNodes.current).forEach(n => n.source.disconnect());
+            audioNodes.current = {};
         };
     }, [settings.voiceChat, localPlayer?.id]);
 
@@ -122,11 +160,11 @@ export const useVoiceChat = () => {
         }
     }, [localPlayer?.isMuted, localStream]);
 
-    // 3. Perfect Negotiation SDP Helper
-    const setAudioConstraints = (sdp: string) => {
+    // 3. Connection Helpers
+    const setAudioQuality = (sdp: string) => {
         return sdp.split('\r\n').map(line => {
             if (line.startsWith('a=fmtp:') && (line.includes('111') || line.includes('opus'))) {
-                return `${line.split(';')[0]};maxaveragebitrate=48000;useinbandfec=1`;
+                return `${line.split(';')[0]};maxaveragebitrate=48000;useinbandfec=1;stereo=0;sprop-stereo=0`;
             }
             return line;
         }).join('\r\n');
@@ -141,14 +179,14 @@ export const useVoiceChat = () => {
             iceServers: [
                 { urls: 'stun:stun1.l.google.com:19302' },
                 { urls: 'stun:stun2.l.google.com:19302' },
-                { urls: 'stun:stun.l.google.com:19302' }
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun.cloudflare.com:3478' }
             ]
         });
 
         peers.current[id] = peer;
         candidateQueue.current[id] = [];
 
-        // Add local tracks if available
         if (localStreamRef.current) {
             localStreamRef.current.getAudioTracks().forEach(track => {
                 peer.addTrack(track, localStreamRef.current!);
@@ -162,12 +200,12 @@ export const useVoiceChat = () => {
                 if (peer.localDescription) {
                     const signal = {
                         type: peer.localDescription.type,
-                        sdp: setAudioConstraints(peer.localDescription.sdp)
+                        sdp: setAudioQuality(peer.localDescription.sdp)
                     };
                     socket?.emit('signal', { to: id, from: String(localPlayer?.id), signal });
                 }
             } catch (err) {
-                console.error(`[Voice Scale] Offer error for ${id}:`, err);
+                console.error(`[Voice Scale] Negotiation failed for ${id}:`, err);
             } finally {
                 makingOffer.current[id] = false;
             }
@@ -180,26 +218,25 @@ export const useVoiceChat = () => {
         };
 
         peer.oniceconnectionstatechange = () => {
-            if (['failed', 'disconnected', 'closed'].includes(peer.iceConnectionState)) {
-                console.log(`[Voice Scale] Connection with ${id} lost. Cleaning up.`);
+            if (['failed', 'disconnected'].includes(peer.iceConnectionState)) {
+                console.log(`[Voice Scale] Link with ${id} unstable. Restarting.`);
                 cleanupPeer(id);
             }
         };
 
         peer.ontrack = ({ streams: [remoteStream] }) => {
-            console.log(`[Voice Scale] Audio track received from ${id}`);
-            if (audioElements.current[id]) {
-                audioElements.current[id].remove();
-            }
+            console.log(`[Voice Scale] Stream from ${id} attached.`);
+            // Silent audio tag to satisfy browser tracking
+            if (audioElements.current[id]) audioElements.current[id].remove();
             const audio = document.createElement('audio');
             audio.srcObject = remoteStream;
-            audio.autoplay = true;
-            (audio as any).playsInline = true;
+            audio.muted = true; // We use AudioContext for playback instead!
+            audio.play().catch(() => { });
             audioElements.current[id] = audio;
             document.getElementById('voice-chat-audio-container')?.appendChild(audio);
 
-            audio.play().catch(() => console.warn(`[Voice] Play blocked for ${id}`));
-            setupAnalyzer(remoteStream, id);
+            // PRO QUALITY PLAYBACK via Web Audio API
+            setupAudioGraph(remoteStream, id);
         };
 
         return peer;
@@ -214,7 +251,11 @@ export const useVoiceChat = () => {
             audioElements.current[id].remove();
             delete audioElements.current[id];
         }
-        delete analyzerNodes.current[id];
+        if (audioNodes.current[id]) {
+            audioNodes.current[id].source.disconnect();
+            audioNodes.current[id].gain.disconnect();
+            delete audioNodes.current[id];
+        }
         delete candidateQueue.current[id];
         delete makingOffer.current[id];
         delete ignoreOffer.current[id];
@@ -248,7 +289,7 @@ export const useVoiceChat = () => {
                         await peer.setLocalDescription();
                         const answer = {
                             type: peer.localDescription!.type,
-                            sdp: setAudioConstraints(peer.localDescription!.sdp)
+                            sdp: setAudioQuality(peer.localDescription!.sdp)
                         };
                         socket.emit('signal', { to: id, from: String(localPlayer.id), signal: answer });
                     }
@@ -267,7 +308,7 @@ export const useVoiceChat = () => {
                     }
                 }
             } catch (err) {
-                console.error(`[Voice Scale] Signaling error from ${id}:`, err);
+                console.error(`[Voice Scale] Signal error ${id}:`, err);
             }
         };
 
@@ -275,20 +316,11 @@ export const useVoiceChat = () => {
         return () => { socket.off('signal', handleSignal); };
     }, [socket, settings.voiceChat, localPlayer?.id]);
 
-    // 5. AGGRESSIVE SELF-HEALING HEARTBEAT
+    // 5. DIAGNOSTIC & SELF-HEALING ENGINE
     useEffect(() => {
-        console.log("[Voice Debug] Starting Heartbeat Effect. Voice Chat Enabled:", settings.voiceChat);
+        if (!settings.voiceChat || !localPlayer) return;
 
         const interval = setInterval(() => {
-            if (!settings.voiceChat) {
-                console.log("[Voice Debug] Heartbeat skip: settings.voiceChat is FALSE");
-                return;
-            }
-            if (!localPlayer) {
-                console.log("[Voice Debug] Heartbeat skip: localPlayer is NULL");
-                return;
-            }
-
             const statusSummary: Record<string, any> = {};
 
             players.forEach(p => {
@@ -296,59 +328,54 @@ export const useVoiceChat = () => {
                 if (pid === String(localPlayer.id)) return;
 
                 const peer = peers.current[pid];
+                const isSpeaking = speakingPlayers[pid];
+
                 if (peer) {
-                    const hasAudio = peer.getReceivers().some(r => r.track?.kind === 'audio' && r.track.readyState === 'live');
-                    const iceState = peer.iceConnectionState;
-                    const sigState = peer.signalingState;
+                    const receivers = peer.getReceivers();
+                    const hasAudio = receivers.some(r => r.track?.kind === 'audio' && r.track.readyState === 'live');
+                    const ice = peer.iceConnectionState;
 
                     statusSummary[p.name || pid] = {
-                        "Escuchando": hasAudio ? "✅ SI" : "❌ NO",
-                        "Señal": iceState,
-                        "Signaling": sigState
+                        "Conexión": ice === 'connected' ? "✅" : "⚠️ " + ice,
+                        "Audio": hasAudio ? "✅" : "❌",
+                        "Hablando": isSpeaking ? "🎤 SI" : "🔇 NO"
                     };
 
-                    if (!hasAudio && iceState === 'connected') {
+                    // GHOST RECOVERY: Connected but silent for too long
+                    if (hasAudio && ice === 'connected' && !isSpeaking && Math.random() < 0.3) {
+                        console.log(`[Voice Scale] Silent link with ${p.name}. Poking track...`);
                         peer.onnegotiationneeded?.(new Event('negotiationneeded'));
                     }
 
-                    if (sigState !== 'stable' && !makingOffer.current[pid]) {
+                    // STUCK RECOVERY
+                    if (peer.signalingState !== 'stable' && !makingOffer.current[pid] && Math.random() < 0.1) {
                         cleanupPeer(pid);
                     }
                 } else {
-                    statusSummary[p.name || pid] = { "Escuchando": "❌ SIN CONEXION", "Señal": "none", "Signaling": "none" };
+                    statusSummary[p.name || pid] = { "Conexión": "❌", "Audio": "❌", "Hablando": "🔇" };
                 }
             });
 
-            console.log("--- [ESTADO DE LA RED DE VOZ] ---");
-            console.table(statusSummary);
-            // Expose for mobile debugging
             (window as any).voiceStatus = statusSummary;
-        }, 5000);
+        }, 4000);
 
         return () => clearInterval(interval);
-    }, [players, localStream, settings.voiceChat, localPlayer?.id]);
+    }, [players, localStream, settings.voiceChat, localPlayer?.id, speakingPlayers]);
 
     // 6. Mesh Lifecycle Sweep
     useEffect(() => {
         if (!settings.voiceChat || !localPlayer) return;
 
         const myId = String(localPlayer.id);
-
-        // Ensure every player in the room has a peer object or is in the queue
         players.forEach(p => {
             const pid = String(p.id);
-            if (pid !== myId && !peers.current[pid]) {
-                if (!connectionQueue.current.includes(pid)) {
-                    connectionQueue.current.push(pid);
-                }
+            if (pid !== myId && !peers.current[pid] && !connectionQueue.current.includes(pid)) {
+                connectionQueue.current.push(pid);
             }
         });
 
-        // Cleanup people who left
         Object.keys(peers.current).forEach(id => {
-            if (!players.some(p => String(p.id) === id)) {
-                cleanupPeer(id);
-            }
+            if (!players.some(p => String(p.id) === id)) cleanupPeer(id);
         });
 
         const processQueue = async () => {
@@ -356,10 +383,10 @@ export const useVoiceChat = () => {
             isProcessingQueue.current = true;
             try {
                 while (connectionQueue.current.length > 0) {
-                    const targetId = connectionQueue.current.shift();
-                    if (targetId && !peers.current[targetId]) {
-                        createPeer(targetId);
-                        await new Promise(r => setTimeout(r, 400));
+                    const tid = connectionQueue.current.shift();
+                    if (tid && !peers.current[tid]) {
+                        createPeer(tid);
+                        await new Promise(r => setTimeout(r, 600)); // More stagger for scale
                     }
                 }
             } finally {
