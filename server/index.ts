@@ -243,6 +243,17 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('update_player_status', ({ code, playerId, isMuted }) => {
+        const room = rooms.get(code);
+        if (room) {
+            const player = room.players.find(p => p.id === playerId);
+            if (player) {
+                player.isMuted = isMuted;
+                io.to(code).emit('room_updated', formatRoom(room));
+            }
+        }
+    });
+
     socket.on('kick_player', ({ code, playerId }) => {
         const room = rooms.get(code);
         if (room) {
