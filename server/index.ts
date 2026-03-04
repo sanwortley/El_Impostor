@@ -113,12 +113,16 @@ io.on('connection', (socket) => {
 
             const existingIndex = room.players.findIndex(p => p.id === player.id);
             if (existingIndex !== -1) {
-                // Reconnecting existing player
+                // Reconnecting existing player - ALWAYS ALLOWED
                 room.players[existingIndex].socketId = socket.id;
                 room.players[existingIndex].name = player.name;
             } else {
-                // New player joining
-                const newPlayer = { ...player, socketId: socket.id, isHost: false };
+                // New player joining - Check if game is in progress
+                if (room.phase !== 'lobby') {
+                    socket.emit('error', 'PARTIDA_EN_CURSO');
+                    return;
+                }
+                const newPlayer = { ...player, socketId: socket.id, isHost: false, isMuted: true };
                 room.players.push(newPlayer);
             }
             socket.join(code);

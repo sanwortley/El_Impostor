@@ -21,6 +21,15 @@ export const useVoiceChat = () => {
         gain: GainNode
     }>>({});
 
+    // Recovery Function exposed to Window
+    useEffect(() => {
+        (window as any).resetVoice = () => {
+            console.log("[Voice Debug] MANUAL RESET TRIGGERED");
+            Object.keys(peers.current).forEach(id => cleanupPeer(id));
+            if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+        };
+    }, []);
+
     const animationFrameId = useRef<number | null>(null);
     const makingOffer = useRef<Record<string, boolean>>({});
     const ignoreOffer = useRef<Record<string, boolean>>({});
