@@ -430,7 +430,8 @@ io.on('connection', (socket) => {
     });
 });
 
-app.get('/:path*', (_req, res) => {
+// Catch-all: serve index.html for any request that hasn't been handled (e.g. for SPA routing)
+app.use((_req, res) => {
     res.sendFile(path.join(distPath, 'index.html'));
 });
 
