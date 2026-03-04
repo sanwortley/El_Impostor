@@ -167,7 +167,7 @@ io.on('connection', (socket) => {
                     relation: roleData?.relation,
                     word: roleData?.word,
                     isEliminated: false,
-                    isMuted: false
+                    isMuted: true // ALWAYS start muted for Walkie-Talkie
                 };
             });
             room.word = word;
@@ -221,9 +221,6 @@ io.on('connection', (socket) => {
             room.phase = phase;
             if (phase === 'voting') {
                 room.votes = {};
-            }
-            if (phase === 'summary' || phase === 'setup') {
-                room.players.forEach(p => p.isMuted = false);
             }
             if (phase === 'playing') {
                 // Pick a new random starter player when entering playing phase from reveal
@@ -331,19 +328,16 @@ io.on('connection', (socket) => {
                 room.lastVoteResults.isImpostor = eliminatedPlayer.role === 'impostor';
 
                 const impostorsAlive = room.players.filter(p => p.role === 'impostor' && !p.isEliminated);
-                const normalsAlive = room.players.filter(p => p.role === 'normal' && !p.isEliminated);
+                const normalsAlive = room.players.filter(p => (p.role === 'normal' || p.role === 'prankster') && !p.isEliminated);
 
                 if (impostorsAlive.length === 0) {
                     room.winner = 'normals';
                     room.phase = 'summary';
-                    room.players.forEach(p => p.isMuted = false);
                 } else if (impostorsAlive.length >= normalsAlive.length) {
                     room.winner = 'impostors';
                     room.phase = 'summary';
-                    room.players.forEach(p => p.isMuted = false);
                 } else {
                     room.phase = 'playing';
-                    // Pick a new random starter player for the next round
                     const alivePlayers = room.players.filter(p => !p.isEliminated);
                     if (alivePlayers.length > 0) {
                         const randomIndex = Math.floor(Math.random() * alivePlayers.length);
@@ -354,7 +348,6 @@ io.on('connection', (socket) => {
             }
         } else {
             room.phase = 'playing';
-            // Pick a new random starter player for the next round
             const alivePlayers = room.players.filter(p => !p.isEliminated);
             if (alivePlayers.length > 0) {
                 const randomIndex = Math.floor(Math.random() * alivePlayers.length);
@@ -420,7 +413,7 @@ io.on('connection', (socket) => {
     });
 });
 
-app.get('/{*path}', (_req, res) => {
+app.get('/*', (_req, res) => {
     res.sendFile(path.join(distPath, 'index.html'));
 });
 

@@ -216,7 +216,7 @@ const App: React.FC = () => {
             </AnimatePresence>
 
             {/* PERSISTENT WALKIE TALKIE (Only in active game phases) */}
-            {(phase === 'setup' || phase === 'playing' || phase === 'voting' || phase === 'reveal') && (
+            {(phase === 'setup' || phase === 'playing' || phase === 'voting' || phase === 'reveal' || phase === 'summary') && (
                 <WalkieTalkie />
             )}
         </div>
