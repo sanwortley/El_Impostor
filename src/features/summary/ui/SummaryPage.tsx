@@ -7,16 +7,18 @@ import { motion } from 'framer-motion';
 export const SummaryPage: React.FC = () => {
     const { players, settings, startGame, gameMode, winner, setPhase, localPlayer } = useGameStore();
 
-    // Freeze the secret word when the summary mounts to avoid flashing the NEW word 
-    // when startGame is clicked (since the secret word updates immediately in the store)
+    // Freeze the data when the summary mounts to avoid flashing the NEW roles/word 
+    // when startGame is clicked (since data updates immediately in the store)
     const displayedSecretWord = React.useMemo(() => settings.secretWord, []);
     const displayedCategoryName = React.useMemo(() => settings.chosenCategory?.name, []);
+    const displayedPlayers = React.useMemo(() => players, []);
+    const displayedIsChaos = React.useMemo(() => settings.isTotalChaos, []);
 
     const isOnline = gameMode === 'online';
     const canRestart = !isOnline || localPlayer?.isHost === true;
 
     // Prank round: triggered automatically when any player has role 'victim'
-    const isPrankRound = players.some(p => p.role === 'victim');
+    const isPrankRound = displayedPlayers.some(p => p.role === 'victim');
 
     // Winner Color Logic
     const isNormalWin = winner === 'normals';
@@ -26,7 +28,7 @@ export const SummaryPage: React.FC = () => {
 
     // Prank mode summary
     if (isPrankRound) {
-        const victim = players.find(p => p.role === 'victim');
+        const victim = displayedPlayers.find(p => p.role === 'victim');
         return (
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -100,12 +102,12 @@ export const SummaryPage: React.FC = () => {
                     </motion.div>
                 )}
                 <h1 className="text-4xl sm:text-6xl font-black text-white italic uppercase tracking-tighter italic">
-                    {settings.isTotalChaos ? '¡MODO TOTAL CHAOS!' : 'RESULTADOS'}
+                    {displayedIsChaos ? '¡MODO TOTAL CHAOS!' : 'RESULTADOS'}
                 </h1>
             </header>
 
             <div className="grid grid-cols-1 gap-3">
-                {players.map((player) => (
+                {displayedPlayers.map((player) => (
                     <motion.div
                         key={player.id}
                         initial={{ opacity: 0, x: -10 }}
@@ -123,18 +125,18 @@ export const SummaryPage: React.FC = () => {
                             <div className="flex flex-col">
                                 <span className={`text-xl font-black italic uppercase tracking-tight ${player.role === 'impostor' ? 'text-red-400' : 'text-white/90'}`}>{player.name}</span>
                                 <span className="text-[9px] font-black uppercase tracking-widest text-white/20">
-                                    {settings.isTotalChaos ? 'SUJETO BAJO CAOS' : (player.role === 'impostor' ? 'AGENTE INFILTRADO' : 'PERSONAL CIVIL')}
+                                    {displayedIsChaos ? 'SUJETO BAJO CAOS' : (player.role === 'impostor' ? 'AGENTE INFILTRADO' : 'PERSONAL CIVIL')}
                                 </span>
                             </div>
                         </div>
 
-                        {settings.isTotalChaos && player.word && (
+                        {displayedIsChaos && player.word && (
                             <div className="bg-primary/10 border border-primary/20 text-primary text-[10px] font-black px-3 py-1.5 rounded-xl uppercase tracking-tighter italic">
                                 {player.word}
                             </div>
                         )}
 
-                        {player.role === 'impostor' && !settings.isTotalChaos && (
+                        {player.role === 'impostor' && !displayedIsChaos && (
                             <div className="bg-red-500 text-white text-[9px] font-black px-3 py-1.5 rounded-xl uppercase tracking-widest italic animate-pulse">
                                 IMPOSTOR
                             </div>
@@ -146,7 +148,7 @@ export const SummaryPage: React.FC = () => {
                 ))}
             </div>
 
-            {!settings.isTotalChaos && (
+            {!displayedIsChaos && (
                 <div className="p-8 rounded-[2rem] glass text-center relative overflow-hidden border-primary/20">
                     <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
                         <Target size={120} className="text-primary" />

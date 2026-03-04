@@ -316,10 +316,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
         const items = randomCategory.items;
         const randomWord = items[Math.floor(Math.random() * items.length)];
 
-        // Modes: Normal, Prank (10%), or Total Chaos (10%)
+        // Modes: Normal, Prank (5%), or Total Chaos (5%)
         const randomValue = Math.random();
-        const triggerPrank = randomValue < 0.10;
-        const triggerTotalChaos = !triggerPrank && randomValue < 0.20;
+        const triggerPrank = randomValue < 0.05;
+        const triggerTotalChaos = !triggerPrank && randomValue < 0.10;
 
         let playersWithRoles = triggerPrank
             ? assignVictim(players)

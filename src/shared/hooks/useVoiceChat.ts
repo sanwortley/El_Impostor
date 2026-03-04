@@ -111,39 +111,66 @@ export const useVoiceChat = () => {
         }
     };
 
-    // 2. Microphone Management with Global Signaling Poke
+    // 2. Microphone Management with Global Signaling Poke & Health Check
     useEffect(() => {
-        if (settings.voiceChat && localPlayer) {
-            const initMic = async () => {
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({
-                        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-                        video: false
-                    });
-                    localStreamRef.current = stream;
-                    setLocalStream(stream);
-                    if (localPlayer.isMuted) stream.getAudioTracks().forEach(t => t.enabled = false);
+        let healthCheckInterval: any;
+        const initMic = async () => {
+            if (!settings.voiceChat || !localPlayer) return;
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true,
+                        channelCount: 1
+                    },
+                    video: false
+                });
 
-                    // Poke all peers to update negotiation with new tracks
-                    Object.keys(peers.current).forEach(id => {
-                        const peer = peers.current[id];
-                        if (peer) {
-                            stream.getAudioTracks().forEach(track => {
-                                // Only add if not already present
-                                if (!peer.getSenders().some(s => s.track === track)) {
-                                    peer.addTrack(track, stream);
-                                }
-                            });
-                        }
-                    });
-                } catch (err) {
-                    console.error("[Voice] Mic fail:", err);
-                    alert("MICROFONO BLOQUEADO: Dale permisos al navegador para que te escuchen.");
+                console.log("[Voice Debug] Mic initialized successfully");
+                localStreamRef.current = stream;
+                setLocalStream(stream);
+
+                // Setup analyzer for the local user so the UI sees them speaking
+                if (!audioContextRef.current) {
+                    audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
                 }
-            };
+                setupAudioGraph(stream, String(localPlayer.id));
+
+                if (localPlayer.isMuted) stream.getAudioTracks().forEach(t => t.enabled = false);
+
+                // Poke active peers to insert tracks
+                Object.keys(peers.current).forEach(id => {
+                    const peer = peers.current[id];
+                    if (peer) {
+                        stream.getAudioTracks().forEach(track => {
+                            const senders = peer.getSenders();
+                            if (!senders.some(s => s.track?.id === track.id)) {
+                                peer.addTrack(track, stream);
+                            }
+                        });
+                    }
+                });
+            } catch (err) {
+                console.error("[Voice] Mic fail:", err);
+            }
+        };
+
+        if (settings.voiceChat && localPlayer) {
             initMic();
+
+            // Health Check: If the track stops or dies, restart it
+            healthCheckInterval = setInterval(() => {
+                const track = localStreamRef.current?.getAudioTracks()[0];
+                if (track && track.readyState === 'ended') {
+                    console.warn("[Voice] Mic track ended. Restarting...");
+                    initMic();
+                }
+            }, 5000);
         }
+
         return () => {
+            clearInterval(healthCheckInterval);
             if (localStreamRef.current) {
                 localStreamRef.current.getTracks().forEach(t => t.stop());
                 localStreamRef.current = null;
@@ -219,8 +246,6 @@ export const useVoiceChat = () => {
         peer.ontrack = ({ streams: [remoteStream] }) => {
             if (audioElements.current[id]) audioElements.current[id].remove();
 
-            // MOBILE COMPATIBLE PLAYBACK: 
-            // We keep it visible/audible but very quiet to help AudioContext
             const audio = document.createElement('audio');
             audio.srcObject = remoteStream;
             audio.volume = 0.01;
@@ -306,7 +331,7 @@ export const useVoiceChat = () => {
         return () => { socket.off('signal', handleSignal); };
     }, [socket, settings.voiceChat, localPlayer?.id]);
 
-    // 5. HEARTBEAT & SELF-HEALING (The "Male / Santiago" Connectivity Boost)
+    // 5. HEARTBEAT & SELF-HEALING
     useEffect(() => {
         if (!settings.voiceChat || !localPlayer) return;
 
