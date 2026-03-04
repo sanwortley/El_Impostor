@@ -55,60 +55,74 @@ export const PlayersEditor: React.FC = () => {
 
             <div className="grid grid-cols-1 gap-2 mt-2">
                 <AnimatePresence mode="popLayout">
-                    {players.map((player) => (
-                        <motion.div
-                            key={player.id}
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: 20 }}
-                            className={`flex items-center justify-between p-4 rounded-xl border transition-all ${!player.isOnline && gameMode === 'online' ? 'opacity-50 grayscale' : ''
-                                } ${gameMode === 'online' && player.id === localPlayer?.id
-                                    ? 'bg-primary/10 border-primary/20'
-                                    : 'bg-white/5 border-white/5'
-                                }`}
-                        >
-                            <div className="flex items-center gap-3">
-                                <div className="flex flex-col">
-                                    <div className="flex items-center gap-2">
-                                        <span className={`font-bold ${gameMode === 'online' && player.id === localPlayer?.id ? 'text-primary' : 'text-white'}`}>
-                                            {player.name}
-                                        </span>
-                                        {gameMode === 'online' && player.isHost && (
-                                            <Crown size={14} className="text-yellow-500 fill-yellow-500" />
-                                        )}
-                                        {!player.isOnline && gameMode === 'online' && (
-                                            <div className="flex items-center gap-1 text-[8px] bg-red-500/20 text-red-500 px-2 py-0.5 rounded-full font-black uppercase tracking-widest">
-                                                <WifiOff size={8} />
-                                                Offline
-                                            </div>
+                    {players.map((player) => {
+                        const isOfflineHost = player.isHost && !player.isOnline;
+                        const canClaim = isOfflineHost && player.id !== localPlayer?.id;
+
+                        return (
+                            <motion.div
+                                key={player.id}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: 20 }}
+                                className={`flex items-center justify-between p-4 rounded-xl border transition-all ${!player.isOnline && gameMode === 'online' ? 'opacity-50 grayscale' : ''
+                                    } ${gameMode === 'online' && player.id === localPlayer?.id
+                                        ? 'bg-primary/10 border-primary/20'
+                                        : 'bg-white/5 border-white/5'
+                                    }`}
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className="flex flex-col">
+                                        <div className="flex items-center gap-2">
+                                            <span className={`font-bold ${gameMode === 'online' && player.id === localPlayer?.id ? 'text-primary' : 'text-white'}`}>
+                                                {player.name}
+                                            </span>
+                                            {gameMode === 'online' && player.isHost && (
+                                                <Crown size={14} className="text-yellow-500 fill-yellow-500" />
+                                            )}
+                                            {!player.isOnline && gameMode === 'online' && (
+                                                <div className="flex items-center gap-1 text-[8px] bg-red-500/20 text-red-500 px-2 py-0.5 rounded-full font-black uppercase tracking-widest">
+                                                    <WifiOff size={8} />
+                                                    Offline
+                                                </div>
+                                            )}
+                                        </div>
+                                        {gameMode === 'online' && player.id === localPlayer?.id && (
+                                            <span className="text-[9px] text-primary/60 font-black uppercase tracking-widest">Tú</span>
                                         )}
                                     </div>
-                                    {gameMode === 'online' && player.id === localPlayer?.id && (
-                                        <span className="text-[9px] text-primary/60 font-black uppercase tracking-widest">Tú</span>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                    {canClaim && (
+                                        <button
+                                            onClick={() => socket?.emit('claim_host', { code: roomCode })}
+                                            className="flex items-center gap-1 bg-yellow-500 text-black px-2 py-1 rounded-lg font-black text-[10px] uppercase animate-bounce shadow-[0_0_15px_rgba(234,179,8,0.4)]"
+                                        >
+                                            <Crown size={12} />
+                                            Reclamar
+                                        </button>
+                                    )}
+                                    {isHost && player.id !== localPlayer?.id && (
+                                        <button
+                                            onClick={() => handleKick(player.id)}
+                                            className="text-white/10 hover:text-red-500 transition-colors p-2 rounded-lg hover:bg-red-500/10"
+                                            title="Eliminar jugador"
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
+                                    )}
+                                    {gameMode === 'online' && player.isHost && player.id === localPlayer?.id && (
+                                        <Shield size={16} className="text-white/20" />
                                     )}
                                 </div>
-                            </div>
-
-                            <div className="flex items-center gap-2">
-                                {isHost && player.id !== localPlayer?.id && (
-                                    <button
-                                        onClick={() => handleKick(player.id)}
-                                        className="text-white/10 hover:text-red-500 transition-colors p-2 rounded-lg hover:bg-red-500/10"
-                                        title="Eliminar jugador"
-                                    >
-                                        <Trash2 size={16} />
-                                    </button>
-                                )}
-                                {gameMode === 'online' && player.isHost && player.id === localPlayer?.id && (
-                                    <Shield size={16} className="text-white/20" />
-                                )}
-                            </div>
-                        </motion.div>
-                    ))}
+                            </motion.div>
+                        );
+                    })}
                 </AnimatePresence>
             </div>
 
-            {(gameMode === 'local' ? players.length < 3 : players.length < 3) && (
+            {players.length < 3 && (
                 <p className="text-[10px] text-red-400/60 font-black uppercase tracking-widest text-center mt-2">
                     Mínimo 3 agentes para iniciar misión
                 </p>

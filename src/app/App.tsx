@@ -32,6 +32,25 @@ const App: React.FC = () => {
         }
     }, [settings.oledMode]);
 
+    // Force Sync on visibility change (re-tabbing)
+    React.useEffect(() => {
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                const { socket, roomCode, localPlayer } = useGameStore.getState();
+                if (socket && roomCode && localPlayer) {
+                    console.log("[Sync] Tab became visible, forcing room sync...");
+                    socket.emit('join_room', {
+                        code: roomCode,
+                        player: { ...localPlayer, socketId: socket.id }
+                    });
+                }
+            }
+        };
+
+        window.addEventListener('visibilitychange', handleVisibilityChange);
+        return () => window.removeEventListener('visibilitychange', handleVisibilityChange);
+    }, []);
+
     const showBack = phase !== 'mode_select';
 
     const handleBack = () => {

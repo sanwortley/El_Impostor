@@ -267,6 +267,23 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('claim_host', ({ code }) => {
+        const room = rooms.get(code);
+        if (room) {
+            const currentHost = room.players.find(p => p.isHost);
+            const hostIsOffline = currentHost && disconnectTimers.has(currentHost.id);
+
+            if (hostIsOffline || !currentHost) {
+                const idx = room.players.findIndex(p => p.socketId === socket.id);
+                if (idx !== -1) {
+                    room.players.forEach(p => p.isHost = false);
+                    room.players[idx].isHost = true;
+                    io.to(code).emit('room_updated', formatRoom(room));
+                }
+            }
+        }
+    });
+
     socket.on('cast_vote', ({ code, targetId, voterId }) => {
         const room = rooms.get(code);
         if (room) {
@@ -407,7 +424,7 @@ io.on('connection', (socket) => {
                         }
                     }
                 }
-            }, 60000); // 60s grace period is enough for a refresh
+            }, 12000); // 12 seconds
             disconnectTimers.set(player.id, timer);
         }
     });
