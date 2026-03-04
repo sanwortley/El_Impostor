@@ -57,9 +57,6 @@ export const useVoiceChat = () => {
                 }
             }
             newSpeakingPlayers[playerId] = hasVoice;
-            if (hasVoice) {
-                console.log(`Voice detected for ${playerId}`);
-            }
         });
 
         setSpeakingPlayers(prev => {
@@ -86,24 +83,23 @@ export const useVoiceChat = () => {
             }
 
             const context = audioContextRef.current;
-
             const source = context.createMediaStreamSource(stream);
             const analyzer = context.createAnalyser();
             analyzer.fftSize = 256;
             source.connect(analyzer);
             const dataArray = new Uint8Array(analyzer.frequencyBinCount) as any;
             analyzerNodes.current[playerId] = { analyzer, dataArray };
-            console.log(`Audio analyzer set up for ${playerId}`);
         } catch (e) {
-            console.error("Error setting up audio analyzer:", e);
+            console.error("[Voice] Error setupAnalyzer:", e);
         }
     };
 
-    // 1. Initialize/Cleanup Microphone
+    // 1. Initialize Microphone
     useEffect(() => {
         if (settings.voiceChat && localPlayer) {
             const initMic = async () => {
                 try {
+                    console.log("[Voice] Initializing microphone...");
                     const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
                     localStreamRef.current = stream;
                     setLocalStream(stream);
@@ -112,13 +108,11 @@ export const useVoiceChat = () => {
                         stream.getAudioTracks().forEach(track => track.enabled = false);
                     }
 
-                    // Setup analyzer for local player
                     setupAnalyzer(stream, localPlayer.id);
                 } catch (err) {
-                    console.error("No se pudo acceder al micrófono:", err);
+                    console.error("[Voice] Microphone access error:", err);
                 }
             };
-
             initMic();
         }
 
@@ -132,7 +126,7 @@ export const useVoiceChat = () => {
         };
     }, [settings.voiceChat, localPlayer?.id]);
 
-    // 2. Handle Local Mute (Dead players can't speak)
+    // 2. Handle Local Mute
     useEffect(() => {
         if (localStream && localPlayer) {
             localStream.getAudioTracks().forEach(track => {
@@ -141,7 +135,7 @@ export const useVoiceChat = () => {
         }
     }, [localPlayer?.isMuted, localStream]);
 
-    // 3. Audio Element Container
+    // 3. Persistent Audio Container
     useEffect(() => {
         let container = document.getElementById('voice-chat-audio-container');
         if (!container) {
@@ -150,68 +144,20 @@ export const useVoiceChat = () => {
             container.style.display = 'none';
             document.body.appendChild(container);
         }
-        return () => {
-            // Cleanup on unmount if needed, but usually better to keep it if app stays alive
-        };
     }, []);
 
-    // 4. Signaling Listener (Stable)
-    useEffect(() => {
-        if (!socket || !settings.voiceChat || !localPlayer) return;
-
-        const handleSignal = async ({ from, signal }: any) => {
-            let peer = peers.current[from];
-
-            // If we don't have a peer yet, we create one as receiver
-            if (!peer) {
-                console.log(`Signal received from unknown peer ${from}, creating receiver peer.`);
-                peer = createPeer(from, false);
-            }
-
-            if (!peer) return;
-
-            try {
-                if (signal.type === 'offer') {
-                    await peer.setRemoteDescription(new RTCSessionDescription(signal));
-                    const answer = await peer.createAnswer();
-                    await peer.setLocalDescription(answer);
-                    socket.emit('signal', {
-                        to: from,
-                        from: localPlayer.id,
-                        signal: answer
-                    });
-                } else if (signal.type === 'answer') {
-                    if (peer.signalingState === 'have-local-offer') {
-                        await peer.setRemoteDescription(new RTCSessionDescription(signal));
-                    }
-                } else if (signal.type === 'candidate') {
-                    if (signal.candidate) {
-                        await peer.addIceCandidate(new RTCIceCandidate(signal.candidate));
-                    }
-                }
-            } catch (e) {
-                console.error(`Error handling signal from ${from}:`, e);
-            }
-        };
-
-        socket.on('signal', handleSignal);
-        return () => {
-            socket.off('signal', handleSignal);
-        };
-    }, [socket, settings.voiceChat, localPlayer?.id]); // Only depends on socket and identity
-
-    // 5. Mesh Management (Incremental)
+    // 4. Mesh Connection Logic
     const createPeer = (targetId: string, initiator: boolean) => {
         if (peers.current[targetId]) return peers.current[targetId];
 
-        console.log(`[WebRTC] Creating peer for ${targetId} (initiator: ${initiator})`);
+        console.log(`[Voice] Creating peer for ${targetId} (initiator: ${initiator})`);
         const peer = new RTCPeerConnection({
             iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
         });
 
         peers.current[targetId] = peer;
 
-        // Add local tracks from the current local stream
+        // Add local tracks if ready
         if (localStreamRef.current) {
             localStreamRef.current.getTracks().forEach(track => {
                 peer.addTrack(track, localStreamRef.current!);
@@ -220,9 +166,8 @@ export const useVoiceChat = () => {
 
         peer.ontrack = (event) => {
             const remoteStream = event.streams[0];
-            console.log(`[WebRTC] Received remote stream from ${targetId}`);
+            console.log(`[Voice] Received track from ${targetId}`);
 
-            // Cleanup old audio element for this player
             if (audioElements.current[targetId]) {
                 audioElements.current[targetId].pause();
                 audioElements.current[targetId].remove();
@@ -234,11 +179,10 @@ export const useVoiceChat = () => {
             audio.id = `audio-${targetId}`;
             audioElements.current[targetId] = audio;
 
-            // Attach to DOM to ensure persistence in some browsers
             const container = document.getElementById('voice-chat-audio-container');
             if (container) container.appendChild(audio);
 
-            audio.play().catch(e => console.warn(`[WebRTC] Audio play failed for ${targetId}:`, e));
+            audio.play().catch(e => console.warn(`[Voice] Audio play error for ${targetId}:`, e));
             setupAnalyzer(remoteStream, targetId);
         };
 
@@ -262,16 +206,73 @@ export const useVoiceChat = () => {
                         signal: peer.localDescription
                     });
                 })
-                .catch(err => console.error(`[WebRTC] Offer error for ${targetId}:`, err));
+                .catch(err => console.error(`[Voice] Offer error for ${targetId}:`, err));
         }
 
         return peer;
     };
 
+    // 5. Signaling Listener
+    useEffect(() => {
+        if (!socket || !settings.voiceChat || !localPlayer) return;
+
+        const handleSignal = async ({ from, signal }: any) => {
+            let peer = peers.current[from];
+            if (!peer) {
+                peer = createPeer(from, false);
+            }
+            if (!peer) return;
+
+            try {
+                if (signal.type === 'offer') {
+                    // CRITICAL FIX: If we take an offer but don't have our mic ready yet, 
+                    // we might answer without tracks. Let's wait up to 5 seconds.
+                    let waitAttempts = 0;
+                    while (!localStreamRef.current && waitAttempts < 10) {
+                        console.log(`[Voice] Waiting for mic before answering offer from ${from}...`);
+                        await new Promise(r => setTimeout(r, 500));
+                        waitAttempts++;
+                    }
+
+                    // Re-add tracks if they just became available
+                    if (localStreamRef.current && peer.getSenders().length === 0) {
+                        localStreamRef.current.getTracks().forEach(track => {
+                            peer.addTrack(track, localStreamRef.current!);
+                        });
+                    }
+
+                    await peer.setRemoteDescription(new RTCSessionDescription(signal));
+                    const answer = await peer.createAnswer();
+                    await peer.setLocalDescription(answer);
+                    socket.emit('signal', {
+                        to: from,
+                        from: localPlayer.id,
+                        signal: answer
+                    });
+                } else if (signal.type === 'answer') {
+                    if (peer.signalingState === 'have-local-offer') {
+                        await peer.setRemoteDescription(new RTCSessionDescription(signal));
+                    }
+                } else if (signal.type === 'candidate') {
+                    if (signal.candidate) {
+                        try {
+                            await peer.addIceCandidate(new RTCIceCandidate(signal.candidate));
+                        } catch (e) { /* Ignore closed connections */ }
+                    }
+                }
+            } catch (e) {
+                console.error(`[Voice] Signaling error from ${from}:`, e);
+            }
+        };
+
+        socket.on('signal', handleSignal);
+        return () => { socket.off('signal', handleSignal); };
+    }, [socket, settings.voiceChat, localPlayer?.id]);
+
+    // 6. Incremental Peer Management
     useEffect(() => {
         if (!settings.voiceChat || !localStream || !localPlayer) return;
 
-        // Add peers for new players
         players.forEach(p => {
             if (p.id !== localPlayer.id && !peers.current[p.id]) {
                 const shouldInitiate = localPlayer.id > p.id;
@@ -279,42 +280,52 @@ export const useVoiceChat = () => {
             }
         });
 
-        // Cleanup peers for disconnected players
+        // Cleanup
         Object.keys(peers.current).forEach(id => {
-            if (!players.find(p => p.id === id)) {
-                console.log(`[WebRTC] Cleaning up player ${id}`);
-                const peer = peers.current[id];
-                if (peer) peer.close();
+            if (!players.some(p => p.id === id)) {
+                console.log(`[Voice] Cleaning up peer ${id}`);
+                peers.current[id]?.close();
                 delete peers.current[id];
-
                 const audio = audioElements.current[id];
-                if (audio) {
-                    audio.pause();
-                    audio.remove();
-                    delete audioElements.current[id];
-                }
-
+                if (audio) { audio.pause(); audio.remove(); delete audioElements.current[id]; }
                 delete analyzerNodes.current[id];
             }
         });
     }, [players, settings.voiceChat, localStream, localPlayer?.id]);
 
-    // Full Cleanup when disabled
+    // 7. Late Track Update
     useEffect(() => {
-        if (!settings.voiceChat) {
-            Object.values(peers.current).forEach(p => p.close());
-            Object.values(audioElements.current).forEach(a => {
-                a.pause();
-                a.remove();
-            });
-            peers.current = {};
-            audioElements.current = {};
-            analyzerNodes.current = {};
-            setSpeakingPlayers({});
+        if (!localStream) return;
+        Object.keys(peers.current).forEach(targetId => {
+            const peer = peers.current[targetId];
+            if (peer && peer.getSenders().length === 0) {
+                console.log(`[Voice] Adding late tracks to peer ${targetId}`);
+                localStream.getTracks().forEach(track => peer.addTrack(track, localStream));
+                peer.createOffer()
+                    .then(offer => peer.setLocalDescription(offer))
+                    .then(() => {
+                        socket?.emit('signal', {
+                            to: targetId,
+                            from: localPlayer?.id,
+                            signal: peer.localDescription
+                        });
+                    }).catch(() => { });
+            }
+        });
+    }, [localStream, socket, localPlayer?.id]);
 
-            const container = document.getElementById('voice-chat-audio-container');
-            if (container) container.innerHTML = '';
-        }
+    // 8. Global Cleanup
+    useEffect(() => {
+        return () => {
+            if (!settings.voiceChat) {
+                Object.values(peers.current).forEach(p => p.close());
+                Object.values(audioElements.current).forEach(a => { a.pause(); a.remove(); });
+                peers.current = {};
+                audioElements.current = {};
+                analyzerNodes.current = {};
+                setSpeakingPlayers({});
+            }
+        };
     }, [settings.voiceChat]);
 
     return { localStream, speakingPlayers };
