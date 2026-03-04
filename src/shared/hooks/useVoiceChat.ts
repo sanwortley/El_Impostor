@@ -32,7 +32,7 @@ export const useVoiceChat = () => {
         if (audioContextRef.current.state === 'suspended') audioContextRef.current.resume();
 
         const newSpeakingPlayers: Record<string, boolean> = {};
-        const threshold = 10; // Slightly higher for many players to avoid noise
+        const threshold = 5; // Reduced for better sensitivity
 
         Object.entries(analyzerNodes.current).forEach(([playerId, { analyzer, dataArray }]) => {
             analyzer.getByteFrequencyData(dataArray);
@@ -67,7 +67,7 @@ export const useVoiceChat = () => {
             const context = audioContextRef.current;
             const source = context.createMediaStreamSource(stream);
             const analyzer = context.createAnalyser();
-            analyzer.fftSize = 32; // Very small for 30-player scale
+            analyzer.fftSize = 64; // Slightly bigger for better detection
             source.connect(analyzer);
             const dataArray = new Uint8Array(analyzer.frequencyBinCount) as any;
             analyzerNodes.current[playerId] = { analyzer, dataArray };
@@ -83,14 +83,15 @@ export const useVoiceChat = () => {
                         audio: {
                             echoCancellation: true,
                             noiseSuppression: true,
-                            autoGainControl: true
+                            autoGainControl: true,
+                            channelCount: 1 // Mono is more stable for voice mesh
                         },
                         video: false
                     });
                     localStreamRef.current = stream;
                     setLocalStream(stream);
                     if (localPlayer.isMuted) stream.getAudioTracks().forEach(t => t.enabled = false);
-                    setupAnalyzer(stream, localPlayer.id);
+                    setupAnalyzer(stream, String(localPlayer.id));
                 } catch (err) { console.error("[Voice] Mic access error:", err); }
             };
             initMic();
@@ -101,7 +102,7 @@ export const useVoiceChat = () => {
                 localStreamRef.current = null;
             }
             setLocalStream(null);
-            delete analyzerNodes.current[localPlayer?.id || ''];
+            delete analyzerNodes.current[localPlayer?.id ? String(localPlayer.id) : ''];
         };
     }, [settings.voiceChat, localPlayer?.id]);
 
@@ -120,19 +121,19 @@ export const useVoiceChat = () => {
             const targetId = connectionQueue.current.shift();
             if (targetId && !peers.current[targetId]) {
                 createPeer(targetId);
-                // Wait 250ms between connections to let the browser CPU breathe
-                await new Promise(r => setTimeout(r, 250));
+                await new Promise(r => setTimeout(r, 300));
             }
         }
         isProcessingQueue.current = false;
     };
 
-    // SDP Bitrate Optimization (crucial for 30 players)
-    const setAudioBitrate = (sdp: string, bitrate: number) => {
+    // SDP Bitrate Optimization (Increased for better quality: 64kbps)
+    const setAudioQuality = (sdp: string) => {
         const lines = sdp.split('\r\n');
         const updatedLines = lines.map(line => {
             if (line.startsWith('a=fmtp:') && (line.includes('111') || line.includes('opus'))) {
-                return `${line};maxaveragebitrate=${bitrate * 1000}`;
+                // maxaveragebitrate=64000 (quality), stereo=1 (clarity), useinbandfec=1 (packet loss protection)
+                return `${line};maxaveragebitrate=64000;stereo=1;useinbandfec=1`;
             }
             return line;
         });
@@ -164,11 +165,11 @@ export const useVoiceChat = () => {
                 makingOffer.current[targetId] = true;
                 await peer.setLocalDescription();
 
-                // Bitrate optimization for the offer
+                // Quality optimization for the offer
                 if (peer.localDescription) {
                     const optimizedOffer = {
                         type: peer.localDescription.type,
-                        sdp: setAudioBitrate(peer.localDescription.sdp, 24) // 24kbps OPUS
+                        sdp: setAudioQuality(peer.localDescription.sdp)
                     };
                     socket?.emit('signal', { to: targetId, from: localPlayer?.id, signal: optimizedOffer });
                 }
@@ -195,7 +196,7 @@ export const useVoiceChat = () => {
             audio.autoplay = true;
             audioElements.current[targetId] = audio;
             document.getElementById('voice-chat-audio-container')?.appendChild(audio);
-            setupAnalyzer(remoteStream, targetId);
+            setupAnalyzer(remoteStream, String(targetId));
         };
 
         return peer;
@@ -235,7 +236,7 @@ export const useVoiceChat = () => {
                         await peer.setLocalDescription();
                         const optimizedAnswer = {
                             type: peer.localDescription!.type,
-                            sdp: setAudioBitrate(peer.localDescription!.sdp, 24)
+                            sdp: setAudioQuality(peer.localDescription!.sdp)
                         };
                         socket.emit('signal', { to: from, from: localPlayer.id, signal: optimizedAnswer });
                     }
@@ -248,7 +249,9 @@ export const useVoiceChat = () => {
                     }
                 } else if (signal.type === 'candidate') {
                     if (peer.remoteDescription && peer.remoteDescription.type) {
-                        await peer.addIceCandidate(new RTCIceCandidate(signal.candidate));
+                        try {
+                            await peer.addIceCandidate(new RTCIceCandidate(signal.candidate));
+                        } catch (e) { }
                     } else {
                         candidateQueue.current[from].push(signal.candidate);
                     }
