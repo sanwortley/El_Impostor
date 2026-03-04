@@ -16,7 +16,7 @@ export const useVoiceChat = () => {
 
     const audioNodes = useRef<Record<string, {
         analyzer: AnalyserNode,
-        dataArray: Uint8Array,
+        dataArray: any,
         source: MediaStreamAudioSourceNode,
         gain: GainNode
     }>>({});
