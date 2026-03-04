@@ -211,8 +211,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
             get().setPhase(phase as GamePhase);
         });
 
-        // Host closed the room — reset everyone back to the start
-        socket.on('room_closed', () => {
+        // Host closed the room or you were kicked
+        socket.on('room_closed', (reason?: string) => {
+            if (reason === 'KICKED') alert("HAS SIDO ELIMINADO DE LA SALA POR EL ANFITRIÓN.");
             socket.disconnect();
             set({
                 socket: null,
@@ -307,6 +308,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     startGame: () => {
         const { socket, roomCode, players, settings, gameMode } = get();
+        if (players.length < 3) return;
 
         const sourceCategories = settings.selectedCategories.length > 0
             ? settings.selectedCategories

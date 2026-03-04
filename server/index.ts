@@ -47,6 +47,7 @@ interface Player {
     relation?: string;
     word?: string;
     isMuted?: boolean;
+    isOnline?: boolean;
 }
 
 interface Room {
@@ -73,6 +74,10 @@ const disconnectTimers = new Map<string, NodeJS.Timeout>(); // playerId -> Timeo
 function formatRoom(room: Room) {
     return {
         ...room,
+        players: room.players.map(p => ({
+            ...p,
+            isOnline: !disconnectTimers.has(p.id)
+        })),
         currentVotes: room.votes
     };
 }
@@ -113,15 +118,21 @@ io.on('connection', (socket) => {
 
             const existingIndex = room.players.findIndex(p => p.id === player.id);
             if (existingIndex !== -1) {
-                // Reconnecting existing player - ALWAYS ALLOWED
+                // Reconnecting existing player - Sync state
                 room.players[existingIndex].socketId = socket.id;
-                room.players[existingIndex].name = player.name;
+                // Keep the original role and word if game is running
             } else {
-                // New player joining - Check if game is in progress
+                // New player joining - Only allowed in lobby
                 if (room.phase !== 'lobby') {
                     socket.emit('error', 'PARTIDA_EN_CURSO');
                     return;
                 }
+
+                // Safety: Avoid duplicate names in lobby
+                if (room.players.some(p => p.name === player.name)) {
+                    player.name = `${player.name} #2`;
+                }
+
                 const newPlayer = { ...player, socketId: socket.id, isHost: false, isMuted: true };
                 room.players.push(newPlayer);
             }
@@ -187,11 +198,14 @@ io.on('connection', (socket) => {
             io.to(code).emit('room_closed');
             rooms.delete(code);
         } else {
+            // Remove the player and their votes immediately
             room.players = room.players.filter(p => p.socketId !== socket.id);
+            delete room.votes[leavingPlayer.id];
+
             if (room.players.length === 0) {
                 rooms.delete(code);
             } else {
-                // If the game is in progress but we fall below 3 players, go back to lobby
+                // End game if below 3 players
                 if (room.phase !== 'lobby' && room.players.length < 3) {
                     room.phase = 'lobby';
                 }
@@ -229,6 +243,30 @@ io.on('connection', (socket) => {
         if (room) {
             room.settings = settings;
             io.to(code).emit('room_updated', formatRoom(room));
+        }
+    });
+
+    socket.on('kick_player', ({ code, playerId }) => {
+        const room = rooms.get(code);
+        if (room) {
+            // Only host can kick
+            const sender = room.players.find(p => p.socketId === socket.id);
+            if (!sender?.isHost) return;
+
+            const idx = room.players.findIndex(p => p.id === playerId);
+            if (idx !== -1) {
+                const kickedPlayer = room.players.splice(idx, 1)[0];
+                delete room.votes[kickedPlayer.id];
+
+                // Emit kicked event to that specific user
+                io.to(kickedPlayer.socketId).emit('room_closed', 'KICKED');
+
+                // End game if below 3 players
+                if (room.phase !== 'lobby' && room.players.length < 3) {
+                    room.phase = 'lobby';
+                }
+                io.to(code).emit('room_updated', formatRoom(room));
+            }
         }
     });
 
@@ -349,6 +387,9 @@ io.on('connection', (socket) => {
                 clearTimeout(disconnectTimers.get(player.id)!);
             }
 
+            // Immediately notify others that someone is offline
+            io.to(code).emit('room_updated', formatRoom(room));
+
             const timer = setTimeout(() => {
                 disconnectTimers.delete(player.id);
                 const currentRoom = rooms.get(code);
@@ -356,13 +397,16 @@ io.on('connection', (socket) => {
                     const idx = currentRoom.players.findIndex(p => p.id === player.id);
                     if (idx !== -1) {
                         const removedPlayer = currentRoom.players.splice(idx, 1)[0];
+                        // Cleanup their vote if any
+                        delete currentRoom.votes[removedPlayer.id];
+
                         if (currentRoom.players.length === 0) {
                             rooms.delete(code);
                         } else {
                             if (removedPlayer.isHost) {
                                 currentRoom.players[0].isHost = true;
                             }
-                            // If the game is in progress but we fall below 3 players, go back to lobby
+                            // End active game if capacity drops below 3
                             if (currentRoom.phase !== 'lobby' && currentRoom.players.length < 3) {
                                 currentRoom.phase = 'lobby';
                             }
@@ -370,7 +414,7 @@ io.on('connection', (socket) => {
                         }
                     }
                 }
-            }, 120000); // 2 minute grace period
+            }, 60000); // 60s grace period is enough for a refresh
             disconnectTimers.set(player.id, timer);
         }
     });

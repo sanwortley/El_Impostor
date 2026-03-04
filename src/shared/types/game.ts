@@ -19,6 +19,7 @@ export interface Player {
     relation?: string;
     word?: string;
     isMuted?: boolean;
+    isOnline?: boolean;
 }
 
 export interface GameSettings {

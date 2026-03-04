@@ -1,19 +1,28 @@
-
 import React, { useState } from 'react';
 import { useGameStore } from '../../game/store/gameStore';
 import { Card } from '../../../shared/ui/Card';
 import { Button } from '../../../shared/ui/Button';
-import { Users, Crown, Shield, UserPlus, Trash2 } from 'lucide-react';
+import { Users, Crown, Shield, UserPlus, Trash2, WifiOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const PlayersEditor: React.FC = () => {
-    const { players, localPlayer, gameMode, addPlayer, removePlayer } = useGameStore();
+    const { players, localPlayer, gameMode, addPlayer, removePlayer, socket, roomCode } = useGameStore();
     const [newName, setNewName] = useState('');
+
+    const isHost = localPlayer?.isHost;
 
     const handleAdd = () => {
         if (newName.trim()) {
             addPlayer(newName.trim());
             setNewName('');
+        }
+    };
+
+    const handleKick = (playerId: string) => {
+        if (gameMode === 'local') {
+            removePlayer(playerId);
+        } else if (isHost && socket && roomCode) {
+            socket.emit('kick_player', { code: roomCode, playerId });
         }
     };
 
@@ -52,34 +61,46 @@ export const PlayersEditor: React.FC = () => {
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: 20 }}
-                            className={`flex items-center justify-between p-4 rounded-xl border transition-all ${gameMode === 'online' && player.socketId === localPlayer?.socketId
-                                ? 'bg-primary/10 border-primary/20'
-                                : 'bg-white/5 border-white/5'
+                            className={`flex items-center justify-between p-4 rounded-xl border transition-all ${!player.isOnline && gameMode === 'online' ? 'opacity-50 grayscale' : ''
+                                } ${gameMode === 'online' && player.id === localPlayer?.id
+                                    ? 'bg-primary/10 border-primary/20'
+                                    : 'bg-white/5 border-white/5'
                                 }`}
                         >
                             <div className="flex items-center gap-3">
-                                <span className={`font-bold ${gameMode === 'online' && player.socketId === localPlayer?.socketId ? 'text-primary' : 'text-white'}`}>
-                                    {player.name}
-                                </span>
-                                {gameMode === 'online' && player.isHost && (
-                                    <Crown size={14} className="text-yellow-500 fill-yellow-500" />
-                                )}
-                                {gameMode === 'online' && player.socketId === localPlayer?.socketId && (
-                                    <span className="text-[10px] bg-primary/20 text-primary px-2 py-0.5 rounded-full font-bold uppercase">Tú</span>
-                                )}
+                                <div className="flex flex-col">
+                                    <div className="flex items-center gap-2">
+                                        <span className={`font-bold ${gameMode === 'online' && player.id === localPlayer?.id ? 'text-primary' : 'text-white'}`}>
+                                            {player.name}
+                                        </span>
+                                        {gameMode === 'online' && player.isHost && (
+                                            <Crown size={14} className="text-yellow-500 fill-yellow-500" />
+                                        )}
+                                        {!player.isOnline && gameMode === 'online' && (
+                                            <div className="flex items-center gap-1 text-[8px] bg-red-500/20 text-red-500 px-2 py-0.5 rounded-full font-black uppercase tracking-widest">
+                                                <WifiOff size={8} />
+                                                Offline
+                                            </div>
+                                        )}
+                                    </div>
+                                    {gameMode === 'online' && player.id === localPlayer?.id && (
+                                        <span className="text-[9px] text-primary/60 font-black uppercase tracking-widest">Tú</span>
+                                    )}
+                                </div>
                             </div>
 
                             <div className="flex items-center gap-2">
-                                {gameMode === 'online' && player.isHost && (
-                                    <Shield size={16} className="text-white/20" />
-                                )}
-                                {gameMode === 'local' && (
+                                {isHost && player.id !== localPlayer?.id && (
                                     <button
-                                        onClick={() => removePlayer(player.id)}
-                                        className="text-white/20 hover:text-red-500 transition-colors p-1"
+                                        onClick={() => handleKick(player.id)}
+                                        className="text-white/10 hover:text-red-500 transition-colors p-2 rounded-lg hover:bg-red-500/10"
+                                        title="Eliminar jugador"
                                     >
                                         <Trash2 size={16} />
                                     </button>
+                                )}
+                                {gameMode === 'online' && player.isHost && player.id === localPlayer?.id && (
+                                    <Shield size={16} className="text-white/20" />
                                 )}
                             </div>
                         </motion.div>
@@ -87,8 +108,10 @@ export const PlayersEditor: React.FC = () => {
                 </AnimatePresence>
             </div>
 
-            {players.length < 2 && (
-                <p className="text-xs text-red-400 mt-2">Mínimo 2 jugadores para empezar</p>
+            {(gameMode === 'local' ? players.length < 3 : players.length < 3) && (
+                <p className="text-[10px] text-red-400/60 font-black uppercase tracking-widest text-center mt-2">
+                    Mínimo 3 agentes para iniciar misión
+                </p>
             )}
         </Card>
     );
