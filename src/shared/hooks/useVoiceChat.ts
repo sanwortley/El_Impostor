@@ -3,7 +3,7 @@ import { useGameStore } from '../../features/game/store/gameStore';
 
 /**
  * Hook to manage High-Scale multi-party voice chat (up to 30 players).
- * Uses Staggered Connections, SDP Bitrate Limiting, and Perfect Negotiation.
+ * Optimized with Perfect Negotiation (including Rollback) and late track injection.
  */
 export const useVoiceChat = () => {
     const { socket, players, localPlayer, settings } = useGameStore();
@@ -16,7 +16,7 @@ export const useVoiceChat = () => {
     const analyzerNodes = useRef<Record<string, { analyzer: AnalyserNode, dataArray: any }>>({});
     const animationFrameId = useRef<number | null>(null);
 
-    // Scaling optimizations
+    // Collision & Queue Management
     const makingOffer = useRef<Record<string, boolean>>({});
     const ignoreOffer = useRef<Record<string, boolean>>({});
     const candidateQueue = useRef<Record<string, RTCIceCandidateInit[]>>({});
@@ -32,7 +32,7 @@ export const useVoiceChat = () => {
         if (audioContextRef.current.state === 'suspended') audioContextRef.current.resume();
 
         const newSpeakingPlayers: Record<string, boolean> = {};
-        const threshold = 5; // Reduced for better sensitivity
+        const threshold = 5;
 
         Object.entries(analyzerNodes.current).forEach(([playerId, { analyzer, dataArray }]) => {
             analyzer.getByteFrequencyData(dataArray);
@@ -67,11 +67,11 @@ export const useVoiceChat = () => {
             const context = audioContextRef.current;
             const source = context.createMediaStreamSource(stream);
             const analyzer = context.createAnalyser();
-            analyzer.fftSize = 64; // Slightly bigger for better detection
+            analyzer.fftSize = 64;
             source.connect(analyzer);
             const dataArray = new Uint8Array(analyzer.frequencyBinCount) as any;
-            analyzerNodes.current[playerId] = { analyzer, dataArray };
-        } catch (e) { console.error("[Voice] Analyzer Setup Error:", e); }
+            analyzerNodes.current[String(playerId)] = { analyzer, dataArray };
+        } catch (e) { console.error("[Voice] Analyzer error:", e); }
     };
 
     // 2. Microphone Management
@@ -80,19 +80,14 @@ export const useVoiceChat = () => {
             const initMic = async () => {
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({
-                        audio: {
-                            echoCancellation: true,
-                            noiseSuppression: true,
-                            autoGainControl: true,
-                            channelCount: 1 // Mono is more stable for voice mesh
-                        },
+                        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
                         video: false
                     });
                     localStreamRef.current = stream;
                     setLocalStream(stream);
                     if (localPlayer.isMuted) stream.getAudioTracks().forEach(t => t.enabled = false);
                     setupAnalyzer(stream, String(localPlayer.id));
-                } catch (err) { console.error("[Voice] Mic access error:", err); }
+                } catch (err) { console.error("[Voice] Mic error:", err); }
             };
             initMic();
         }
@@ -112,32 +107,32 @@ export const useVoiceChat = () => {
         }
     }, [localPlayer?.isMuted, localStream]);
 
-    // 3. Staggered Mesh Connector
+    // 3. High Reliability Staggered Connector
     const processQueue = async () => {
         if (isProcessingQueue.current || connectionQueue.current.length === 0) return;
         isProcessingQueue.current = true;
-
-        while (connectionQueue.current.length > 0) {
-            const targetId = connectionQueue.current.shift();
-            if (targetId && !peers.current[targetId]) {
-                createPeer(targetId);
-                await new Promise(r => setTimeout(r, 300));
+        try {
+            while (connectionQueue.current.length > 0) {
+                const targetId = connectionQueue.current.shift();
+                if (targetId && !peers.current[targetId]) {
+                    createPeer(targetId);
+                    await new Promise(r => setTimeout(r, 300));
+                }
             }
+        } finally {
+            isProcessingQueue.current = false;
         }
-        isProcessingQueue.current = false;
     };
 
-    // SDP Bitrate Optimization (Increased for better quality: 64kbps)
+    // SDP Quality Optimization
     const setAudioQuality = (sdp: string) => {
-        const lines = sdp.split('\r\n');
-        const updatedLines = lines.map(line => {
+        return sdp.split('\r\n').map(line => {
             if (line.startsWith('a=fmtp:') && (line.includes('111') || line.includes('opus'))) {
-                // maxaveragebitrate=64000 (quality), stereo=1 (clarity), useinbandfec=1 (packet loss protection)
-                return `${line};maxaveragebitrate=64000;stereo=1;useinbandfec=1`;
+                // High Quality Voice (48kbps), FEC enabled for packet loss detection
+                return `${line.split(';')[0]};maxaveragebitrate=48000;useinbandfec=1`;
             }
             return line;
-        });
-        return updatedLines.join('\r\n');
+        }).join('\r\n');
     };
 
     const createPeer = (targetId: string) => {
@@ -149,8 +144,6 @@ export const useVoiceChat = () => {
             iceServers: [
                 { urls: 'stun:stun1.l.google.com:19302' },
                 { urls: 'stun:stun2.l.google.com:19302' },
-                { urls: 'stun:stun3.l.google.com:19302' },
-                { urls: 'stun:stun4.l.google.com:19302' },
                 { urls: 'stun:stun.l.google.com:19302' }
             ]
         });
@@ -158,9 +151,8 @@ export const useVoiceChat = () => {
         peers.current[id] = peer;
         candidateQueue.current[id] = [];
 
-        // Add tracks if ready
+        // Add tracks immediately if we have them
         if (localStreamRef.current) {
-            console.log(`[Voice Scale] Adding tracks to peer ${id}`);
             localStreamRef.current.getTracks().forEach(track => {
                 peer.addTrack(track, localStreamRef.current!);
             });
@@ -170,13 +162,12 @@ export const useVoiceChat = () => {
             try {
                 makingOffer.current[id] = true;
                 await peer.setLocalDescription();
-
                 if (peer.localDescription) {
-                    const optimizedOffer = {
+                    const signal = {
                         type: peer.localDescription.type,
                         sdp: setAudioQuality(peer.localDescription.sdp)
                     };
-                    socket?.emit('signal', { to: id, from: String(localPlayer?.id), signal: optimizedOffer });
+                    socket?.emit('signal', { to: id, from: String(localPlayer?.id), signal });
                 }
             } catch (err) {
                 console.error(`[Voice Scale] Negotiation Error with ${id}:`, err);
@@ -192,7 +183,6 @@ export const useVoiceChat = () => {
         };
 
         peer.ontrack = ({ streams: [remoteStream] }) => {
-            console.log(`[Voice Scale] Received audio track from ${id}`);
             if (audioElements.current[id]) {
                 audioElements.current[id].pause();
                 audioElements.current[id].remove();
@@ -208,93 +198,89 @@ export const useVoiceChat = () => {
         return peer;
     };
 
-    // 4. Global Signal Handler
+    // 4. Perfect Negotiation Signaling Handler
     useEffect(() => {
         if (!socket || !settings.voiceChat || !localPlayer) return;
 
         const handleSignal = async ({ from, signal }: any) => {
-            const peer = createPeer(from);
+            const id = String(from);
+            const peer = createPeer(id);
 
             try {
                 if (signal.type === 'offer' || signal.type === 'answer') {
-                    const isPolite = localPlayer.id < from;
+                    // "Polite Peer" logic using string comparison
+                    const isPolite = String(localPlayer.id).localeCompare(id) < 0;
                     const offerCollision = signal.type === 'offer' &&
-                        (makingOffer.current[from] || peer.signalingState !== 'stable');
+                        (makingOffer.current[id] || peer.signalingState !== 'stable');
 
-                    ignoreOffer.current[from] = offerCollision && !isPolite;
-                    if (ignoreOffer.current[from]) return;
+                    ignoreOffer.current[id] = offerCollision && !isPolite;
+                    if (ignoreOffer.current[id]) {
+                        console.log(`[Voice Scale] Collision: Ignoring offer from ${id}`);
+                        return;
+                    }
 
-                    if (signal.type === 'offer') {
-                        // Wait for mic if arriving too early
-                        let wait = 0;
-                        while (!localStreamRef.current && wait < 15) {
-                            await new Promise(r => setTimeout(r, 400));
-                            wait++;
-                        }
-                        if (localStreamRef.current && peer.getSenders().length === 0) {
-                            localStreamRef.current.getTracks().forEach(t => peer.addTrack(t, localStreamRef.current!));
-                        }
+                    // CRITICAL: Perfect Negotiation Rollback
+                    if (offerCollision && isPolite) {
+                        console.log(`[Voice Scale] Collision: Rolling back for ${id}`);
+                        await peer.setLocalDescription({ type: 'rollback' });
+                    }
+
+                    // Defensive check for answers: only apply if we sent an offer
+                    if (signal.type === 'answer' && peer.signalingState !== 'have-local-offer') {
+                        console.warn(`[Voice Scale] Ignoring stale answer from ${id} in state ${peer.signalingState}`);
+                        return;
                     }
 
                     await peer.setRemoteDescription(new RTCSessionDescription(signal));
 
                     if (signal.type === 'offer') {
                         await peer.setLocalDescription();
-                        const optimizedAnswer = {
+                        const answer = {
                             type: peer.localDescription!.type,
                             sdp: setAudioQuality(peer.localDescription!.sdp)
                         };
-                        socket.emit('signal', { to: from, from: localPlayer.id, signal: optimizedAnswer });
+                        socket.emit('signal', { to: id, from: String(localPlayer.id), signal: answer });
                     }
 
-                    if (candidateQueue.current[from]) {
-                        for (const cand of candidateQueue.current[from]) {
-                            await peer.addIceCandidate(new RTCIceCandidate(cand));
+                    // Apply buffered candidates
+                    if (candidateQueue.current[id]?.length > 0) {
+                        for (const cand of candidateQueue.current[id]) {
+                            try { await peer.addIceCandidate(new RTCIceCandidate(cand)); } catch (e) { }
                         }
-                        candidateQueue.current[from] = [];
+                        candidateQueue.current[id] = [];
                     }
                 } else if (signal.type === 'candidate') {
                     if (peer.remoteDescription && peer.remoteDescription.type) {
-                        try {
-                            await peer.addIceCandidate(new RTCIceCandidate(signal.candidate));
-                        } catch (e) { }
+                        try { await peer.addIceCandidate(new RTCIceCandidate(signal.candidate)); } catch (e) { }
                     } else {
-                        candidateQueue.current[from].push(signal.candidate);
+                        candidateQueue.current[id].push(signal.candidate);
                     }
                 }
-            } catch (err) { console.error(`[Voice Scale] Signaling error from ${from}:`, err); }
+            } catch (err) { console.error(`[Voice Scale] Signaling error from ${id}:`, err); }
         };
 
         socket.on('signal', handleSignal);
         return () => { socket.off('signal', handleSignal); };
     }, [socket, settings.voiceChat, localPlayer?.id]);
 
-    // 5. Track Injector (Crucial for Host or late mic permission)
+    // 5. Dynamic Track Injection (for Host/Late Mic)
     useEffect(() => {
         if (!localStream) return;
-
-        console.log(`[Voice Scale] Mic active, checking ${Object.keys(peers.current).length} existing peers for tracks...`);
-
-        Object.keys(peers.current).forEach(targetId => {
-            const peer = peers.current[targetId];
-            if (peer) {
-                const senders = peer.getSenders();
-                // If this peer has no audio tracks being sent, add them now
-                if (senders.length === 0 || !senders.some(s => s.track?.kind === 'audio')) {
-                    console.log(`[Voice Scale] Injecting late tracks to player ${targetId}`);
-                    localStream.getTracks().forEach(track => {
-                        peer.addTrack(track, localStream);
-                    });
-                }
+        Object.keys(peers.current).forEach(id => {
+            const peer = peers.current[id];
+            if (peer && peer.getSenders().length === 0) {
+                console.log(`[Voice Scale] Injecting audio tracks to existing peer ${id}`);
+                localStream.getTracks().forEach(track => {
+                    peer.addTrack(track, localStream);
+                });
             }
         });
     }, [localStream]);
 
-    // 6. Lifecycle Manager (Immediate Connection)
+    // 6. Lifecycle Manager
     useEffect(() => {
         if (!settings.voiceChat || !localPlayer) return;
 
-        // Populate queue for new players (ensure IDs are strings for consistent comparison)
         const myId = String(localPlayer.id);
         players.forEach(p => {
             const pid = String(p.id);
@@ -304,22 +290,14 @@ export const useVoiceChat = () => {
                 }
             }
         });
-
         processQueue();
 
-        // Cleanup disconnected players
         Object.keys(peers.current).forEach(id => {
             if (!players.some(p => String(p.id) === id)) {
-                console.log(`[Voice Scale] Player ${id} left, closing connection.`);
-                if (peers.current[id]) {
-                    peers.current[id].close();
-                    delete peers.current[id];
-                }
-                if (audioElements.current[id]) {
-                    audioElements.current[id].pause();
-                    audioElements.current[id].remove();
-                    delete audioElements.current[id];
-                }
+                peers.current[id].close();
+                delete peers.current[id];
+                audioElements.current[id]?.remove();
+                delete audioElements.current[id];
                 delete analyzerNodes.current[id];
                 delete makingOffer.current[id];
                 delete ignoreOffer.current[id];
@@ -330,20 +308,14 @@ export const useVoiceChat = () => {
 
     // UI Bridge
     useEffect(() => {
-        if (!document.getElementById('voice-chat-audio-container')) {
-            const div = document.createElement('div');
-            div.id = 'voice-chat-audio-container';
-            div.style.display = 'none';
-            document.body.appendChild(div);
+        let container = document.getElementById('voice-chat-audio-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'voice-chat-audio-container';
+            container.style.display = 'none';
+            document.body.appendChild(container);
         }
-        return () => {
-            if (!settings.voiceChat) {
-                Object.values(peers.current).forEach(p => p.close());
-                peers.current = {};
-                document.getElementById('voice-chat-audio-container')?.remove();
-            }
-        };
-    }, [settings.voiceChat]);
+    }, []);
 
     return { localStream, speakingPlayers };
 };
