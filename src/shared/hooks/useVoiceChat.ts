@@ -141,115 +141,181 @@ export const useVoiceChat = () => {
         }
     }, [localPlayer?.isMuted, localStream]);
 
-    // 3. Signaling Logic
+    // 3. Audio Element Container
     useEffect(() => {
-        if (!socket || !settings.voiceChat || !localStream) return;
-
-        const createPeer = (targetId: string, initiator: boolean) => {
-            const peer = new RTCPeerConnection({
-                iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
-            });
-
-            peers.current[targetId] = peer;
-
-            // Add local tracks
-            localStream.getTracks().forEach(track => peer.addTrack(track, localStream));
-
-            // Handle remote tracks
-            peer.ontrack = (event) => {
-                const remoteStream = event.streams[0];
-
-                // Remove old audio if exists
-                if (audioElements.current[targetId]) {
-                    audioElements.current[targetId].pause();
-                    audioElements.current[targetId].srcObject = null;
-                }
-
-                const audio = document.createElement('audio');
-                audio.srcObject = remoteStream;
-                audio.autoplay = true;
-                audioElements.current[targetId] = audio;
-
-                audio.play().catch(e => console.log("Audio autoplay error:", e));
-
-                // Setup analyzer for remote player
-                setupAnalyzer(remoteStream, targetId);
-            };
-
-            // Ice Candidates
-            peer.onicecandidate = (event) => {
-                if (event.candidate) {
-                    socket.emit('signal', {
-                        to: targetId,
-                        from: localPlayer?.id,
-                        signal: { type: 'candidate', candidate: event.candidate }
-                    });
-                }
-            };
-
-            if (initiator) {
-                peer.createOffer().then(offer => {
-                    peer.setLocalDescription(offer);
-                    socket.emit('signal', {
-                        to: targetId,
-                        from: localPlayer?.id,
-                        signal: offer
-                    });
-                });
-            }
-
-            return peer;
+        let container = document.getElementById('voice-chat-audio-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'voice-chat-audio-container';
+            container.style.display = 'none';
+            document.body.appendChild(container);
+        }
+        return () => {
+            // Cleanup on unmount if needed, but usually better to keep it if app stays alive
         };
+    }, []);
+
+    // 4. Signaling Listener (Stable)
+    useEffect(() => {
+        if (!socket || !settings.voiceChat || !localPlayer) return;
 
         const handleSignal = async ({ from, signal }: any) => {
             let peer = peers.current[from];
 
+            // If we don't have a peer yet, we create one as receiver
             if (!peer) {
+                console.log(`Signal received from unknown peer ${from}, creating receiver peer.`);
                 peer = createPeer(from, false);
             }
 
-            if (signal.type === 'offer') {
-                await peer.setRemoteDescription(new RTCSessionDescription(signal));
-                const answer = await peer.createAnswer();
-                await peer.setLocalDescription(answer);
-                socket.emit('signal', {
-                    to: from,
-                    from: localPlayer?.id,
-                    signal: answer
-                });
-            } else if (signal.type === 'answer') {
-                await peer.setRemoteDescription(new RTCSessionDescription(signal));
-            } else if (signal.type === 'candidate') {
-                try {
-                    await peer.addIceCandidate(new RTCIceCandidate(signal.candidate));
-                } catch (e) {
-                    console.error("Error adding ICE candidate", e);
+            if (!peer) return;
+
+            try {
+                if (signal.type === 'offer') {
+                    await peer.setRemoteDescription(new RTCSessionDescription(signal));
+                    const answer = await peer.createAnswer();
+                    await peer.setLocalDescription(answer);
+                    socket.emit('signal', {
+                        to: from,
+                        from: localPlayer.id,
+                        signal: answer
+                    });
+                } else if (signal.type === 'answer') {
+                    if (peer.signalingState === 'have-local-offer') {
+                        await peer.setRemoteDescription(new RTCSessionDescription(signal));
+                    }
+                } else if (signal.type === 'candidate') {
+                    if (signal.candidate) {
+                        await peer.addIceCandidate(new RTCIceCandidate(signal.candidate));
+                    }
                 }
+            } catch (e) {
+                console.error(`Error handling signal from ${from}:`, e);
             }
         };
 
         socket.on('signal', handleSignal);
+        return () => {
+            socket.off('signal', handleSignal);
+        };
+    }, [socket, settings.voiceChat, localPlayer?.id]); // Only depends on socket and identity
 
-        // Notify everyone we are ready to connect
-        // In WebRTC mesh, usually new joiners initiate offers to everyone else
+    // 5. Mesh Management (Incremental)
+    const createPeer = (targetId: string, initiator: boolean) => {
+        if (peers.current[targetId]) return peers.current[targetId];
+
+        console.log(`[WebRTC] Creating peer for ${targetId} (initiator: ${initiator})`);
+        const peer = new RTCPeerConnection({
+            iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+        });
+
+        peers.current[targetId] = peer;
+
+        // Add local tracks from the current local stream
+        if (localStreamRef.current) {
+            localStreamRef.current.getTracks().forEach(track => {
+                peer.addTrack(track, localStreamRef.current!);
+            });
+        }
+
+        peer.ontrack = (event) => {
+            const remoteStream = event.streams[0];
+            console.log(`[WebRTC] Received remote stream from ${targetId}`);
+
+            // Cleanup old audio element for this player
+            if (audioElements.current[targetId]) {
+                audioElements.current[targetId].pause();
+                audioElements.current[targetId].remove();
+            }
+
+            const audio = document.createElement('audio');
+            audio.srcObject = remoteStream;
+            audio.autoplay = true;
+            audio.id = `audio-${targetId}`;
+            audioElements.current[targetId] = audio;
+
+            // Attach to DOM to ensure persistence in some browsers
+            const container = document.getElementById('voice-chat-audio-container');
+            if (container) container.appendChild(audio);
+
+            audio.play().catch(e => console.warn(`[WebRTC] Audio play failed for ${targetId}:`, e));
+            setupAnalyzer(remoteStream, targetId);
+        };
+
+        peer.onicecandidate = (event) => {
+            if (event.candidate && socket && localPlayer) {
+                socket.emit('signal', {
+                    to: targetId,
+                    from: localPlayer.id,
+                    signal: { type: 'candidate', candidate: event.candidate }
+                });
+            }
+        };
+
+        if (initiator) {
+            peer.createOffer()
+                .then(offer => peer.setLocalDescription(offer))
+                .then(() => {
+                    socket?.emit('signal', {
+                        to: targetId,
+                        from: localPlayer?.id,
+                        signal: peer.localDescription
+                    });
+                })
+                .catch(err => console.error(`[WebRTC] Offer error for ${targetId}:`, err));
+        }
+
+        return peer;
+    };
+
+    useEffect(() => {
+        if (!settings.voiceChat || !localStream || !localPlayer) return;
+
+        // Add peers for new players
         players.forEach(p => {
-            if (p.id !== localPlayer?.id && !peers.current[p.id]) {
-                createPeer(p.id, true);
+            if (p.id !== localPlayer.id && !peers.current[p.id]) {
+                const shouldInitiate = localPlayer.id > p.id;
+                createPeer(p.id, shouldInitiate);
             }
         });
 
-        return () => {
-            socket.off('signal', handleSignal);
+        // Cleanup peers for disconnected players
+        Object.keys(peers.current).forEach(id => {
+            if (!players.find(p => p.id === id)) {
+                console.log(`[WebRTC] Cleaning up player ${id}`);
+                const peer = peers.current[id];
+                if (peer) peer.close();
+                delete peers.current[id];
+
+                const audio = audioElements.current[id];
+                if (audio) {
+                    audio.pause();
+                    audio.remove();
+                    delete audioElements.current[id];
+                }
+
+                delete analyzerNodes.current[id];
+            }
+        });
+    }, [players, settings.voiceChat, localStream, localPlayer?.id]);
+
+    // Full Cleanup when disabled
+    useEffect(() => {
+        if (!settings.voiceChat) {
             Object.values(peers.current).forEach(p => p.close());
             Object.values(audioElements.current).forEach(a => {
                 a.pause();
-                a.srcObject = null;
+                a.remove();
             });
             peers.current = {};
             audioElements.current = {};
             analyzerNodes.current = {};
-        };
-    }, [socket, settings.voiceChat, localStream, players.length]);
+            setSpeakingPlayers({});
+
+            const container = document.getElementById('voice-chat-audio-container');
+            if (container) container.innerHTML = '';
+        }
+    }, [settings.voiceChat]);
 
     return { localStream, speakingPlayers };
 };
