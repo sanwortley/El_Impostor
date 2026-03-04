@@ -16,6 +16,8 @@ export const useVoiceChat = () => {
     const analyzerNodes = useRef<Record<string, { analyzer: AnalyserNode, dataArray: any }>>({});
     const animationFrameId = useRef<number | null>(null);
 
+    console.log("[Voice Debug] Hook Initialized");
+
     const makingOffer = useRef<Record<string, boolean>>({});
     const ignoreOffer = useRef<Record<string, boolean>>({});
     const candidateQueue = useRef<Record<string, RTCIceCandidateInit[]>>({});
@@ -92,12 +94,14 @@ export const useVoiceChat = () => {
                         audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
                         video: false
                     });
+                    console.log("[Voice Debug] Microphone stream acquired successfully");
                     localStreamRef.current = stream;
                     setLocalStream(stream);
                     if (localPlayer.isMuted) stream.getAudioTracks().forEach(t => t.enabled = false);
                     setupAnalyzer(stream, String(localPlayer.id));
                 } catch (err) {
-                    console.error("[Voice] Mic access error:", err);
+                    console.error("[Voice Debug] CRITICAL: Microphone failure:", err);
+                    alert("ERROR DE MICROFONO: No se pudo acceder al audio. Asegurate de dar permisos en el navegador.");
                 }
             };
             initMic();
@@ -273,9 +277,18 @@ export const useVoiceChat = () => {
 
     // 5. AGGRESSIVE SELF-HEALING HEARTBEAT
     useEffect(() => {
-        if (!settings.voiceChat || !localPlayer) return;
+        console.log("[Voice Debug] Starting Heartbeat Effect. Voice Chat Enabled:", settings.voiceChat);
 
         const interval = setInterval(() => {
+            if (!settings.voiceChat) {
+                console.log("[Voice Debug] Heartbeat skip: settings.voiceChat is FALSE");
+                return;
+            }
+            if (!localPlayer) {
+                console.log("[Voice Debug] Heartbeat skip: localPlayer is NULL");
+                return;
+            }
+
             const statusSummary: Record<string, any> = {};
 
             players.forEach(p => {
@@ -308,6 +321,8 @@ export const useVoiceChat = () => {
 
             console.log("--- [ESTADO DE LA RED DE VOZ] ---");
             console.table(statusSummary);
+            // Expose for mobile debugging
+            (window as any).voiceStatus = statusSummary;
         }, 5000);
 
         return () => clearInterval(interval);

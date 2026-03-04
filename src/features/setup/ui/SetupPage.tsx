@@ -25,14 +25,32 @@ export const SetupPage: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             className="flex flex-col gap-6"
         >
-            <header className="flex flex-col items-center text-center py-4">
+            <header className="flex flex-col items-center text-center py-4 relative">
                 <h1 className="text-4xl md:text-6xl font-black text-primary tracking-tighter uppercase italic">
                     El Impostor
                 </h1>
                 {roomCode && (
-                    <div className="mt-2 bg-white/5 border border-white/10 px-4 py-1 rounded-full">
-                        <span className="text-white/40 text-xs font-bold uppercase tracking-widest mr-2">SALA:</span>
-                        <span className="text-primary font-black text-lg tracking-widest">{roomCode}</span>
+                    <div className="mt-2 flex items-center gap-2">
+                        <div className="bg-white/5 border border-white/10 px-4 py-1 rounded-full">
+                            <span className="text-white/40 text-xs font-bold uppercase tracking-widest mr-2">SALA:</span>
+                            <span className="text-primary font-black text-lg tracking-widest">{roomCode}</span>
+                        </div>
+                        <button
+                            onClick={() => {
+                                const status = (window as any).voiceStatus;
+                                if (!status || Object.keys(status).length === 0) {
+                                    alert("Estado: Inicializando o sin otros jugadores...");
+                                } else {
+                                    alert("DIAGNÓSTICO DE VOZ:\n" + Object.entries(status).map(([name, data]: any) =>
+                                        `${name}: ${data.Escuchando} (Señal: ${data.Señal})`
+                                    ).join("\n"));
+                                }
+                            }}
+                            className="p-2 bg-white/5 border border-white/10 rounded-full text-white/40 active:text-primary transition-colors"
+                            title="Diagnóstico de Voz"
+                        >
+                            <Sparkles size={16} />
+                        </button>
                     </div>
                 )}
             </header>
