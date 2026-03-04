@@ -51,7 +51,8 @@ export const useVoiceChat = () => {
         const threshold = 15; // Higher threshold to avoid background noise showing as speaking
 
         Object.entries(audioNodes.current).forEach(([playerId, { analyzer, dataArray }]) => {
-            analyzer.getByteFrequencyData(dataArray);
+            // Explicit cast to 'any' to bypass Render/TS strict Buffer check
+            analyzer.getByteFrequencyData(dataArray as any);
             let volume = 0;
             for (let i = 0; i < dataArray.length; i++) {
                 if (dataArray[i] > volume) volume = dataArray[i];
