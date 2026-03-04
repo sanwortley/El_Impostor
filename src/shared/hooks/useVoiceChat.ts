@@ -129,7 +129,14 @@ export const useVoiceChat = () => {
 
     // SDP Bitrate Optimization (crucial for 30 players)
     const setAudioBitrate = (sdp: string, bitrate: number) => {
-        return sdp.replace(/a=fmtp:111 .*/, `$0;maxaveragebitrate=${bitrate * 1000}`);
+        const lines = sdp.split('\r\n');
+        const updatedLines = lines.map(line => {
+            if (line.startsWith('a=fmtp:') && (line.includes('111') || line.includes('opus'))) {
+                return `${line};maxaveragebitrate=${bitrate * 1000}`;
+            }
+            return line;
+        });
+        return updatedLines.join('\r\n');
     };
 
     const createPeer = (targetId: string) => {
