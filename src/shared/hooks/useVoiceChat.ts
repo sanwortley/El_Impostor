@@ -263,11 +263,15 @@ export const useVoiceChat = () => {
         return () => { socket.off('signal', handleSignal); };
     }, [socket, settings.voiceChat, localPlayer?.id]);
 
-    // 5. Lifecycle Manager
+    // 5. Lifecycle Manager (Immediate Connection)
     useEffect(() => {
-        if (!settings.voiceChat || !localStream || !localPlayer) return;
+        // We don't wait for localStream anymore. 
+        // We want to hear others even if we don't have a mic yet.
+        if (!settings.voiceChat || !localPlayer) return;
 
-        // Populate queue instead of connecting immediately
+        console.log(`[Voice Scale] Checking mesh for ${players.length} players...`);
+
+        // Populate queue for new players
         players.forEach(p => {
             if (p.id !== localPlayer.id && !peers.current[p.id]) {
                 if (!connectionQueue.current.includes(p.id)) {
@@ -278,17 +282,26 @@ export const useVoiceChat = () => {
 
         processQueue();
 
-        // Cleanup
+        // Cleanup disconnected players
         Object.keys(peers.current).forEach(id => {
             if (!players.some(p => p.id === id)) {
-                peers.current[id].close();
-                delete peers.current[id];
-                audioElements.current[id]?.remove();
-                delete audioElements.current[id];
+                console.log(`[Voice Scale] Player ${id} left, closing connection.`);
+                if (peers.current[id]) {
+                    peers.current[id].close();
+                    delete peers.current[id];
+                }
+                if (audioElements.current[id]) {
+                    audioElements.current[id].pause();
+                    audioElements.current[id].remove();
+                    delete audioElements.current[id];
+                }
                 delete analyzerNodes.current[id];
+                delete makingOffer.current[id];
+                delete ignoreOffer.current[id];
+                delete candidateQueue.current[id];
             }
         });
-    }, [players, settings.voiceChat, localStream, localPlayer?.id]);
+    }, [players, settings.voiceChat, localPlayer?.id]);
 
     // UI Bridge
     useEffect(() => {
