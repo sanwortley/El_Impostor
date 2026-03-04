@@ -3,7 +3,7 @@ import { useGameStore } from '../../features/game/store/gameStore';
 
 /**
  * Hook to manage High-Scale multi-party voice chat (up to 30 players).
- * Reinforced with Audio Graph processing for 2x Volume Boost and Auto-Recovery.
+ * Optimized with Forced Track Injection and Audio Context fallback for mobile.
  */
 export const useVoiceChat = () => {
     const { socket, players, localPlayer, settings } = useGameStore();
@@ -14,7 +14,6 @@ export const useVoiceChat = () => {
     const [speakingPlayers, setSpeakingPlayers] = useState<Record<string, boolean>>({});
     const audioContextRef = useRef<AudioContext | null>(null);
 
-    // Advanced Audio Graph tracking
     const audioNodes = useRef<Record<string, {
         analyzer: AnalyserNode,
         dataArray: Uint8Array,
@@ -29,7 +28,7 @@ export const useVoiceChat = () => {
     const connectionQueue = useRef<string[]>([]);
     const isProcessingQueue = useRef(false);
 
-    // 1. Efficient Audio Level Detection & Volume Management
+    // 1. Efficient Audio Level Detection
     const checkVoiceActivity = () => {
         if (!audioContextRef.current) {
             animationFrameId.current = requestAnimationFrame(checkVoiceActivity);
@@ -40,7 +39,7 @@ export const useVoiceChat = () => {
         }
 
         const newSpeakingPlayers: Record<string, boolean> = {};
-        const threshold = 10; // Slightly higher threshold for better accuracy
+        const threshold = 15; // Higher threshold to avoid background noise showing as speaking
 
         Object.entries(audioNodes.current).forEach(([playerId, { analyzer, dataArray }]) => {
             analyzer.getByteFrequencyData(dataArray);
@@ -61,7 +60,9 @@ export const useVoiceChat = () => {
 
     useEffect(() => {
         animationFrameId.current = requestAnimationFrame(checkVoiceActivity);
-        const resumeAudio = () => audioContextRef.current?.resume();
+        const resumeAudio = () => {
+            if (audioContextRef.current?.state === 'suspended') audioContextRef.current.resume();
+        };
         window.addEventListener('click', resumeAudio);
         window.addEventListener('touchstart', resumeAudio);
         return () => {
@@ -78,7 +79,6 @@ export const useVoiceChat = () => {
             }
             const context = audioContextRef.current;
 
-            // Cleanup old nodes for this player if they exist
             if (audioNodes.current[playerId]) {
                 audioNodes.current[playerId].source.disconnect();
                 audioNodes.current[playerId].gain.disconnect();
@@ -89,56 +89,47 @@ export const useVoiceChat = () => {
             const gainNode = context.createGain();
 
             analyzer.fftSize = 64;
-            // VOLUME BOOST: 250% by default to ensure loud voices
-            gainNode.gain.value = 2.5;
+            gainNode.gain.value = 2.8; // High volume boost
 
-            // Connect: Source -> Gain -> Analyzer -> Destination (Speakers)
             source.connect(gainNode);
             gainNode.connect(analyzer);
             gainNode.connect(context.destination);
 
             const dataArray = new Uint8Array(analyzer.frequencyBinCount);
             audioNodes.current[String(playerId)] = { analyzer, dataArray, source, gain: gainNode };
-            console.log(`[Voice Debug] Audio Graph linked for ${playerId} at 2.5x volume`);
         } catch (e) {
-            console.error("[Voice] Audio Graph error:", e);
+            console.error("[Voice] Audio Graph Error:", e);
         }
     };
 
-    // 2. Microphone Management
+    // 2. Microphone Management with Global Signaling Poke
     useEffect(() => {
         if (settings.voiceChat && localPlayer) {
             const initMic = async () => {
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({
-                        audio: {
-                            echoCancellation: true,
-                            noiseSuppression: true,
-                            autoGainControl: true,
-                            channelCount: 1 // Mono for better stability
-                        },
+                        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
                         video: false
                     });
-                    console.log("[Voice Debug] Mic ready");
                     localStreamRef.current = stream;
                     setLocalStream(stream);
                     if (localPlayer.isMuted) stream.getAudioTracks().forEach(t => t.enabled = false);
 
-                    // Also setup local analyzer (but don't connect to destination to avoid echo)
-                    if (!audioContextRef.current) audioContextRef.current = new AudioContext();
-                    const source = audioContextRef.current.createMediaStreamSource(stream);
-                    const analyzer = audioContextRef.current.createAnalyser();
-                    analyzer.fftSize = 64;
-                    source.connect(analyzer);
-                    audioNodes.current[String(localPlayer.id)] = {
-                        analyzer,
-                        dataArray: new Uint8Array(analyzer.frequencyBinCount),
-                        source,
-                        gain: audioContextRef.current.createGain() // Dummy gain
-                    };
+                    // Poke all peers to update negotiation with new tracks
+                    Object.keys(peers.current).forEach(id => {
+                        const peer = peers.current[id];
+                        if (peer) {
+                            stream.getAudioTracks().forEach(track => {
+                                // Only add if not already present
+                                if (!peer.getSenders().some(s => s.track === track)) {
+                                    peer.addTrack(track, stream);
+                                }
+                            });
+                        }
+                    });
                 } catch (err) {
-                    console.error("[Voice Debug] Mic failure:", err);
-                    alert("ERROR DE MICROFONO: Verificá los permisos en el navegador.");
+                    console.error("[Voice] Mic fail:", err);
+                    alert("MICROFONO BLOQUEADO: Dale permisos al navegador para que te escuchen.");
                 }
             };
             initMic();
@@ -149,8 +140,6 @@ export const useVoiceChat = () => {
                 localStreamRef.current = null;
             }
             setLocalStream(null);
-            Object.values(audioNodes.current).forEach(n => n.source.disconnect());
-            audioNodes.current = {};
         };
     }, [settings.voiceChat, localPlayer?.id]);
 
@@ -160,11 +149,11 @@ export const useVoiceChat = () => {
         }
     }, [localPlayer?.isMuted, localStream]);
 
-    // 3. Connection Helpers
+    // 3. Perfect Negotiation Helpers
     const setAudioQuality = (sdp: string) => {
         return sdp.split('\r\n').map(line => {
             if (line.startsWith('a=fmtp:') && (line.includes('111') || line.includes('opus'))) {
-                return `${line.split(';')[0]};maxaveragebitrate=48000;useinbandfec=1;stereo=0;sprop-stereo=0`;
+                return `${line.split(';')[0]};maxaveragebitrate=48000;useinbandfec=1`;
             }
             return line;
         }).join('\r\n');
@@ -174,12 +163,10 @@ export const useVoiceChat = () => {
         const id = String(targetId);
         if (peers.current[id]) return peers.current[id];
 
-        console.log(`[Voice Scale] Mesh: Initializing peer for ${id}`);
         const peer = new RTCPeerConnection({
             iceServers: [
                 { urls: 'stun:stun1.l.google.com:19302' },
                 { urls: 'stun:stun2.l.google.com:19302' },
-                { urls: 'stun:stun.l.google.com:19302' },
                 { urls: 'stun:stun.cloudflare.com:3478' }
             ]
         });
@@ -198,17 +185,14 @@ export const useVoiceChat = () => {
                 makingOffer.current[id] = true;
                 await peer.setLocalDescription();
                 if (peer.localDescription) {
-                    const signal = {
-                        type: peer.localDescription.type,
-                        sdp: setAudioQuality(peer.localDescription.sdp)
-                    };
-                    socket?.emit('signal', { to: id, from: String(localPlayer?.id), signal });
+                    socket?.emit('signal', {
+                        to: id,
+                        from: String(localPlayer?.id),
+                        signal: { type: peer.localDescription.type, sdp: setAudioQuality(peer.localDescription.sdp) }
+                    });
                 }
-            } catch (err) {
-                console.error(`[Voice Scale] Negotiation failed for ${id}:`, err);
-            } finally {
-                makingOffer.current[id] = false;
-            }
+            } catch (err) { console.error(`[Voice] Offer err:`, err); }
+            finally { makingOffer.current[id] = false; }
         };
 
         peer.onicecandidate = ({ candidate }) => {
@@ -219,23 +203,22 @@ export const useVoiceChat = () => {
 
         peer.oniceconnectionstatechange = () => {
             if (['failed', 'disconnected'].includes(peer.iceConnectionState)) {
-                console.log(`[Voice Scale] Link with ${id} unstable. Restarting.`);
                 cleanupPeer(id);
             }
         };
 
         peer.ontrack = ({ streams: [remoteStream] }) => {
-            console.log(`[Voice Scale] Stream from ${id} attached.`);
-            // Silent audio tag to satisfy browser tracking
             if (audioElements.current[id]) audioElements.current[id].remove();
+
+            // MOBILE COMPATIBLE PLAYBACK: 
+            // We keep it visible/audible but very quiet to help AudioContext
             const audio = document.createElement('audio');
             audio.srcObject = remoteStream;
-            audio.muted = true; // We use AudioContext for playback instead!
+            audio.volume = 0.01;
             audio.play().catch(() => { });
             audioElements.current[id] = audio;
             document.getElementById('voice-chat-audio-container')?.appendChild(audio);
 
-            // PRO QUALITY PLAYBACK via Web Audio API
             setupAudioGraph(remoteStream, id);
         };
 
@@ -256,9 +239,9 @@ export const useVoiceChat = () => {
             audioNodes.current[id].gain.disconnect();
             delete audioNodes.current[id];
         }
-        delete candidateQueue.current[id];
         delete makingOffer.current[id];
         delete ignoreOffer.current[id];
+        delete candidateQueue.current[id];
     };
 
     // 4. Signal Handler
@@ -287,11 +270,11 @@ export const useVoiceChat = () => {
 
                     if (signal.type === 'offer') {
                         await peer.setLocalDescription();
-                        const answer = {
-                            type: peer.localDescription!.type,
-                            sdp: setAudioQuality(peer.localDescription!.sdp)
-                        };
-                        socket.emit('signal', { to: id, from: String(localPlayer.id), signal: answer });
+                        socket.emit('signal', {
+                            to: id,
+                            from: String(localPlayer.id),
+                            signal: { type: peer.localDescription!.type, sdp: setAudioQuality(peer.localDescription!.sdp) }
+                        });
                     }
 
                     if (candidateQueue.current[id]?.length > 0) {
@@ -307,16 +290,14 @@ export const useVoiceChat = () => {
                         candidateQueue.current[id].push(signal.candidate);
                     }
                 }
-            } catch (err) {
-                console.error(`[Voice Scale] Signal error ${id}:`, err);
-            }
+            } catch (err) { console.error(`[Voice] Signal fail:`, err); }
         };
 
         socket.on('signal', handleSignal);
         return () => { socket.off('signal', handleSignal); };
     }, [socket, settings.voiceChat, localPlayer?.id]);
 
-    // 5. DIAGNOSTIC & SELF-HEALING ENGINE
+    // 5. HEARTBEAT & SELF-HEALING (The "Male / Santiago" Connectivity Boost)
     useEffect(() => {
         if (!settings.voiceChat || !localPlayer) return;
 
@@ -331,38 +312,32 @@ export const useVoiceChat = () => {
                 const isSpeaking = speakingPlayers[pid];
 
                 if (peer) {
-                    const receivers = peer.getReceivers();
-                    const hasAudio = receivers.some(r => r.track?.kind === 'audio' && r.track.readyState === 'live');
+                    const hasAudio = peer.getReceivers().some(r => r.track?.kind === 'audio' && r.track.readyState === 'live');
                     const ice = peer.iceConnectionState;
 
                     statusSummary[p.name || pid] = {
-                        "Conexión": ice === 'connected' ? "✅" : "⚠️ " + ice,
+                        "Señal": ice === 'connected' ? "✅" : "⚠️",
                         "Audio": hasAudio ? "✅" : "❌",
                         "Hablando": isSpeaking ? "🎤 SI" : "🔇 NO"
                     };
 
-                    // GHOST RECOVERY: Connected but silent for too long
-                    if (hasAudio && ice === 'connected' && !isSpeaking && Math.random() < 0.3) {
-                        console.log(`[Voice Scale] Silent link with ${p.name}. Poking track...`);
-                        peer.onnegotiationneeded?.(new Event('negotiationneeded'));
-                    }
-
-                    // STUCK RECOVERY
-                    if (peer.signalingState !== 'stable' && !makingOffer.current[pid] && Math.random() < 0.1) {
+                    // RECOVERY: If peer connected but NO tracks received, force a hard reset for that user
+                    if (ice === 'connected' && !hasAudio && Math.random() < 0.5) {
+                        console.log(`[Voice Scale] ${p.name} connected but silent. Restarting peer.`);
                         cleanupPeer(pid);
                     }
                 } else {
-                    statusSummary[p.name || pid] = { "Conexión": "❌", "Audio": "❌", "Hablando": "🔇" };
+                    statusSummary[p.name || pid] = { "Señal": "❌", "Audio": "❌", "Hablando": "🔇" };
                 }
             });
 
             (window as any).voiceStatus = statusSummary;
-        }, 4000);
+        }, 5000);
 
         return () => clearInterval(interval);
-    }, [players, localStream, settings.voiceChat, localPlayer?.id, speakingPlayers]);
+    }, [players, settings.voiceChat, localPlayer?.id, speakingPlayers]);
 
-    // 6. Mesh Lifecycle Sweep
+    // 6. Mesh Lifecycle
     useEffect(() => {
         if (!settings.voiceChat || !localPlayer) return;
 
@@ -386,7 +361,7 @@ export const useVoiceChat = () => {
                     const tid = connectionQueue.current.shift();
                     if (tid && !peers.current[tid]) {
                         createPeer(tid);
-                        await new Promise(r => setTimeout(r, 600)); // More stagger for scale
+                        await new Promise(r => setTimeout(r, 600));
                     }
                 }
             } finally {
@@ -396,16 +371,6 @@ export const useVoiceChat = () => {
 
         processQueue();
     }, [players, settings.voiceChat, localPlayer?.id, localStream]);
-
-    // UI Bridge
-    useEffect(() => {
-        if (!document.getElementById('voice-chat-audio-container')) {
-            const container = document.createElement('div');
-            container.id = 'voice-chat-audio-container';
-            container.style.display = 'none';
-            document.body.appendChild(container);
-        }
-    }, []);
 
     return { localStream, speakingPlayers };
 };
