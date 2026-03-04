@@ -31,6 +31,7 @@ interface GameStore extends GameState {
     tickTimer: () => void;
     speakingPlayers: Record<string, boolean>;
     setSpeakingPlayers: (speaking: Record<string, boolean>) => void;
+    setMuted: (isMuted: boolean) => void;
 }
 
 const DEFAULT_SETTINGS: GameSettings = {
@@ -61,6 +62,20 @@ export const useGameStore = create<GameStore>((set, get) => ({
     lastVoteResults: null,
     currentVotes: {},
     speakingPlayers: {},
+
+    setMuted: (isMuted: boolean) => {
+        const { socket, roomCode, localPlayer } = get();
+        if (localPlayer) {
+            set({ localPlayer: { ...localPlayer, isMuted } });
+            if (socket && roomCode) {
+                socket.emit('update_player_status', {
+                    code: roomCode,
+                    playerId: localPlayer.id,
+                    isMuted
+                });
+            }
+        }
+    },
 
     setSpeakingPlayers: (speaking) => set({ speakingPlayers: speaking }),
 
@@ -168,7 +183,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 playerList.find((p: any) => p.name === get().localPlayer?.name);
 
             if (updatedLocal) {
-                set({ localPlayer: updatedLocal });
+                // If the player doesn't have an isMuted state yet, default it to TRUE
+                set({
+                    localPlayer: {
+                        ...updatedLocal,
+                        isMuted: updatedLocal.isMuted !== undefined ? updatedLocal.isMuted : true
+                    }
+                });
             }
         });
 

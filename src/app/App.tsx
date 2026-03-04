@@ -10,6 +10,7 @@ import { ModeSelectPage } from '../features/game/ui/ModeSelectPage';
 import { VotingPage } from '../features/game/ui/VotingPage';
 import { ChevronLeft } from 'lucide-react';
 import { useVoiceChat } from '../shared/hooks/useVoiceChat';
+import { WalkieTalkie } from '../features/game/ui/WalkieTalkie';
 
 const App: React.FC = () => {
     const { phase, gameMode, localPlayer, leaveRoom, setPhase, settings, setSpeakingPlayers } = useGameStore();
@@ -213,6 +214,11 @@ const App: React.FC = () => {
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            {/* PERSISTENT WALKIE TALKIE (Only in active game phases) */}
+            {(phase === 'setup' || phase === 'playing' || phase === 'voting' || phase === 'reveal') && (
+                <WalkieTalkie />
+            )}
         </div>
     );
 };
