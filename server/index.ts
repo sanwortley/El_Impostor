@@ -430,7 +430,7 @@ io.on('connection', (socket) => {
     });
 });
 
-app.get('*', (_req, res) => {
+app.get('/:path*', (_req, res) => {
     res.sendFile(path.join(distPath, 'index.html'));
 });
 
