@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
  * Uses Global Pointer Listeners to prevent "sticky" microphones on mobile.
  */
 export const WalkieTalkie: React.FC = () => {
-    const { setMuted, settings, localPlayer } = useGameStore();
+    const { setMuted, settings } = useGameStore();
     const [isPressing, setIsPressing] = useState(false);
     const isPressingRef = useRef(false);
 
